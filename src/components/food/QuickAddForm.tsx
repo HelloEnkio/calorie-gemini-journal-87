@@ -1,14 +1,14 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { FoodEntry, MacroNutrients } from "@/types";
 import { addFoodEntry, generateId } from "@/utils/storage";
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { searchFoods, FoodItem } from "@/utils/foodDatabase";
-import { cn } from "@/lib/utils";
+import FoodNameInput from "./FoodNameInput";
+import NutritionFields from "./NutritionFields";
 
 interface QuickAddFormProps {
   onAdd?: () => void;
@@ -27,20 +27,19 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const suggestionRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionRef = useRef<HTMLDivElement>(null);
   
-  // Rechercher les aliments quand l'utilisateur tape ou quand le composant est monté
+  // Search for food items when user types
   useEffect(() => {
     setIsSearching(true);
-    // Si le champ est vide, afficher les 5 premiers aliments par défaut
     const results = searchFoods(foodName);
     setSuggestions(results);
     setShowSuggestions(true);
     setIsSearching(false);
   }, [foodName]);
   
-  // Afficher les suggestions par défaut au focus du champ
+  // Show default suggestions when input is focused
   const handleInputFocus = () => {
     if (!showSuggestions) {
       setIsSearching(true);
@@ -83,6 +82,7 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
     setShowSuggestions(false);
   };
 
+  // Form submission handler
   const handleSubmit = () => {
     if (!foodName.trim()) {
       toast.error("Veuillez saisir un nom d'aliment");
@@ -92,6 +92,7 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
       toast.error("Veuillez saisir un nombre de calories valide");
       return;
     }
+    
     let macros: MacroNutrients = {
       protein: Number(protein) || 0,
       carbs: Number(carbs) || 0,
@@ -103,12 +104,11 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
       const caloriesNum = Number(calories);
       macros = {
         protein: Math.round(caloriesNum * 0.25 / 4),
-        // 25% from protein (4 cal/g)
         carbs: Math.round(caloriesNum * 0.45 / 4),
-        // 45% from carbs (4 cal/g)
-        fat: Math.round(caloriesNum * 0.3 / 9) // 30% from fat (9 cal/g)
+        fat: Math.round(caloriesNum * 0.3 / 9)
       };
     }
+    
     const newEntry: FoodEntry = {
       id: generateId(),
       name: foodName,
@@ -117,6 +117,7 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
       timestamp: new Date().toISOString(),
       weight: weight ? Number(weight) : undefined
     };
+    
     addFoodEntry(newEntry);
     toast.success("Repas ajouté");
 
@@ -134,80 +135,29 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
     <Card className="mb-4">
       <CardContent className="pt-4">
         <div className="space-y-4">
-          <div className="space-y-2 relative">
-            <Label htmlFor="food-name">Nom du repas/produit</Label>
-            <div className="relative">
-              <Input 
-                id="food-name" 
-                placeholder="Ex: Salade composée" 
-                value={foodName} 
-                onChange={e => setFoodName(e.target.value)}
-                onFocus={handleInputFocus}
-                ref={inputRef}
-                autoComplete="off"
-              />
-              {isSearching && (
-                <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                  <Search className="h-4 w-4 animate-spin text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            
-            {showSuggestions && (
-              <div 
-                ref={suggestionRef}
-                className="absolute z-10 mt-1 w-full border border-input bg-background shadow-md rounded-md py-1 max-h-60 overflow-auto"
-              >
-                {suggestions.length > 0 ? (
-                  suggestions.map((food) => (
-                    <div 
-                      key={food.id}
-                      className="px-3 py-2 hover:bg-muted cursor-pointer flex justify-between items-center"
-                      onClick={() => handleSelectSuggestion(food)}
-                    >
-                      <div>
-                        <div className="font-medium">{food.name}</div>
-                        <div className="text-xs text-muted-foreground">{food.category}</div>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {food.calories} kcal / 100g
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-3 py-2 text-muted-foreground">
-                    Aucun résultat trouvé
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          <FoodNameInput 
+            foodName={foodName}
+            setFoodName={setFoodName}
+            suggestions={suggestions}
+            isSearching={isSearching}
+            showSuggestions={showSuggestions}
+            handleInputFocus={handleInputFocus}
+            handleSelectSuggestion={handleSelectSuggestion}
+            inputRef={inputRef}
+          />
           
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-2">
-              <Label htmlFor="calories">Calories (kcal)</Label>
-              <Input id="calories" type="number" placeholder="Ex: 350" value={calories} onChange={e => setCalories(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="weight">Poids (g)</Label>
-              <Input id="weight" type="number" placeholder="Ex: 100" value={weight} onChange={e => setWeight(e.target.value)} />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-2">
-            <div className="space-y-2">
-              <Label htmlFor="protein">Protéines (g)</Label>
-              <Input id="protein" type="number" placeholder="30" value={protein} onChange={e => setProtein(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="carbs">Glucides (g)</Label>
-              <Input id="carbs" type="number" placeholder="40" value={carbs} onChange={e => setCarbs(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="fat">Lipides (g)</Label>
-              <Input id="fat" type="number" placeholder="15" value={fat} onChange={e => setFat(e.target.value)} />
-            </div>
-          </div>
+          <NutritionFields 
+            calories={calories}
+            setCalories={setCalories}
+            protein={protein}
+            setProtein={setProtein}
+            carbs={carbs}
+            setCarbs={setCarbs}
+            fat={fat}
+            setFat={setFat}
+            weight={weight}
+            setWeight={setWeight}
+          />
           
           <Button onClick={handleSubmit} className="w-full flex items-center gap-2">
             <Plus className="h-4 w-4" />
