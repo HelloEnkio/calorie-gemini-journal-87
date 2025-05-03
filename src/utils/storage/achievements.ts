@@ -52,6 +52,15 @@ export const getAchievements = (): Achievement[] => {
       maxProgress: 5,
       category: 'consistency',
       level: 'gold'
+    },
+    {
+      id: 'macro-balance',
+      name: 'Équilibre parfait',
+      description: 'Atteindre tous vos objectifs de macronutriments en une journée',
+      icon: '⭐',
+      unlocked: false,
+      category: 'nutrition',
+      level: 'gold'
     }
   ];
   
@@ -116,6 +125,15 @@ export const checkAndUpdateAchievements = (): Achievement[] => {
     });
   }
   
+  // Check "macro-balance"
+  const macroBalanceAchievement = achievements.find(a => a.id === 'macro-balance');
+  if (macroBalanceAchievement && !macroBalanceAchievement.unlocked) {
+    const allMacrosOnTarget = checkAllMacrosOnTarget(todayLog);
+    if (allMacrosOnTarget) {
+      updateAchievement('macro-balance', { unlocked: true });
+    }
+  }
+  
   return getAchievements();
 };
 
@@ -165,4 +183,23 @@ const getCalorieGoalStreak = (): number => {
   }
   
   return streak;
+};
+
+// Helper to check if all macros are on target (within 10% margin)
+const checkAllMacrosOnTarget = (log: any): boolean => {
+  const goals = getUserGoals();
+  
+  if (!goals.macros || !log.totalMacros) return false;
+  
+  const { protein, carbs, fat } = log.totalMacros;
+  const proteinGoal = goals.macros.protein;
+  const carbsGoal = goals.macros.carbs;
+  const fatGoal = goals.macros.fat;
+  
+  // Check if all macros are within 10% of target
+  const isProteinOnTarget = protein >= proteinGoal * 0.9 && protein <= proteinGoal * 1.1;
+  const isCarbsOnTarget = carbs >= carbsGoal * 0.9 && carbs <= carbsGoal * 1.1;
+  const isFatOnTarget = fat >= fatGoal * 0.9 && fat <= fatGoal * 1.1;
+  
+  return isProteinOnTarget && isCarbsOnTarget && isFatOnTarget;
 };

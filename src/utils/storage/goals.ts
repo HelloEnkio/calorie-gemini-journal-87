@@ -1,5 +1,5 @@
 
-import { UserGoals } from "@/types";
+import { UserGoals, MacroNutrients } from "@/types";
 import { USER_GOALS_KEY } from "./core";
 
 // User goals
@@ -12,7 +12,8 @@ export const getUserGoals = (): UserGoals => {
   // Default goals
   const defaultGoals: UserGoals = {
     dailyCalories: 2000,
-    macros: { protein: 140, carbs: 220, fat: 65 }
+    macros: { protein: 140, carbs: 220, fat: 65 },
+    macroPercentages: { protein: 25, carbs: 45, fat: 30 }
   };
   
   localStorage.setItem(USER_GOALS_KEY, JSON.stringify(defaultGoals));

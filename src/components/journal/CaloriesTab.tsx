@@ -3,10 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Star, Trophy } from "lucide-react";
 import FoodEntry from "@/components/food/FoodEntry";
 import QuickAddForm from "@/components/food/QuickAddForm";
 import GeminiInputForm from "@/components/food/GeminiInputForm";
 import { DailyLog, UserGoals } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface CaloriesTabProps {
   dayLog: DailyLog;
@@ -20,6 +22,80 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
     Math.round((dayLog.totalCalories / goals.dailyCalories) * 100),
     100
   );
+  
+  // Calculate macro target percentages
+  const getMacroTargetPercentage = (macro: keyof typeof dayLog.totalMacros) => {
+    if (!goals.macros || !goals.macros[macro]) return 0;
+    return Math.min(Math.round((dayLog.totalMacros[macro] / goals.macros[macro]!) * 100), 100);
+  };
+  
+  // Get macro status 
+  const getMacroStatus = (macro: keyof typeof dayLog.totalMacros) => {
+    if (!goals.macros || !goals.macros[macro]) return "default";
+    
+    const percentage = (dayLog.totalMacros[macro] / goals.macros[macro]!) * 100;
+    if (percentage >= 90 && percentage <= 110) return "success";
+    if (percentage > 80 && percentage < 90) return "near";
+    if (percentage > 110 && percentage < 120) return "near";
+    return "far";
+  };
+  
+  // Get macro classes based on status
+  const getMacroStatusClasses = (macro: keyof typeof dayLog.totalMacros, type: 'bg' | 'text' | 'ring') => {
+    const status = getMacroStatus(macro);
+    
+    const classes = {
+      protein: {
+        bg: {
+          default: "bg-green-100",
+          near: "bg-green-200 animate-pulse",
+          success: "bg-green-200 shadow-md ring-2 ring-green-500",
+          far: "bg-green-50"
+        },
+        text: {
+          default: "text-green-800",
+          near: "text-green-800",
+          success: "text-green-800 font-semibold",
+          far: "text-green-700"
+        }
+      },
+      carbs: {
+        bg: {
+          default: "bg-amber-100",
+          near: "bg-amber-200 animate-pulse",
+          success: "bg-amber-200 shadow-md ring-2 ring-amber-500",
+          far: "bg-amber-50"
+        },
+        text: {
+          default: "text-amber-800",
+          near: "text-amber-800",
+          success: "text-amber-800 font-semibold",
+          far: "text-amber-700"
+        }
+      },
+      fat: {
+        bg: {
+          default: "bg-rose-100",
+          near: "bg-rose-200 animate-pulse",
+          success: "bg-rose-200 shadow-md ring-2 ring-rose-500",
+          far: "bg-rose-50"
+        },
+        text: {
+          default: "text-rose-800",
+          near: "text-rose-800",
+          success: "text-rose-800 font-semibold",
+          far: "text-rose-700"
+        }
+      }
+    };
+    
+    return classes[macro][type][status];
+  };
+  
+  // Calculate macro goal percentages
+  const proteinTargetPct = getMacroTargetPercentage("protein");
+  const carbsTargetPct = getMacroTargetPercentage("carbs");
+  const fatTargetPct = getMacroTargetPercentage("fat");
   
   // Format macros as percentages
   const getTotalMacrosPercentage = () => {
@@ -38,6 +114,12 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
   };
   
   const macroPercentages = getTotalMacrosPercentage();
+  
+  // Check if all macros are on target
+  const allMacrosOnTarget = 
+    getMacroStatus("protein") === "success" && 
+    getMacroStatus("carbs") === "success" && 
+    getMacroStatus("fat") === "success";
   
   return (
     <>
@@ -69,25 +151,93 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
       
       {/* Macro breakdown */}
       <div className="mb-6">
-        <h2 className="text-lg font-medium mb-3">Macronutriments</h2>
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-lg font-medium">Macronutriments</h2>
+          
+          {allMacrosOnTarget && (
+            <Badge className="bg-primary animate-pulse">
+              <Trophy className="h-3 w-3 mr-1" /> Parfait !
+            </Badge>
+          )}
+        </div>
         
         <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="bg-green-100 text-green-800 p-3 rounded-lg">
+          <div className={cn(
+            "p-3 rounded-lg transition-all relative",
+            getMacroStatusClasses("protein", "bg"),
+            getMacroStatusClasses("protein", "text")
+          )}>
             <div className="font-medium">Protéines</div>
             <div className="text-xl font-bold">{dayLog.totalMacros.protein}g</div>
-            <div className="text-xs">{macroPercentages.protein}%</div>
+            <div className="text-xs mb-1">{macroPercentages.protein}%</div>
+            
+            {goals.macros?.protein && (
+              <>
+                <Progress
+                  value={proteinTargetPct}
+                  className={cn("h-1", getMacroStatus("protein") === "success" && "bg-green-300")}
+                />
+                <div className="text-xs mt-1">
+                  {proteinTargetPct}% de l'objectif
+                </div>
+                
+                {getMacroStatus("protein") === "success" && (
+                  <Star className="absolute top-1 right-1 h-4 w-4 text-green-600 fill-green-600" />
+                )}
+              </>
+            )}
           </div>
           
-          <div className="bg-amber-100 text-amber-800 p-3 rounded-lg">
+          <div className={cn(
+            "p-3 rounded-lg transition-all relative",
+            getMacroStatusClasses("carbs", "bg"),
+            getMacroStatusClasses("carbs", "text")
+          )}>
             <div className="font-medium">Glucides</div>
             <div className="text-xl font-bold">{dayLog.totalMacros.carbs}g</div>
-            <div className="text-xs">{macroPercentages.carbs}%</div>
+            <div className="text-xs mb-1">{macroPercentages.carbs}%</div>
+            
+            {goals.macros?.carbs && (
+              <>
+                <Progress
+                  value={carbsTargetPct}
+                  className={cn("h-1", getMacroStatus("carbs") === "success" && "bg-amber-300")}
+                />
+                <div className="text-xs mt-1">
+                  {carbsTargetPct}% de l'objectif
+                </div>
+                
+                {getMacroStatus("carbs") === "success" && (
+                  <Star className="absolute top-1 right-1 h-4 w-4 text-amber-600 fill-amber-600" />
+                )}
+              </>
+            )}
           </div>
           
-          <div className="bg-rose-100 text-rose-800 p-3 rounded-lg">
+          <div className={cn(
+            "p-3 rounded-lg transition-all relative",
+            getMacroStatusClasses("fat", "bg"),
+            getMacroStatusClasses("fat", "text")
+          )}>
             <div className="font-medium">Lipides</div>
             <div className="text-xl font-bold">{dayLog.totalMacros.fat}g</div>
-            <div className="text-xs">{macroPercentages.fat}%</div>
+            <div className="text-xs mb-1">{macroPercentages.fat}%</div>
+            
+            {goals.macros?.fat && (
+              <>
+                <Progress
+                  value={fatTargetPct}
+                  className={cn("h-1", getMacroStatus("fat") === "success" && "bg-rose-300")}
+                />
+                <div className="text-xs mt-1">
+                  {fatTargetPct}% de l'objectif
+                </div>
+                
+                {getMacroStatus("fat") === "success" && (
+                  <Star className="absolute top-1 right-1 h-4 w-4 text-rose-600 fill-rose-600" />
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

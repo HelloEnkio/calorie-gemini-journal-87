@@ -4,9 +4,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Calendar, 
-  PieChart, 
   BarChart, 
-  Trophy 
+  Trophy,
+  Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,8 @@ const NavigationBar = () => {
   const [activeTab, setActiveTab] = useState(
     location.pathname === "/" ? "journal" : 
     location.pathname === "/stats" ? "stats" :
-    location.pathname === "/achievements" ? "achievements" : "journal"
+    location.pathname === "/achievements" ? "achievements" :
+    location.pathname === "/settings" ? "settings" : "journal"
   );
   
   const handleTabChange = (value: string) => {
@@ -31,6 +32,9 @@ const NavigationBar = () => {
       case "achievements":
         navigate("/achievements");
         break;
+      case "settings":
+        navigate("/settings");
+        break;
       default:
         navigate("/");
         break;
@@ -41,7 +45,7 @@ const NavigationBar = () => {
     <div className="fixed bottom-0 left-0 right-0 border-t bg-background z-10">
       <div className="px-2 py-1 max-w-md mx-auto">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid grid-cols-3 h-16">
+          <TabsList className="grid grid-cols-4 h-16">
             <TabsTrigger 
               value="journal" 
               className="flex flex-col items-center justify-center space-y-1 data-[state=active]:bg-muted"
@@ -77,6 +81,18 @@ const NavigationBar = () => {
                 )} 
               />
               <span className="text-xs">Succès</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="settings" 
+              className="flex flex-col items-center justify-center space-y-1 data-[state=active]:bg-muted"
+            >
+              <Settings 
+                className={cn(
+                  "h-5 w-5", 
+                  activeTab === "settings" ? "text-primary" : "text-muted-foreground"
+                )} 
+              />
+              <span className="text-xs">Param.</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>

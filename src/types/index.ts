@@ -37,6 +37,7 @@ export interface WeightEntry {
 export interface UserGoals {
   dailyCalories: number;
   macros?: MacroNutrients;
+  macroPercentages?: MacroNutrients;
   weeklyWorkouts?: number;
   targetWeight?: number;
 }
