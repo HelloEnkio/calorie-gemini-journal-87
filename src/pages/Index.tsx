@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { format, addDays, subDays, isToday } from "date-fns";
+import { fr } from "date-fns/locale"; // Import the French locale properly
 import FoodEntry from "@/components/food/FoodEntry";
 import QuickAddForm from "@/components/food/QuickAddForm";
 import GeminiInputForm from "@/components/food/GeminiInputForm";
@@ -72,7 +73,7 @@ const Index = () => {
   const macroPercentages = getTotalMacrosPercentage();
   
   // Format the date for display
-  const dateFormatted = format(currentDate, "EEEE d MMMM", { locale: require('date-fns/locale/fr') });
+  const dateFormatted = format(currentDate, "EEEE d MMMM", { locale: fr });
   
   useEffect(() => {
     // Check achievements when the page loads

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { format, subDays, parseISO } from "date-fns";
+import { fr } from "date-fns/locale"; // Import French locale properly
 import CalorieChart from "@/components/stats/CalorieChart";
 import MacroDistribution from "@/components/stats/MacroDistribution";
 import { getLogsInDateRange, formatDateKey, getAllLogs } from "@/utils/storage";
