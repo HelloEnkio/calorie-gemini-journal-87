@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -252,23 +253,24 @@ const StatsPage = () => {
                 </div>
               </div>
             
-            {weightChange && (
-              <div>
-                <Separator className="my-3" />
-                <div className="text-center">
-                  <div className="text-sm text-muted-foreground">Evolution du poids</div>
-                  <div className={`text-xl font-bold ${
-                    Number(weightChange) > 0 
-                      ? 'text-rose-500'
-                      : Number(weightChange) < 0
-                        ? 'text-emerald-500'
-                        : ''
-                  }`}>
-                    {Number(weightChange) > 0 ? '+' : ''}{weightChange} kg
+              {weightChange && (
+                <div>
+                  <Separator className="my-3" />
+                  <div className="text-center">
+                    <div className="text-sm text-muted-foreground">Evolution du poids</div>
+                    <div className={`text-xl font-bold ${
+                      Number(weightChange) > 0 
+                        ? 'text-rose-500'
+                        : Number(weightChange) < 0
+                          ? 'text-emerald-500'
+                          : ''
+                    }`}>
+                      {Number(weightChange) > 0 ? '+' : ''}{weightChange} kg
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
