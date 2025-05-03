@@ -1,0 +1,51 @@
+
+import { Button } from "@/components/ui/button";
+import { Carousel, CarouselContent, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Calendar } from "lucide-react";
+import { addDays, subDays } from "date-fns";
+
+interface JournalDateNavigatorProps {
+  currentDate: Date;
+  dateFormatted: string;
+  navigateToDay: (date: Date) => void;
+  goToToday: () => void;
+  isToday: boolean;
+}
+
+const JournalDateNavigator = ({
+  currentDate,
+  dateFormatted,
+  navigateToDay,
+  goToToday,
+  isToday
+}: JournalDateNavigatorProps) => {
+  return (
+    <div className="mb-4">
+      <Carousel className="w-full">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl font-bold">Journal nutritionnel</h1>
+          {!isToday && (
+            <Button variant="outline" size="sm" onClick={goToToday} className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              <span>Aujourd'hui</span>
+            </Button>
+          )}
+        </div>
+        
+        <div className="flex items-center justify-between mb-4">
+          <CarouselPrevious 
+            onClick={() => navigateToDay(subDays(currentDate, 1))} 
+            className="relative translate-y-0 left-0" 
+          />
+          <p className="text-center text-muted-foreground capitalize">{dateFormatted}</p>
+          <CarouselNext 
+            onClick={() => navigateToDay(addDays(currentDate, 1))} 
+            className="relative translate-y-0 right-0" 
+          />
+        </div>
+      </Carousel>
+    </div>
+  );
+};
+
+export default JournalDateNavigator;

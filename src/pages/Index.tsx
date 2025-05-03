@@ -1,26 +1,16 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { format, addDays, subDays, isToday } from "date-fns";
+import { isToday, format, addDays, subDays } from "date-fns";
 import { fr } from "date-fns/locale"; 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from "@/components/ui/carousel";
-import { getLogForDate, getUserGoals, checkAndUpdateAchievements, formatDateKey } from "@/utils/storage";
 import { Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Carousel, CarouselContent, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { formatDateKey, getLogForDate, getUserGoals, checkAndUpdateAchievements } from "@/utils/storage";
 import CaloriesTab from "@/components/journal/CaloriesTab";
 import WeightTab from "@/components/journal/WeightTab";
 import WorkoutTab from "@/components/journal/WorkoutTab";
+import JournalDateNavigator from "@/components/journal/JournalDateNavigator";
 
 const Index = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -58,25 +48,13 @@ const Index = () => {
   return (
     <div className="mobile-container pt-4 pb-20">
       {/* Day navigation */}
-      <div className="mb-4">
-        <Carousel className="w-full">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold">Journal nutritionnel</h1>
-            {!isToday(currentDate) && (
-              <Button variant="outline" size="sm" onClick={goToToday} className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                <span>Aujourd'hui</span>
-              </Button>
-            )}
-          </div>
-          
-          <div className="flex items-center justify-between mb-4">
-            <CarouselPrevious onClick={() => navigateToDay(subDays(currentDate, 1))} className="relative translate-y-0 left-0" />
-            <p className="text-center text-muted-foreground capitalize">{dateFormatted}</p>
-            <CarouselNext onClick={() => navigateToDay(addDays(currentDate, 1))} className="relative translate-y-0 right-0" />
-          </div>
-        </Carousel>
-      </div>
+      <JournalDateNavigator 
+        currentDate={currentDate} 
+        dateFormatted={dateFormatted} 
+        navigateToDay={navigateToDay}
+        goToToday={goToToday}
+        isToday={isToday(currentDate)}
+      />
       
       {/* Journal Sub-tabs */}
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="mb-6">
