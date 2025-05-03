@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { FoodEntry, MacroNutrients } from "@/types";
 import { addFoodEntry, generateId } from "@/utils/storage";
-import { Plus } from "lucide-react";
+import { Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
-import { searchFoods, FoodItem } from "@/utils/foodDatabase";
+import { searchFoods, FoodItem, updateFoodItem } from "@/utils/foodDatabase";
 import FoodNameInput from "./FoodNameInput";
 import NutritionFields from "./NutritionFields";
 
@@ -22,6 +22,17 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
   const [carbs, setCarbs] = useState<string>("");
   const [fat, setFat] = useState<string>("");
   const [weight, setWeight] = useState<string>("");
+  
+  // Auto-update toggle
+  const [autoUpdateMacros, setAutoUpdateMacros] = useState<boolean>(true);
+  
+  // Track original values for proportion calculations
+  const [originalFoodItem, setOriginalFoodItem] = useState<FoodItem | null>(null);
+  const [originalQuantity, setOriginalQuantity] = useState<string | null>(null);
+  const [originalCalories, setOriginalCalories] = useState<string | null>(null);
+  const [originalProtein, setOriginalProtein] = useState<string | null>(null);
+  const [originalCarbs, setOriginalCarbs] = useState<string | null>(null);
+  const [originalFat, setOriginalFat] = useState<string | null>(null);
   
   // Autocomplete state
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
@@ -69,6 +80,18 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
     };
   }, []);
   
+  // Update macros based on quantity
+  const updateMacrosBasedOnQuantity = () => {
+    if (!originalQuantity || Number(originalQuantity) <= 0 || !weight) return;
+
+    const ratio = Number(weight) / Number(originalQuantity);
+    
+    if (originalCalories) setCalories((Number(originalCalories) * ratio).toFixed(0));
+    if (originalProtein) setProtein((Number(originalProtein) * ratio).toFixed(1));
+    if (originalCarbs) setCarbs((Number(originalCarbs) * ratio).toFixed(1));
+    if (originalFat) setFat((Number(originalFat) * ratio).toFixed(1));
+  };
+  
   // Handle selecting a suggestion
   const handleSelectSuggestion = (food: FoodItem) => {
     setFoodName(food.name);
@@ -76,9 +99,19 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
     setProtein(food.macros.protein.toString());
     setCarbs(food.macros.carbs.toString());
     setFat(food.macros.fat.toString());
+    
+    // Store original values
+    setOriginalFoodItem(food);
+    setOriginalCalories(food.calories.toString());
+    setOriginalProtein(food.macros.protein.toString());
+    setOriginalCarbs(food.macros.carbs.toString());
+    setOriginalFat(food.macros.fat.toString());
+    
     if (food.weight) {
       setWeight(food.weight.toString());
+      setOriginalQuantity(food.weight.toString());
     }
+    
     setShowSuggestions(false);
   };
 
@@ -118,6 +151,30 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
       weight: weight ? Number(weight) : undefined
     };
     
+    // Update food item in the database if values changed and we selected an existing item
+    if (originalFoodItem && 
+        (originalFoodItem.calories !== Number(calories) ||
+         originalFoodItem.macros.protein !== Number(protein) ||
+         originalFoodItem.macros.carbs !== Number(carbs) ||
+         originalFoodItem.macros.fat !== Number(fat) ||
+         (originalFoodItem.weight && originalFoodItem.weight !== Number(weight)))) {
+      
+      // Create an updated version of the food item
+      const updatedFoodItem: FoodItem = {
+        ...originalFoodItem,
+        calories: Number(calories),
+        macros: {
+          protein: Number(protein),
+          carbs: Number(carbs),
+          fat: Number(fat)
+        },
+        weight: weight ? Number(weight) : originalFoodItem.weight
+      };
+      
+      // Update the food item in the database
+      updateFoodItem(updatedFoodItem);
+    }
+    
     addFoodEntry(newEntry);
     toast.success("Repas ajouté");
 
@@ -128,6 +185,12 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
     setCarbs("");
     setFat("");
     setWeight("");
+    setOriginalFoodItem(null);
+    setOriginalQuantity(null);
+    setOriginalCalories(null);
+    setOriginalProtein(null);
+    setOriginalCarbs(null);
+    setOriginalFat(null);
     if (onAdd) onAdd();
   };
   
@@ -157,6 +220,10 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
             setFat={setFat}
             weight={weight}
             setWeight={setWeight}
+            autoUpdateMacros={autoUpdateMacros}
+            setAutoUpdateMacros={setAutoUpdateMacros}
+            originalQuantity={originalQuantity}
+            updateMacrosBasedOnQuantity={updateMacrosBasedOnQuantity}
           />
           
           <Button onClick={handleSubmit} className="w-full flex items-center gap-2">

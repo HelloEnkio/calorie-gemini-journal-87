@@ -296,3 +296,28 @@ export const getFoodById = (id: string): FoodItem | undefined => {
 export const getAllFoods = (): FoodItem[] => {
   return [...foodDatabase];
 };
+
+/**
+ * Met à jour un aliment existant dans la base de données
+ * @param updatedFood Aliment mis à jour
+ * @returns Booléen indiquant si la mise à jour a réussi
+ */
+export const updateFoodItem = (updatedFood: FoodItem): boolean => {
+  const index = foodDatabase.findIndex(food => food.id === updatedFood.id);
+  if (index === -1) return false;
+  
+  // Mettre à jour l'aliment dans la base de données
+  foodDatabase[index] = { ...updatedFood };
+  
+  // Mettre à jour le moteur de recherche
+  const newFoodSearchEngine = new FuzzySearch(foodDatabase, ['name', 'category'], {
+    threshold: 0.2,
+    caseSensitive: false,
+    maxResults: 5,
+  });
+  
+  // Remplacer l'ancien moteur de recherche par le nouveau
+  Object.assign(foodSearchEngine, newFoodSearchEngine);
+  
+  return true;
+};
