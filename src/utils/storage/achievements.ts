@@ -1,156 +1,10 @@
 
-import { DailyLog, FoodEntry, WorkoutEntry, WeightEntry, Achievement, UserGoals } from "@/types";
+import { Achievement } from "@/types";
+import { ACHIEVEMENTS_KEY } from "./core";
+import { getUserGoals } from "./goals";
+import { getAllLogs, formatDateKey } from "./core";
 
-// Key constants
-const DAILY_LOGS_KEY = 'nutrition-tracker-daily-logs';
-const ACHIEVEMENTS_KEY = 'nutrition-tracker-achievements';
-const USER_GOALS_KEY = 'nutrition-tracker-user-goals';
-
-// Helper for formatting dates consistently
-export const formatDateKey = (date: Date = new Date()): string => {
-  return date.toISOString().split('T')[0]; // YYYY-MM-DD format
-};
-
-// Get today's log or create a new one
-export const getTodaysLog = (): DailyLog => {
-  return getLogForDate(formatDateKey());
-};
-
-// Get log for a specific date
-export const getLogForDate = (dateKey: string): DailyLog => {
-  const allLogs = getAllLogs();
-  
-  const dayLog = allLogs.find(log => log.date === dateKey);
-  
-  if (dayLog) {
-    return dayLog;
-  }
-  
-  // Create new log for the date
-  const newLog: DailyLog = {
-    date: dateKey,
-    totalCalories: 0,
-    totalMacros: { protein: 0, carbs: 0, fat: 0 },
-    foodEntries: [],
-    workouts: [],
-  };
-  
-  // Save and return the new log
-  saveDailyLog(newLog);
-  return newLog;
-};
-
-// Get all logs
-export const getAllLogs = (): DailyLog[] => {
-  const logsJson = localStorage.getItem(DAILY_LOGS_KEY);
-  return logsJson ? JSON.parse(logsJson) : [];
-};
-
-// Save/update a daily log
-export const saveDailyLog = (log: DailyLog): void => {
-  const allLogs = getAllLogs();
-  const logIndex = allLogs.findIndex(l => l.date === log.date);
-  
-  if (logIndex >= 0) {
-    allLogs[logIndex] = log;
-  } else {
-    allLogs.push(log);
-  }
-  
-  localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(allLogs));
-};
-
-// Add food entry
-export const addFoodEntry = (entry: FoodEntry): void => {
-  const todayLog = getTodaysLog();
-  todayLog.foodEntries.push(entry);
-  
-  // Update totals
-  todayLog.totalCalories += entry.calories;
-  todayLog.totalMacros.protein += entry.macros.protein;
-  todayLog.totalMacros.carbs += entry.macros.carbs;
-  todayLog.totalMacros.fat += entry.macros.fat;
-  
-  saveDailyLog(todayLog);
-};
-
-// Remove food entry
-export const removeFoodEntry = (entryId: string): void => {
-  const todayLog = getTodaysLog();
-  const entryIndex = todayLog.foodEntries.findIndex(entry => entry.id === entryId);
-  
-  if (entryIndex >= 0) {
-    const entry = todayLog.foodEntries[entryIndex];
-    
-    // Update totals
-    todayLog.totalCalories -= entry.calories;
-    todayLog.totalMacros.protein -= entry.macros.protein;
-    todayLog.totalMacros.carbs -= entry.macros.carbs;
-    todayLog.totalMacros.fat -= entry.macros.fat;
-    
-    // Remove entry
-    todayLog.foodEntries.splice(entryIndex, 1);
-    saveDailyLog(todayLog);
-  }
-};
-
-// Add workout entry
-export const addWorkoutEntry = (entry: WorkoutEntry): void => {
-  const todayLog = getTodaysLog();
-  todayLog.workouts.push(entry);
-  saveDailyLog(todayLog);
-};
-
-// Remove workout entry
-export const removeWorkoutEntry = (entryId: string): void => {
-  const todayLog = getTodaysLog();
-  todayLog.workouts = todayLog.workouts.filter(entry => entry.id !== entryId);
-  saveDailyLog(todayLog);
-};
-
-// Add weight entry
-export const addWeightEntry = (entry: WeightEntry): void => {
-  const todayLog = getTodaysLog();
-  todayLog.weight = entry;
-  saveDailyLog(todayLog);
-};
-
-// Get logs for a date range
-export const getLogsInDateRange = (startDate: string, endDate: string): DailyLog[] => {
-  return getAllLogs().filter(log => log.date >= startDate && log.date <= endDate);
-};
-
-// Get logs for last N days
-export const getLogsForLastDays = (days: number): DailyLog[] => {
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
-  
-  return getLogsInDateRange(formatDateKey(startDate), formatDateKey(endDate));
-};
-
-// User goals
-export const getUserGoals = (): UserGoals => {
-  const goalsJson = localStorage.getItem(USER_GOALS_KEY);
-  if (goalsJson) {
-    return JSON.parse(goalsJson);
-  }
-  
-  // Default goals
-  const defaultGoals: UserGoals = {
-    dailyCalories: 2000,
-    macros: { protein: 140, carbs: 220, fat: 65 }
-  };
-  
-  localStorage.setItem(USER_GOALS_KEY, JSON.stringify(defaultGoals));
-  return defaultGoals;
-};
-
-export const saveUserGoals = (goals: UserGoals): void => {
-  localStorage.setItem(USER_GOALS_KEY, JSON.stringify(goals));
-};
-
-// Achievements
+// Get achievements
 export const getAchievements = (): Achievement[] => {
   const achievementsJson = localStorage.getItem(ACHIEVEMENTS_KEY);
   if (achievementsJson) {
@@ -222,7 +76,11 @@ export const updateAchievement = (achievementId: string, updates: Partial<Achiev
 export const checkAndUpdateAchievements = (): Achievement[] => {
   const achievements = getAchievements();
   const allLogs = getAllLogs();
-  const todayLog = getTodaysLog();
+  const todayLog = allLogs.find(log => log.date === formatDateKey()) || {
+    foodEntries: [],
+    workouts: [],
+    weight: undefined
+  };
   
   // Check "first-entry"
   if (!achievements.find(a => a.id === 'first-entry')?.unlocked && 
@@ -307,9 +165,4 @@ const getCalorieGoalStreak = (): number => {
   }
   
   return streak;
-};
-
-// Helper for generating IDs
-export const generateId = (): string => {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
 };
