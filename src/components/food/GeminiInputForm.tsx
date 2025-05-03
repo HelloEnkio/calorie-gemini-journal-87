@@ -25,7 +25,6 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiKey, setApiKey] = useState(getGeminiApiKey());
   const [apiKeyInput, setApiKeyInput] = useState("");
-  const [foodWeight, setFoodWeight] = useState("");
   
   const isDemo = apiKey === "DEMO_KEY";
   
@@ -49,11 +48,8 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
     setIsAnalyzing(true);
     
     try {
-      // Convertir le poids en nombre si présent
-      const weightInGrams = foodWeight ? parseInt(foodWeight) : undefined;
-      
-      // Passer le poids à la fonction d'analyse
-      const result = await analyzeFoodWithGemini(foodDescription, weightInGrams);
+      // Nous supprimons la référence au poids ici
+      const result = await analyzeFoodWithGemini(foodDescription);
       
       if (result.success && result.calories && result.macros) {
         // Add the analyzed food to the journal
@@ -63,17 +59,15 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
           calories: result.calories,
           macros: result.macros,
           timestamp: new Date().toISOString(),
-          weight: weightInGrams,
-          // Store the Gemini prompt and response
+          // Nous ne définissons plus de poids ici
           geminiData: {
-            prompt: foodDescription + (weightInGrams ? ` (${weightInGrams}g)` : ''),
+            prompt: foodDescription,
             response: result
           }
         });
         
         toast.success("Repas ou aliment ajouté avec succès");
         setFoodDescription("");
-        setFoodWeight("");
         if (onAdd) onAdd();
       } else {
         toast.error(result.errorMessage || "Erreur d'analyse, veuillez réessayer");
@@ -185,24 +179,12 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
         </div>
       </div>
       
-      <div className="flex gap-2">
-        <div className="relative flex-shrink-0 w-20">
-          <Input
-            type="number"
-            placeholder="Poids (g)"
-            value={foodWeight}
-            onChange={(e) => setFoodWeight(e.target.value)}
-            className="w-full"
-            disabled={isAnalyzing}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground flex-grow pt-2">
-          {isDemo ? 
-            "Mode démo actif. Ajoutez un poids en grammes pour plus de précision" :
-            "Ajoutez un poids en grammes pour une analyse plus précise"
-          }
-        </p>
-      </div>
+      <p className="text-xs text-muted-foreground">
+        {isDemo ? 
+          "Mode démo actif. Configurez une clé API pour des résultats plus précis." :
+          "Décrivez votre repas ou aliment pour obtenir une analyse nutritionnelle."
+        }
+      </p>
     </div>
   );
 };
