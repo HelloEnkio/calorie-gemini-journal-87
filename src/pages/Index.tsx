@@ -43,7 +43,7 @@ const Index = () => {
   }, []);
   
   return (
-    <div className="mobile-container pt-4 pb-20">
+    <div className="mobile-container pt-6 pb-20">
       {/* Day navigation */}
       <JournalDateNavigator 
         currentDate={currentDate} 
@@ -54,14 +54,14 @@ const Index = () => {
       />
       
       {/* Journal Sub-tabs */}
-      <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="mb-6">
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="calories">Calories</TabsTrigger>
-          <TabsTrigger value="weight">Poids</TabsTrigger>
-          <TabsTrigger value="workout">Sport</TabsTrigger>
+      <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="mb-6 mt-4">
+        <TabsList className="grid grid-cols-3 mb-6 rounded-xl bg-muted/70 p-1">
+          <TabsTrigger value="calories" className="rounded-lg data-[state=active]:shadow-sm">Calories</TabsTrigger>
+          <TabsTrigger value="weight" className="rounded-lg data-[state=active]:shadow-sm">Poids</TabsTrigger>
+          <TabsTrigger value="workout" className="rounded-lg data-[state=active]:shadow-sm">Sport</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="calories">
+        <TabsContent value="calories" className="tab-content">
           <CaloriesTab 
             dayLog={dayLog} 
             goals={goals} 
@@ -69,14 +69,14 @@ const Index = () => {
           />
         </TabsContent>
         
-        <TabsContent value="weight">
+        <TabsContent value="weight" className="tab-content">
           <WeightTab 
             dayLog={dayLog} 
             refreshData={refreshData} 
           />
         </TabsContent>
         
-        <TabsContent value="workout">
+        <TabsContent value="workout" className="tab-content">
           <WorkoutTab 
             dayLog={dayLog} 
             refreshData={refreshData} 

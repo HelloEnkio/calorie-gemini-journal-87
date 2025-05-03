@@ -37,13 +37,13 @@ const NavigationBar = () => {
   };
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t bg-background z-10">
-      <div className="px-2 py-1 max-w-md mx-auto">
+    <div className="fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-lg z-10">
+      <div className="px-4 py-2 max-w-md mx-auto">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid grid-cols-3 h-16">
+          <TabsList className="grid grid-cols-3 h-16 rounded-xl bg-muted/80 p-1">
             <TabsTrigger 
               value="journal" 
-              className="flex flex-col items-center justify-center space-y-1 data-[state=active]:bg-muted"
+              className="flex flex-col items-center justify-center space-y-1 data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all"
             >
               <Calendar 
                 className={cn(
@@ -55,7 +55,7 @@ const NavigationBar = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="stats" 
-              className="flex flex-col items-center justify-center space-y-1 data-[state=active]:bg-muted"
+              className="flex flex-col items-center justify-center space-y-1 data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all"
             >
               <BarChart 
                 className={cn(
@@ -67,7 +67,7 @@ const NavigationBar = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
-              className="flex flex-col items-center justify-center space-y-1 data-[state=active]:bg-muted"
+              className="flex flex-col items-center justify-center space-y-1 data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all"
             >
               <Settings 
                 className={cn(

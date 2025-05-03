@@ -40,7 +40,7 @@ const FoodNameInput = ({
 
   return (
     <div className="space-y-2 relative">
-      <Label htmlFor="food-name">Nom du repas/produit</Label>
+      <Label htmlFor="food-name" className="text-sm font-medium">Nom du repas/produit</Label>
       <div className="relative">
         <Input 
           id="food-name" 
@@ -50,6 +50,7 @@ const FoodNameInput = ({
           onFocus={handleInputFocus}
           ref={inputRef}
           autoComplete="off"
+          className="floating-input"
         />
       </div>
       

@@ -9,18 +9,22 @@ import {
 } from "@/services/geminiService";
 import { addFoodEntry, generateId } from "@/utils/storage";
 import { toast } from "sonner";
-import { Loader2, Settings, X, Plus } from "lucide-react";
+import { Loader2, Settings, X, Plus, ChevronRight } from "lucide-react";
 import { 
   Popover,
   PopoverContent,
   PopoverTrigger 
 } from "@/components/ui/popover";
+import { useProtectedAction } from "@/hooks/useProtectedAction";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface GeminiInputFormProps {
   onAdd?: () => void;
 }
 
 const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
+  const { protectAction } = useProtectedAction();
+  const { isLoggedIn } = useAuth();
   const [foodDescription, setFoodDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiKey, setApiKey] = useState(getGeminiApiKey());
@@ -48,7 +52,6 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
     setIsAnalyzing(true);
     
     try {
-      // Nous supprimons la référence au poids ici
       const result = await analyzeFoodWithGemini(foodDescription);
       
       if (result.success && result.calories && result.macros) {
@@ -59,7 +62,6 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
           calories: result.calories,
           macros: result.macros,
           timestamp: new Date().toISOString(),
-          // Nous ne définissons plus de poids ici
           geminiData: {
             prompt: foodDescription,
             response: result
@@ -80,109 +82,119 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
     }
   };
   
+  const handleProtectedAnalyze = () => {
+    protectAction(() => handleAnalyze());
+  };
+  
   return (
-    <div className="space-y-2">
-      <div className="relative flex items-center">
-        <Input
-          placeholder="Décrivez votre repas ou aliment (ex: poulet et une salade)"
-          value={foodDescription}
-          onChange={(e) => setFoodDescription(e.target.value)}
-          className="pr-24"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleAnalyze();
-            }
-          }}
-          disabled={isAnalyzing}
-        />
-        <div className="absolute right-1 flex items-center gap-1">
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={handleAnalyze}
+    <div className="space-y-3">
+      <div className="food-input-highlight rounded-xl p-1">
+        <div className="relative rounded-lg bg-white">
+          <Input
+            placeholder="Décrivez votre repas ou aliment..."
+            value={foodDescription}
+            onChange={(e) => setFoodDescription(e.target.value)}
+            className="pr-24 pl-4 h-12 border-0 shadow-none bg-transparent"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleProtectedAnalyze();
+              }
+            }}
             disabled={isAnalyzing}
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Analyse
-              </>
-            ) : (
-              "Analyser"
-            )}
-          </Button>
-          
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="px-2"
-              >
-                <Settings size={16} />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4">
-              <div className="space-y-4">
-                <div className="font-medium text-center">
-                  Configurer l'API Gemini
-                </div>
-                
-                <div className="text-sm text-muted-foreground">
-                  {isDemo ? (
-                    <div className="p-2 bg-yellow-100 text-yellow-800 rounded mb-3">
-                      Mode démo actif. Entrez votre clé API pour utiliser l'API Gemini.
-                    </div>
-                  ) : (
-                    <div className="p-2 bg-green-100 text-green-800 rounded mb-3">
-                      Clé API configurée. Vous utilisez l'API Gemini.
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Input
-                      placeholder="Entrez votre clé API Gemini"
-                      value={apiKeyInput}
-                      onChange={(e) => setApiKeyInput(e.target.value)}
-                      type="password"
-                    />
-                    {apiKeyInput && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="absolute right-1 top-1 bottom-1 px-2"
-                        onClick={() => setApiKeyInput("")}
-                      >
-                        <X size={14} />
-                      </Button>
+          />
+          <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            <Button
+              size="sm"
+              onClick={handleProtectedAnalyze}
+              disabled={isAnalyzing}
+              className="rounded-lg bg-primary/90 hover:bg-primary"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  Analyse
+                </>
+              ) : (
+                <>
+                  Analyser
+                  <ChevronRight className="h-3 w-3" />
+                </>
+              )}
+            </Button>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="px-2 rounded-full h-8 w-8 aspect-square"
+                >
+                  <Settings size={16} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4 rounded-xl">
+                <div className="space-y-4">
+                  <div className="font-medium text-center">
+                    Configurer l'API Gemini
+                  </div>
+                  
+                  <div className="text-sm text-muted-foreground">
+                    {isDemo ? (
+                      <div className="p-3 bg-yellow-100 text-yellow-800 rounded-lg mb-3">
+                        Mode démo actif. Entrez votre clé API pour utiliser l'API Gemini.
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-green-100 text-green-800 rounded-lg mb-3">
+                        Clé API configurée. Vous utilisez l'API Gemini.
+                      </div>
                     )}
                   </div>
+                  
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        placeholder="Entrez votre clé API Gemini"
+                        value={apiKeyInput}
+                        onChange={(e) => setApiKeyInput(e.target.value)}
+                        type="password"
+                        className="pr-10"
+                      />
+                      {apiKeyInput && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 rounded-full"
+                          onClick={() => setApiKeyInput("")}
+                        >
+                          <X size={14} />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    className="w-full" 
+                    onClick={handleSaveApiKey}
+                    disabled={!apiKeyInput || apiKeyInput === apiKey}
+                  >
+                    Enregistrer la clé API
+                  </Button>
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Votre clé API est stockée localement dans votre navigateur.
+                  </p>
                 </div>
-                
-                <Button 
-                  className="w-full" 
-                  onClick={handleSaveApiKey}
-                  disabled={!apiKeyInput || apiKeyInput === apiKey}
-                >
-                  Enregistrer la clé API
-                </Button>
-                
-                <p className="text-xs text-muted-foreground">
-                  Votre clé API est stockée localement dans votre navigateur.
-                </p>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
       
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground px-1">
         {isDemo ? 
           "Mode démo actif. Configurez une clé API pour des résultats plus précis." :
-          "Décrivez votre repas ou aliment pour obtenir une analyse nutritionnelle."
+          "Décrivez votre repas naturellement, par exemple \"Une salade césar avec poulet grillé et croûtons\""
         }
       </p>
     </div>

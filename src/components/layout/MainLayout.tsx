@@ -26,11 +26,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
   return (
     <div className="main-layout">
-      <div className="fixed top-0 left-0 right-0 h-12 border-b bg-background px-4 z-10 flex items-center justify-between">
+      <div className="fixed top-0 left-0 right-0 h-16 backdrop-blur-md bg-background/80 px-4 z-10 flex items-center justify-between shadow-sm">
         <div className="flex items-center">
-          <span className="font-medium">Nutrition Tracker</span>
+          <span className="font-medium text-lg">Nutrition Tracker</span>
           {subscriptionPlan === "premium" && (
-            <span className="ml-2 bg-primary/10 text-primary text-xs font-medium px-2 py-0.5 rounded-full">
+            <span className="ml-2 bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">
               Premium
             </span>
           )}
@@ -39,13 +39,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <div className="flex items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar className="h-8 w-8 cursor-pointer">
+              <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
                 <AvatarFallback className="bg-primary/10">
                   <UserRound className="h-4 w-4 text-primary" />
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 rounded-xl">
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm font-medium">{isLoggedIn ? username : "Non connecté"}</p>
                 {isLoggedIn && subscriptionPlan && (
@@ -58,22 +58,22 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               
               {isLoggedIn ? (
                 <>
-                  <DropdownMenuItem>Mon profil</DropdownMenuItem>
-                  <DropdownMenuItem>Mes préférences</DropdownMenuItem>
+                  <DropdownMenuItem className="rounded-lg">Mon profil</DropdownMenuItem>
+                  <DropdownMenuItem className="rounded-lg">Mes préférences</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}>Déconnexion</DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout} className="rounded-lg text-destructive">Déconnexion</DropdownMenuItem>
                 </>
               ) : (
                 <>
-                  <DropdownMenuItem onClick={handleLogin}>Connexion</DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogin}>Créer un compte</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogin} className="rounded-lg">Connexion</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogin} className="rounded-lg">Créer un compte</DropdownMenuItem>
                 </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
-      <div className="page-container pt-12">
+      <div className="page-container pt-16">
         {children || <Outlet />}
       </div>
       <NavigationBar />
