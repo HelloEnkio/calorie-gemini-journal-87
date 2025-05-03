@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, subDays } from "date-fns";
 import { FileDown } from "lucide-react";
 import { getLogsInDateRange, formatDateKey, getAllLogs } from "@/utils/storage";
@@ -13,14 +13,15 @@ import MacroDistribution from "@/components/stats/MacroDistribution";
 import DateRangeSelector from "@/components/stats/DateRangeSelector";
 import StatsSummary from "@/components/stats/StatsSummary";
 import { calculateWeightChange, getDateRangeDescription } from "@/utils/statsHelpers";
+import WeightChart from "@/components/stats/WeightChart";
+import WorkoutStats from "@/components/stats/WorkoutStats";
 
 const StatsPage = () => {
   const today = new Date();
-  // Default to showing all 30 days of data instead of just the week
   const [dateRange, setDateRange] = useState<"week" | "month" | "custom">("month");
-  // Start from 30 days ago rather than 7 days
   const [startDate, setStartDate] = useState(formatDateKey(subDays(today, 30)));
   const [endDate, setEndDate] = useState(formatDateKey(today));
+  const [activeStatTab, setActiveStatTab] = useState("calories");
   
   // Get data for selected timeframe
   const getLogs = () => {
@@ -97,24 +98,56 @@ const StatsPage = () => {
           onEndDateChange={handleEndDateChange}
         />
         
-        <Card className="mb-6">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Calories</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CalorieChart logs={logs} />
-          </CardContent>
-        </Card>
+        <Tabs value={activeStatTab} onValueChange={setActiveStatTab} className="mt-6">
+          <TabsList className="mb-4">
+            <TabsTrigger value="calories">Calories</TabsTrigger>
+            <TabsTrigger value="weight">Poids</TabsTrigger>
+            <TabsTrigger value="workout">Sport</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="calories">
+            <Card className="mb-6">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Calories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CalorieChart logs={logs} />
+              </CardContent>
+            </Card>
+            
+            <Card className="mb-6">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Distribution des macros</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MacroDistribution logs={logs} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="weight">
+            <Card className="mb-6">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Évolution du poids</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <WeightChart logs={logs} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="workout">
+            <Card className="mb-6">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Activités sportives</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <WorkoutStats logs={logs} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </Tabs>
-      
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Distribution des macros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <MacroDistribution logs={logs} />
-        </CardContent>
-      </Card>
       
       <Card>
         <CardHeader className="pb-2">

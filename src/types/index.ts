@@ -1,85 +1,74 @@
 
-// Food and nutrition types
-export interface MacroNutrients {
-  protein: number;  // in grams
-  carbs: number;    // in grams
-  fat: number;      // in grams
+// Extend the existing types to include weight and geminiData
+
+export interface Macros {
+  protein: number;
+  carbs: number;
+  fat: number;
 }
 
 export interface FoodEntry {
   id: string;
   name: string;
   calories: number;
-  macros: MacroNutrients;
+  macros: Macros;
   timestamp: string;
-  mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  weight?: number;
+  geminiData?: {
+    prompt: string;
+    response: any;
+  };
 }
 
-// Workout types
+export interface WeightEntry {
+  weight: number;
+  timestamp: string;
+  notes?: string;
+}
+
 export interface WorkoutEntry {
   id: string;
   type: string;
-  duration: number;  // in minutes
+  duration: number;
   caloriesBurned?: number;
-  notes?: string;
-  timestamp: string;
-}
-
-// Weight tracking
-export interface WeightEntry {
-  id: string;
-  weight: number;  // in kg
   timestamp: string;
   notes?: string;
 }
 
-// User stats and goals
-export interface UserGoals {
-  dailyCalories: number;
-  macros?: MacroNutrients;
-  macroPercentages?: MacroNutrients;
-  weeklyWorkouts?: number;
-  targetWeight?: number;
-}
-
-// Achievement types
-export interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  unlocked: boolean;
-  progress?: number; // 0-100
-  maxProgress?: number;
-  category: 'nutrition' | 'fitness' | 'consistency' | 'weight';
-  level: 'bronze' | 'silver' | 'gold';
-}
-
-// App general types
 export interface DailyLog {
   date: string;
   totalCalories: number;
-  totalMacros: MacroNutrients;
+  totalMacros: Macros;
   foodEntries: FoodEntry[];
   workouts: WorkoutEntry[];
   weight?: WeightEntry;
 }
 
-export interface WeeklyStats {
-  startDate: string;
-  endDate: string;
-  averageCalories: number;
-  averageMacros: MacroNutrients;
-  totalWorkouts: number;
-  weightChange?: number;
-  caloriesBurned: number;
+export interface UserGoals {
+  dailyCalories: number;
+  macros?: {
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+  };
+  targetWeight?: number;
 }
 
-// Gemini API types
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  unlockedAt?: string;
+  progress?: number;
+  maxProgress?: number;
+}
+
 export interface GeminiNutritionResponse {
   success: boolean;
   foodName?: string;
   calories?: number;
-  macros?: MacroNutrients;
+  macros?: Macros;
   errorMessage?: string;
 }

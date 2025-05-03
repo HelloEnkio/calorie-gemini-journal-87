@@ -3,18 +3,21 @@ import { FoodEntry as FoodEntryType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { removeFoodEntry } from "@/utils/storage";
-import { X } from "lucide-react";
+import { X, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 interface FoodEntryProps {
   entry: FoodEntryType;
   onDelete?: () => void;
+  hasDetails?: boolean;
+  isExpanded?: boolean;
 }
 
-const FoodEntry = ({ entry, onDelete }: FoodEntryProps) => {
-  const handleDelete = () => {
+const FoodEntry = ({ entry, onDelete, hasDetails = false, isExpanded = false }: FoodEntryProps) => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Empêcher le dépliant de s'ouvrir lors de la suppression
     removeFoodEntry(entry.id);
-    toast.success("Repas supprimé");
+    toast.success("Élément supprimé");
     if (onDelete) onDelete();
   };
   
@@ -22,9 +25,17 @@ const FoodEntry = ({ entry, onDelete }: FoodEntryProps) => {
     <Card className="mb-2 p-3 relative group">
       <div className="flex justify-between">
         <div className="flex-1">
-          <div className="font-medium">{entry.name}</div>
-          <div className="text-sm text-muted-foreground mt-1">
-            {entry.calories} kcal
+          <div className="font-medium flex items-center">
+            {entry.name}
+            {hasDetails && (
+              <span className="ml-2 text-primary">
+                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </span>
+            )}
+          </div>
+          <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+            <span>{entry.calories} kcal</span>
+            {entry.weight && <span>• {entry.weight}g</span>}
           </div>
         </div>
         <div className="text-right">

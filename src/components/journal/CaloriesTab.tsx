@@ -1,13 +1,14 @@
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Star, Trophy } from "lucide-react";
+import { Star, Trophy, ChevronDown, ChevronUp } from "lucide-react";
 import FoodEntry from "@/components/food/FoodEntry";
 import QuickAddForm from "@/components/food/QuickAddForm";
 import GeminiInputForm from "@/components/food/GeminiInputForm";
-import { DailyLog, UserGoals } from "@/types";
+import { DailyLog, UserGoals, FoodEntry as FoodEntryType } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface CaloriesTabProps {
@@ -17,6 +18,17 @@ interface CaloriesTabProps {
 }
 
 const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
+  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
+
+  // Toggle expanded entry
+  const toggleEntryDetails = (entryId: string) => {
+    if (expandedEntryId === entryId) {
+      setExpandedEntryId(null);
+    } else {
+      setExpandedEntryId(entryId);
+    }
+  };
+  
   // Calculate percentage of goal
   const caloriePercentage = Math.min(
     Math.round((dayLog.totalCalories / goals.dailyCalories) * 100),
@@ -245,10 +257,10 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
       {/* Food entries */}
       <div>
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-lg font-medium">Repas</h2>
+          <h2 className="text-lg font-medium">Repas ou aliments</h2>
           
           <Badge variant="outline">
-            {dayLog.foodEntries.length} {dayLog.foodEntries.length > 1 ? 'repas' : 'repas'}
+            {dayLog.foodEntries.length} {dayLog.foodEntries.length > 1 ? 'éléments' : 'élément'}
           </Badge>
         </div>
         
@@ -262,13 +274,42 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
         {dayLog.foodEntries.length > 0 ? (
           <div className="space-y-3">
             {dayLog.foodEntries.map((entry) => (
-              <FoodEntry key={entry.id} entry={entry} onDelete={refreshData} />
+              <div key={entry.id}>
+                <div 
+                  className="cursor-pointer" 
+                  onClick={() => entry.geminiData && toggleEntryDetails(entry.id)}
+                >
+                  <FoodEntry 
+                    entry={entry} 
+                    onDelete={refreshData}
+                    hasDetails={!!entry.geminiData} 
+                    isExpanded={expandedEntryId === entry.id}
+                  />
+                </div>
+                {expandedEntryId === entry.id && entry.geminiData && (
+                  <Card className="mt-2 mb-4 p-3 bg-slate-50">
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <strong className="text-xs text-slate-500">Prompt :</strong>
+                        <p className="text-slate-700 mt-1">{entry.geminiData.prompt}</p>
+                      </div>
+                      <Separator className="my-2" />
+                      <div>
+                        <strong className="text-xs text-slate-500">Réponse Gemini :</strong>
+                        <pre className="text-xs bg-slate-100 p-2 rounded mt-1 overflow-x-auto">
+                          {JSON.stringify(entry.geminiData.response, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              </div>
             ))}
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
-            <p>Aucun repas enregistré ce jour</p>
-            <p className="text-sm">Utilisez le formulaire ci-dessus pour ajouter des repas</p>
+            <p>Aucun repas ou aliment enregistré ce jour</p>
+            <p className="text-sm">Utilisez le formulaire ci-dessus pour ajouter des repas ou aliments</p>
           </div>
         )}
       </div>

@@ -9,7 +9,7 @@ import {
 } from "@/services/geminiService";
 import { addFoodEntry, generateId } from "@/utils/storage";
 import { toast } from "sonner";
-import { Loader2, Settings, X } from "lucide-react";
+import { Loader2, Settings, X, Plus } from "lucide-react";
 import { 
   Popover,
   PopoverContent,
@@ -25,6 +25,7 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiKey, setApiKey] = useState(getGeminiApiKey());
   const [apiKeyInput, setApiKeyInput] = useState("");
+  const [foodWeight, setFoodWeight] = useState("");
   
   const isDemo = apiKey === "DEMO_KEY";
   
@@ -41,7 +42,7 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
   
   const handleAnalyze = async () => {
     if (!foodDescription.trim()) {
-      toast.error("Veuillez entrer une description du repas");
+      toast.error("Veuillez entrer une description du repas ou de l'aliment");
       return;
     }
     
@@ -51,17 +52,26 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
       const result = await analyzeFoodWithGemini(foodDescription);
       
       if (result.success && result.calories && result.macros) {
+        const weight = foodWeight ? parseInt(foodWeight) : undefined;
+        
         // Add the analyzed food to the journal
         addFoodEntry({
           id: generateId(),
           name: result.foodName || foodDescription,
           calories: result.calories,
           macros: result.macros,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          weight: weight,
+          // Store the Gemini prompt and response
+          geminiData: {
+            prompt: foodDescription,
+            response: result
+          }
         });
         
-        toast.success("Repas ajouté avec succès");
+        toast.success("Repas ou aliment ajouté avec succès");
         setFoodDescription("");
+        setFoodWeight("");
         if (onAdd) onAdd();
       } else {
         toast.error(result.errorMessage || "Erreur d'analyse, veuillez réessayer");
@@ -78,12 +88,13 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
     <div className="space-y-2">
       <div className="relative flex items-center">
         <Input
-          placeholder="Décrivez votre repas (ex: 100g de poulet et une salade)"
+          placeholder="Décrivez votre repas ou aliment (ex: 100g de poulet et une salade)"
           value={foodDescription}
           onChange={(e) => setFoodDescription(e.target.value)}
           className="pr-24"
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
               handleAnalyze();
             }
           }}
@@ -171,12 +182,25 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
           </Popover>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">
-        {isDemo ? 
-          "Mode démo actif. Cliquez sur l'icône ⚙️ pour configurer l'API Gemini" :
-          "Décrivez votre repas pour une analyse automatique avec Gemini"
-        }
-      </p>
+      
+      <div className="flex gap-2">
+        <div className="relative flex-shrink-0 w-20">
+          <Input
+            type="number"
+            placeholder="Poids (g)"
+            value={foodWeight}
+            onChange={(e) => setFoodWeight(e.target.value)}
+            className="w-full"
+            disabled={isAnalyzing}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground flex-grow pt-2">
+          {isDemo ? 
+            "Mode démo actif. Cliquez sur l'icône ⚙️ pour configurer l'API Gemini" :
+            "Décrivez votre repas ou aliment pour une analyse automatique avec Gemini"
+          }
+        </p>
+      </div>
     </div>
   );
 };

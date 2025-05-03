@@ -2,11 +2,8 @@
 import { useState, useEffect } from "react";
 import { isToday, format, addDays, subDays } from "date-fns";
 import { fr } from "date-fns/locale"; 
-import { Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Carousel, CarouselContent, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { formatDateKey, getLogForDate, getUserGoals, checkAndUpdateAchievements } from "@/utils/storage";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CaloriesTab from "@/components/journal/CaloriesTab";
 import WeightTab from "@/components/journal/WeightTab";
 import WorkoutTab from "@/components/journal/WorkoutTab";
