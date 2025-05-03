@@ -1,164 +1,196 @@
 
-import { GeminiNutritionResponse } from "@/types";
+import { FoodEntry, MacroNutrients, GeminiAnalysisResult } from "@/types";
 
-// La clé API peut être stockée localement pour des fins de démo
-// Dans une app de production, elle devrait être stockée côté serveur
-let apiKey = localStorage.getItem("geminiApiKey") || "DEMO_KEY";
-
-export const setGeminiApiKey = (key: string): void => {
-  apiKey = key;
-  localStorage.setItem("geminiApiKey", key);
-};
-
+// Récupère la clé API depuis le localStorage
 export const getGeminiApiKey = (): string => {
-  return apiKey;
+  return localStorage.getItem("gemini-api-key") || "DEMO_KEY";
 };
 
-// Helper function to format the prompt for consistent results
-const formatFoodAnalysisPrompt = (foodDescription: string): string => {
-  return `Analyse nutritionnelle pour: "${foodDescription}"
+// Enregistre la clé API dans le localStorage
+export const setGeminiApiKey = (key: string): void => {
+  localStorage.setItem("gemini-api-key", key);
+};
+
+// Analyse un aliment avec l'API Gemini
+export const analyzeFoodWithGemini = async (
+  foodDescription: string,
+  weight?: number
+): Promise<GeminiAnalysisResult> => {
+  const apiKey = getGeminiApiKey();
   
-  Je souhaite connaître les macronutriments et calories de cet aliment/repas.
-  Réponds uniquement avec un objet JSON au format suivant, sans aucun texte additionnel:
-  
-  {
-    "foodName": "nom du repas/aliment",
-    "calories": nombre total de calories,
-    "macros": {
-      "protein": grammes de protéines,
-      "carbs": grammes de glucides,
-      "fat": grammes de lipides
-    }
+  // Mode démo pour les tests sans clé API
+  if (apiKey === "DEMO_KEY") {
+    console.log("Using demo mode for Gemini analysis");
+    return simulateDemoAnalysis(foodDescription, weight);
   }
   
-  N'inclus aucune explication, uniquement l'objet JSON.`;
-};
-
-// Function to analyze food using Gemini API
-export const analyzeFoodWithGemini = async (
-  foodDescription: string
-): Promise<GeminiNutritionResponse> => {
   try {
-    // Si nous sommes en mode démo (avec la clé par défaut)
-    if (apiKey === "DEMO_KEY") {
-      // Utiliser les réponses simulées comme avant
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    // Construction du prompt en incluant le poids si fourni
+    let prompt = `Analyze the following food item and provide nutritional information:
+      "${foodDescription}"
+      ${weight ? `The weight is ${weight} grams.` : ""}
       
-      // Demo response based on common foods
-      const lowerDescription = foodDescription.toLowerCase();
-      
-      if (lowerDescription.includes("poulet") && lowerDescription.includes("semoule") && lowerDescription.includes("yaourt")) {
-        // Your example: "un peu de poulet, 100g de semoule et un yaourt de brebis"
-        return {
-          success: true,
-          foodName: "Poulet avec semoule et yaourt de brebis",
-          calories: 550,
-          macros: {
-            protein: 35,
-            carbs: 65,
-            fat: 10
-          }
-        };
-      } else if (lowerDescription.includes("pizza")) {
-        return {
-          success: true,
-          foodName: "Pizza",
-          calories: 285,
-          macros: {
-            protein: 12,
-            carbs: 36,
-            fat: 10
-          }
-        };
-      } else if (lowerDescription.includes("salade") || lowerDescription.includes("légumes")) {
-        return {
-          success: true,
-          foodName: "Salade composée",
-          calories: 180,
-          macros: {
-            protein: 5,
-            carbs: 15,
-            fat: 12
-          }
-        };
-      } else if (lowerDescription.includes("pâtes") || lowerDescription.includes("spaghetti")) {
-        return {
-          success: true,
-          foodName: "Pâtes à la sauce tomate",
-          calories: 350,
-          macros: {
-            protein: 12,
-            carbs: 70,
-            fat: 5
-          }
-        };
-      } else if (lowerDescription.includes("steak") || lowerDescription.includes("boeuf")) {
-        return {
-          success: true,
-          foodName: "Steak de boeuf",
-          calories: 350,
-          macros: {
-            protein: 40,
-            carbs: 0,
-            fat: 20
-          }
-        };
-      } else {
-        // Generic response for demo
-        const wordCount = foodDescription.split(/\s+/).length;
-        const calories = wordCount * 100;
-        
-        return {
-          success: true,
-          foodName: foodDescription.slice(0, 30) + (foodDescription.length > 30 ? "..." : ""),
-          calories: calories,
-          macros: {
-            protein: Math.round(calories * 0.25 / 4),
-            carbs: Math.round(calories * 0.45 / 4),
-            fat: Math.round(calories * 0.3 / 9)
-          }
-        };
+      Return the result in valid JSON format with the following structure:
+      {
+        "foodName": "name of the food",
+        "calories": number of calories,
+        "macros": {
+          "protein": grams of protein,
+          "carbs": grams of carbohydrates,
+          "fat": grams of fat
+        }
       }
-    } else {
-      // Utiliser la vraie API Gemini si une clé API est configurée
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
-        method: 'POST',
+      
+      Calculate the values based on the actual weight if provided, otherwise use standard portion.
+      Return ONLY the JSON without any additional text.`;
+    
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: formatFoodAnalysisPrompt(foodDescription) }] }]
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error.message || "Erreur API Gemini");
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ],
+        }),
       }
-      
-      // Parse the response to extract the JSON object
-      const content = data.candidates[0].content;
-      const textContent = content.parts[0].text;
-      const jsonMatch = textContent.match(/\{[\s\S]*\}/);
-      
-      if (!jsonMatch) {
-        throw new Error("Impossible d'analyser les données nutritionnelles de la réponse");
-      }
-      
-      const nutritionData = JSON.parse(jsonMatch[0]);
+    );
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error("Gemini API error:", data.error);
       return {
-        success: true,
-        ...nutritionData
+        success: false,
+        errorMessage: data.error.message || "Erreur d'API Gemini",
       };
     }
+
+    const textResult = data.candidates[0].content.parts[0].text;
+    
+    // Extraire la partie JSON de la réponse
+    const jsonMatch = textResult.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return {
+        success: false,
+        errorMessage: "Format de réponse non valide",
+      };
+    }
+    
+    const jsonResult = JSON.parse(jsonMatch[0]);
+    
+    return {
+      success: true,
+      foodName: jsonResult.foodName,
+      calories: Number(jsonResult.calories),
+      macros: {
+        protein: Number(jsonResult.macros.protein),
+        carbs: Number(jsonResult.macros.carbs),
+        fat: Number(jsonResult.macros.fat),
+      },
+    };
   } catch (error) {
     console.error("Error analyzing food with Gemini:", error);
     return {
       success: false,
-      errorMessage: `Erreur lors de l'analyse: ${error instanceof Error ? error.message : "Erreur inconnue"}`
+      errorMessage: "Erreur de communication avec l'API Gemini",
     };
   }
+};
+
+// Fonction pour le mode démo (sans appel API réel)
+const simulateDemoAnalysis = (
+  foodDescription: string,
+  weight?: number
+): GeminiAnalysisResult => {
+  console.log(`Demo analysis for: "${foodDescription}", weight: ${weight || "not specified"}`);
+  
+  const foodDescLower = foodDescription.toLowerCase();
+  
+  let baseCalories = 0;
+  let baseProtein = 0;
+  let baseCarbs = 0;
+  let baseFat = 0;
+  let name = "";
+  
+  // Analyse simplifiée basée sur des mots-clés
+  if (foodDescLower.includes("riz")) {
+    name = "Riz";
+    baseCalories = 130;
+    baseProtein = 2.7;
+    baseCarbs = 28;
+    baseFat = 0.3;
+  } else if (foodDescLower.includes("poulet") || foodDescLower.includes("chicken")) {
+    name = "Poulet";
+    baseCalories = 165;
+    baseProtein = 31;
+    baseCarbs = 0;
+    baseFat = 3.6;
+  } else if (foodDescLower.includes("salade")) {
+    name = "Salade";
+    baseCalories = 15;
+    baseProtein = 1.5;
+    baseCarbs = 2;
+    baseFat = 0.2;
+  } else if (foodDescLower.includes("pomme") || foodDescLower.includes("apple")) {
+    name = "Pomme";
+    baseCalories = 52;
+    baseProtein = 0.3;
+    baseCarbs = 14;
+    baseFat = 0.2;
+  } else if (foodDescLower.includes("pâtes") || foodDescLower.includes("pasta")) {
+    name = "Pâtes";
+    baseCalories = 131;
+    baseProtein = 5;
+    baseCarbs = 25;
+    baseFat = 1.1;
+  } else if (foodDescLower.includes("pizza")) {
+    name = "Pizza";
+    baseCalories = 250;
+    baseProtein = 11;
+    baseCarbs = 31;
+    baseFat = 10;
+  } else if (foodDescLower.includes("pain") || foodDescLower.includes("bread")) {
+    name = "Pain";
+    baseCalories = 265;
+    baseProtein = 9;
+    baseCarbs = 49;
+    baseFat = 3.2;
+  } else if (foodDescLower.includes("oeufs") || foodDescLower.includes("œufs") || foodDescLower.includes("egg")) {
+    name = "Œuf";
+    baseCalories = 78;
+    baseProtein = 6.3;
+    baseCarbs = 0.6;
+    baseFat = 5.3;
+  } else {
+    // Valeurs génériques par défaut
+    name = foodDescription.length > 20 ? foodDescription.substring(0, 20) + "..." : foodDescription;
+    baseCalories = 100;
+    baseProtein = 5;
+    baseCarbs = 15;
+    baseFat = 3;
+  }
+  
+  // Calcul basé sur le poids si fourni (pour 100g de base)
+  const scaleFactor = weight ? weight / 100 : 1;
+  
+  return {
+    success: true,
+    foodName: name,
+    calories: Math.round(baseCalories * scaleFactor),
+    macros: {
+      protein: Number((baseProtein * scaleFactor).toFixed(1)),
+      carbs: Number((baseCarbs * scaleFactor).toFixed(1)),
+      fat: Number((baseFat * scaleFactor).toFixed(1)),
+    },
+  };
 };

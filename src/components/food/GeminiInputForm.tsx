@@ -49,11 +49,13 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
     setIsAnalyzing(true);
     
     try {
-      const result = await analyzeFoodWithGemini(foodDescription);
+      // Convertir le poids en nombre si présent
+      const weightInGrams = foodWeight ? parseInt(foodWeight) : undefined;
+      
+      // Passer le poids à la fonction d'analyse
+      const result = await analyzeFoodWithGemini(foodDescription, weightInGrams);
       
       if (result.success && result.calories && result.macros) {
-        const weight = foodWeight ? parseInt(foodWeight) : undefined;
-        
         // Add the analyzed food to the journal
         addFoodEntry({
           id: generateId(),
@@ -61,10 +63,10 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
           calories: result.calories,
           macros: result.macros,
           timestamp: new Date().toISOString(),
-          weight: weight,
+          weight: weightInGrams,
           // Store the Gemini prompt and response
           geminiData: {
-            prompt: foodDescription,
+            prompt: foodDescription + (weightInGrams ? ` (${weightInGrams}g)` : ''),
             response: result
           }
         });
@@ -88,7 +90,7 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
     <div className="space-y-2">
       <div className="relative flex items-center">
         <Input
-          placeholder="Décrivez votre repas ou aliment (ex: 100g de poulet et une salade)"
+          placeholder="Décrivez votre repas ou aliment (ex: poulet et une salade)"
           value={foodDescription}
           onChange={(e) => setFoodDescription(e.target.value)}
           className="pr-24"
@@ -196,8 +198,8 @@ const GeminiInputForm = ({ onAdd }: GeminiInputFormProps) => {
         </div>
         <p className="text-xs text-muted-foreground flex-grow pt-2">
           {isDemo ? 
-            "Mode démo actif. Cliquez sur l'icône ⚙️ pour configurer l'API Gemini" :
-            "Décrivez votre repas ou aliment pour une analyse automatique avec Gemini"
+            "Mode démo actif. Ajoutez un poids en grammes pour plus de précision" :
+            "Ajoutez un poids en grammes pour une analyse plus précise"
           }
         </p>
       </div>
