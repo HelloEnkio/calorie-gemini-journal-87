@@ -20,6 +20,7 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
   const [protein, setProtein] = useState<string>("");
   const [carbs, setCarbs] = useState<string>("");
   const [fat, setFat] = useState<string>("");
+  const [weight, setWeight] = useState<string>("");
   
   const handleSubmit = () => {
     if (!foodName.trim()) {
@@ -53,7 +54,8 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
       name: foodName,
       calories: Number(calories),
       macros,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      weight: weight ? Number(weight) : undefined
     };
     
     addFoodEntry(newEntry);
@@ -65,6 +67,7 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
     setProtein("");
     setCarbs("");
     setFat("");
+    setWeight("");
     
     if (onAdd) onAdd();
   };
@@ -83,15 +86,27 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="calories">Calories (kcal)</Label>
-            <Input
-              id="calories"
-              type="number"
-              placeholder="Ex: 350"
-              value={calories}
-              onChange={(e) => setCalories(e.target.value)}
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
+              <Label htmlFor="calories">Calories (kcal)</Label>
+              <Input
+                id="calories"
+                type="number"
+                placeholder="Ex: 350"
+                value={calories}
+                onChange={(e) => setCalories(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="weight">Poids (g)</Label>
+              <Input
+                id="weight"
+                type="number"
+                placeholder="Ex: 100"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+              />
+            </div>
           </div>
           
           <div className="grid grid-cols-3 gap-2">
