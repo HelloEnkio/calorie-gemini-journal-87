@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WeightEntry } from "@/types";
-import { addWeightEntry, generateId, getTodaysLog } from "@/utils/storage";
+import { addWeightEntry } from "@/utils/storage";
+import { generateId } from "@/utils/storage/core";
+import { getTodaysLog } from "@/utils/storage/logs";
 import { toast } from "sonner";
 
 interface WeightEntryFormProps {

@@ -1,7 +1,7 @@
 
 import { FoodEntry, WorkoutEntry, WeightEntry } from "@/types";
-import { generateId, getTodaysLog } from "./core";
-import { saveDailyLog } from "./logs";
+import { generateId } from "./core";
+import { getTodaysLog, saveDailyLog } from "./logs";
 
 // Add food entry
 export const addFoodEntry = (entry: FoodEntry): void => {
