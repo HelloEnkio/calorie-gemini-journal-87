@@ -11,15 +11,27 @@ interface FoodEntryProps {
   onDelete?: () => void;
   hasDetails?: boolean;
   isExpanded?: boolean;
+  totalDailyCalories?: number;
 }
 
-const FoodEntry = ({ entry, onDelete, hasDetails = false, isExpanded = false }: FoodEntryProps) => {
+const FoodEntry = ({ 
+  entry, 
+  onDelete, 
+  hasDetails = false, 
+  isExpanded = false,
+  totalDailyCalories = 0
+}: FoodEntryProps) => {
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation(); // Empêcher le dépliant de s'ouvrir lors de la suppression
     removeFoodEntry(entry.id);
     toast.success("Élément supprimé");
     if (onDelete) onDelete();
   };
+  
+  // Calculate proportion of daily calories
+  const caloriePercentage = totalDailyCalories > 0 
+    ? Math.round((entry.calories / totalDailyCalories) * 100) 
+    : 0;
   
   return (
     <Card className="mb-2 p-3 relative group">
@@ -36,6 +48,9 @@ const FoodEntry = ({ entry, onDelete, hasDetails = false, isExpanded = false }: 
           <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
             <span>{entry.calories} kcal</span>
             {entry.weight && <span>• {entry.weight}g</span>}
+            <span className="text-xs bg-primary/10 text-primary rounded-full px-2">
+              {caloriePercentage}% du total
+            </span>
           </div>
         </div>
         <div className="text-right">

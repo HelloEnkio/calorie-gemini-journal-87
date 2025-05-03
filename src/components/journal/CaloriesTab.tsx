@@ -284,6 +284,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
                     onDelete={refreshData}
                     hasDetails={!!entry.geminiData} 
                     isExpanded={expandedEntryId === entry.id}
+                    totalDailyCalories={dayLog.totalCalories}
                   />
                 </div>
                 {expandedEntryId === entry.id && entry.geminiData && (
