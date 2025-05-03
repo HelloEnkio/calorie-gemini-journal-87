@@ -3,13 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WeightEntry } from "@/types";
 import { addWeightEntry, generateId, getTodaysLog } from "@/utils/storage";
 import { toast } from "sonner";
@@ -20,7 +14,6 @@ interface WeightEntryFormProps {
 
 const WeightEntryForm = ({ onAdd }: WeightEntryFormProps) => {
   const todayLog = getTodaysLog();
-  const [open, setOpen] = useState(false);
   const [weight, setWeight] = useState<string>(
     todayLog.weight ? todayLog.weight.weight.toString() : ""
   );
@@ -48,23 +41,16 @@ const WeightEntryForm = ({ onAdd }: WeightEntryFormProps) => {
     // Reset form
     setWeight("");
     setNotes("");
-    setOpen(false);
     
     if (onAdd) onAdd();
   };
   
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
-          + Enregistrer le poids
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Enregistrer votre poids</DialogTitle>
-        </DialogHeader>
-        
+    <Card className="mb-4">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Enregistrer votre poids</CardTitle>
+      </CardHeader>
+      <CardContent>
         <div className="space-y-4 mb-4">
           <div className="space-y-2">
             <Label htmlFor="weight">Poids (kg)</Label>
@@ -92,8 +78,8 @@ const WeightEntryForm = ({ onAdd }: WeightEntryFormProps) => {
         <Button onClick={handleSubmit} className="w-full">
           Enregistrer
         </Button>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   );
 };
 

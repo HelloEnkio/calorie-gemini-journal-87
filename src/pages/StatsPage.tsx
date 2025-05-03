@@ -2,22 +2,48 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { format, subDays, parseISO } from "date-fns";
 import CalorieChart from "@/components/stats/CalorieChart";
 import MacroDistribution from "@/components/stats/MacroDistribution";
-import { getLogsForLastDays, formatDateKey, getAllLogs } from "@/utils/storage";
+import { getLogsInDateRange, formatDateKey, getAllLogs } from "@/utils/storage";
 import { exportToExcel } from "@/services/excelService";
 import { toast } from "sonner";
-import { FileDown } from "lucide-react";
+import { FileDown, Calendar } from "lucide-react";
 
 const StatsPage = () => {
-  const [timeframe, setTimeframe] = useState<"week" | "month">("week");
+  const today = new Date();
+  const [dateRange, setDateRange] = useState<"week" | "month" | "custom">("week");
+  const [startDate, setStartDate] = useState(formatDateKey(subDays(today, 7)));
+  const [endDate, setEndDate] = useState(formatDateKey(today));
   
   // Get data for selected timeframe
-  const logs = timeframe === "week" 
-    ? getLogsForLastDays(7) 
-    : getLogsForLastDays(30);
+  const getLogs = () => {
+    switch(dateRange) {
+      case "week":
+        return getLogsInDateRange(
+          formatDateKey(subDays(today, 7)),
+          formatDateKey(today)
+        );
+      case "month":
+        return getLogsInDateRange(
+          formatDateKey(subDays(today, 30)),
+          formatDateKey(today)
+        );
+      case "custom":
+        return getLogsInDateRange(startDate, endDate);
+      default:
+        return getLogsInDateRange(
+          formatDateKey(subDays(today, 7)),
+          formatDateKey(today)
+        );
+    }
+  };
+  
+  const logs = getLogs();
   
   // Calculate summary statistics
   const calculateSummary = () => {
@@ -27,7 +53,8 @@ const StatsPage = () => {
         avgProtein: 0,
         avgCarbs: 0,
         avgFat: 0,
-        totalWorkouts: 0
+        totalWorkouts: 0,
+        daysTracked: 0
       };
     }
     
@@ -46,7 +73,8 @@ const StatsPage = () => {
       avgProtein: Math.round(totals.protein / logs.length),
       avgCarbs: Math.round(totals.carbs / logs.length),
       avgFat: Math.round(totals.fat / logs.length),
-      totalWorkouts: totals.workouts
+      totalWorkouts: totals.workouts,
+      daysTracked: logs.length
     };
   };
   
@@ -83,6 +111,40 @@ const StatsPage = () => {
     }
   };
   
+  // Handle custom date changes
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newStartDate = e.target.value;
+    setStartDate(newStartDate);
+  };
+  
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEndDate = e.target.value;
+    setEndDate(newEndDate);
+  };
+  
+  // Format date for display
+  const formatDisplayDate = (dateStr: string) => {
+    try {
+      return format(parseISO(dateStr), 'dd/MM/yyyy');
+    } catch {
+      return dateStr;
+    }
+  };
+  
+  // Get date range description
+  const getDateRangeDescription = () => {
+    switch(dateRange) {
+      case "week":
+        return "7 derniers jours";
+      case "month":
+        return "30 derniers jours";
+      case "custom":
+        return `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
+      default:
+        return "";
+    }
+  };
+  
   return (
     <div className="mobile-container pt-4 pb-20">
       <div className="flex justify-between items-center mb-6">
@@ -99,33 +161,49 @@ const StatsPage = () => {
         </Button>
       </div>
       
-      <Tabs value={timeframe} onValueChange={(v) => setTimeframe(v as "week" | "month")}>
-        <TabsList className="grid grid-cols-2 mb-6">
+      <Tabs value={dateRange} onValueChange={(v) => setDateRange(v as "week" | "month" | "custom")}>
+        <TabsList className="grid grid-cols-3 mb-6">
           <TabsTrigger value="week">7 jours</TabsTrigger>
           <TabsTrigger value="month">30 jours</TabsTrigger>
+          <TabsTrigger value="custom">Personnalisé</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="week" className="tab-content">
-          <Card className="mb-6">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Calories</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CalorieChart logs={logs} timeframe="week" />
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {dateRange === "custom" && (
+          <div className="mb-4 grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="start-date">Date de début</Label>
+              <Input 
+                id="start-date"
+                type="date" 
+                value={startDate}
+                onChange={handleStartDateChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="end-date">Date de fin</Label>
+              <Input 
+                id="end-date"
+                type="date" 
+                value={endDate}
+                onChange={handleEndDateChange}
+              />
+            </div>
+          </div>
+        )}
         
-        <TabsContent value="month" className="tab-content">
-          <Card className="mb-6">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Calories</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CalorieChart logs={logs} timeframe="month" />
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <div className="text-sm text-muted-foreground mb-4 flex items-center">
+          <Calendar className="h-4 w-4 mr-1" /> 
+          <span>{getDateRangeDescription()} ({logs.length} jours)</span>
+        </div>
+        
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Calories</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CalorieChart logs={logs} />
+          </CardContent>
+        </Card>
       </Tabs>
       
       <Card className="mb-6">

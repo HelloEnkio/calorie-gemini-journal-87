@@ -3,14 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WorkoutEntry } from "@/types";
 import { addWorkoutEntry, generateId } from "@/utils/storage";
 import { toast } from "sonner";
@@ -32,7 +26,6 @@ const WORKOUT_TYPES = [
 ];
 
 const WorkoutEntryForm = ({ onAdd }: WorkoutEntryFormProps) => {
-  const [open, setOpen] = useState(false);
   const [workoutType, setWorkoutType] = useState(WORKOUT_TYPES[0]);
   const [duration, setDuration] = useState<string>("30");
   const [caloriesBurned, setCaloriesBurned] = useState<string>("");
@@ -72,23 +65,16 @@ const WorkoutEntryForm = ({ onAdd }: WorkoutEntryFormProps) => {
     setDuration("30");
     setCaloriesBurned("");
     setNotes("");
-    setOpen(false);
     
     if (onAdd) onAdd();
   };
   
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
-          + Ajouter séance de sport
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Ajouter une séance</DialogTitle>
-        </DialogHeader>
-        
+    <Card className="mb-4">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Ajouter une séance de sport</CardTitle>
+      </CardHeader>
+      <CardContent>
         <div className="space-y-4 mb-4">
           <div className="space-y-2">
             <Label htmlFor="workout-type">Type d'entraînement</Label>
@@ -142,8 +128,8 @@ const WorkoutEntryForm = ({ onAdd }: WorkoutEntryFormProps) => {
         <Button onClick={handleSubmit} className="w-full">
           Ajouter
         </Button>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   );
 };
 

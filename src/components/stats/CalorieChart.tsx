@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { DailyLog } from "@/types";
 import { getUserGoals } from "@/utils/storage";
 import {
@@ -15,18 +15,17 @@ import {
 
 interface CalorieChartProps {
   logs: DailyLog[];
-  timeframe?: "week" | "month";
 }
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("fr-FR", { 
-    weekday: "short", 
-    day: "numeric" 
+    day: "numeric",
+    month: "numeric"
   });
 };
 
-const CalorieChart = ({ logs, timeframe = "week" }: CalorieChartProps) => {
+const CalorieChart = ({ logs }: CalorieChartProps) => {
   const goals = getUserGoals();
   
   const chartData = useMemo(() => {

@@ -13,18 +13,22 @@ export const formatDateKey = (date: Date = new Date()): string => {
 
 // Get today's log or create a new one
 export const getTodaysLog = (): DailyLog => {
+  return getLogForDate(formatDateKey());
+};
+
+// Get log for a specific date
+export const getLogForDate = (dateKey: string): DailyLog => {
   const allLogs = getAllLogs();
-  const today = formatDateKey();
   
-  const todayLog = allLogs.find(log => log.date === today);
+  const dayLog = allLogs.find(log => log.date === dateKey);
   
-  if (todayLog) {
-    return todayLog;
+  if (dayLog) {
+    return dayLog;
   }
   
-  // Create new log for today
+  // Create new log for the date
   const newLog: DailyLog = {
-    date: today,
+    date: dateKey,
     totalCalories: 0,
     totalMacros: { protein: 0, carbs: 0, fat: 0 },
     foodEntries: [],
