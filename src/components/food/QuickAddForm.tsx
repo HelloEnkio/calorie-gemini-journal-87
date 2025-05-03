@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,19 +30,26 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
   const suggestionRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  // Search for food when the user types
+  // Rechercher les aliments quand l'utilisateur tape ou quand le composant est monté
   useEffect(() => {
-    if (foodName.trim().length >= 2) {
+    setIsSearching(true);
+    // Si le champ est vide, afficher les 5 premiers aliments par défaut
+    const results = searchFoods(foodName);
+    setSuggestions(results);
+    setShowSuggestions(true);
+    setIsSearching(false);
+  }, [foodName]);
+  
+  // Afficher les suggestions par défaut au focus du champ
+  const handleInputFocus = () => {
+    if (!showSuggestions) {
       setIsSearching(true);
       const results = searchFoods(foodName);
       setSuggestions(results);
-      setShowSuggestions(results.length > 0);
+      setShowSuggestions(true);
       setIsSearching(false);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
     }
-  }, [foodName]);
+  };
   
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -136,6 +142,7 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
                 placeholder="Ex: Salade composée" 
                 value={foodName} 
                 onChange={e => setFoodName(e.target.value)}
+                onFocus={handleInputFocus}
                 ref={inputRef}
                 autoComplete="off"
               />
@@ -151,21 +158,27 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
                 ref={suggestionRef}
                 className="absolute z-10 mt-1 w-full border border-input bg-background shadow-md rounded-md py-1 max-h-60 overflow-auto"
               >
-                {suggestions.map((food) => (
-                  <div 
-                    key={food.id}
-                    className="px-3 py-2 hover:bg-muted cursor-pointer flex justify-between items-center"
-                    onClick={() => handleSelectSuggestion(food)}
-                  >
-                    <div>
-                      <div className="font-medium">{food.name}</div>
-                      <div className="text-xs text-muted-foreground">{food.category}</div>
+                {suggestions.length > 0 ? (
+                  suggestions.map((food) => (
+                    <div 
+                      key={food.id}
+                      className="px-3 py-2 hover:bg-muted cursor-pointer flex justify-between items-center"
+                      onClick={() => handleSelectSuggestion(food)}
+                    >
+                      <div>
+                        <div className="font-medium">{food.name}</div>
+                        <div className="text-xs text-muted-foreground">{food.category}</div>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {food.calories} kcal / 100g
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {food.calories} kcal / 100g
-                    </div>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-muted-foreground">
+                    Aucun résultat trouvé
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>

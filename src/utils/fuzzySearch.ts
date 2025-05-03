@@ -1,8 +1,8 @@
-
 interface FuzzySearchOptions {
   threshold?: number;
   caseSensitive?: boolean;
   sort?: boolean;
+  maxResults?: number;
 }
 
 /**
@@ -26,9 +26,10 @@ export class FuzzySearch {
     this.items = items;
     this.keys = keys;
     this.options = {
-      threshold: options.threshold || 0.5,
+      threshold: options.threshold || 0.2, // Réduire le seuil pour avoir plus de résultats
       caseSensitive: options.caseSensitive || false,
       sort: options.sort !== undefined ? options.sort : true,
+      maxResults: options.maxResults || 5,
     };
   }
 
@@ -39,12 +40,15 @@ export class FuzzySearch {
    */
   search(query: string): any[] {
     if (!query || query === '') {
-      return [];
+      // Retourner les premiers éléments si aucune requête
+      return this.items.slice(0, this.options.maxResults);
     }
 
     const preparedQuery = this.options.caseSensitive ? query : query.toLowerCase();
-    const results = this.items.filter((item) => {
-      return this.keys.some((key) => {
+    
+    // Calculer le score de pertinence pour chaque item
+    const scoredResults = this.items.map((item) => {
+      const maxScore = this.keys.reduce((highest, key) => {
         const value = this.getPropertyValue(item, key);
         const preparedValue = this.options.caseSensitive 
           ? String(value) 
@@ -53,16 +57,25 @@ export class FuzzySearch {
         // Calcule la similarité entre la requête et la valeur
         const similarity = this.calculateSimilarity(preparedQuery, preparedValue);
         
-        return similarity >= this.options.threshold!;
-      });
+        return Math.max(highest, similarity);
+      }, 0);
+
+      return { item, score: maxScore };
     });
 
-    // Trier les résultats par pertinence si nécessaire
-    if (this.options.sort) {
-      return this.sortResultsByRelevance(results, preparedQuery);
+    // Trier les résultats par score de pertinence
+    const sortedResults = scoredResults.sort((a, b) => b.score - a.score);
+    
+    // Si on veut uniquement les résultats au-dessus du seuil
+    if (this.options.threshold !== undefined) {
+      const filteredResults = sortedResults.filter(result => result.score >= this.options.threshold!);
+      
+      // Retourner au maximum le nombre défini dans maxResults
+      return filteredResults.slice(0, this.options.maxResults).map(result => result.item);
     }
-
-    return results;
+    
+    // Sinon retourner simplement les N premiers résultats
+    return sortedResults.slice(0, this.options.maxResults).map(result => result.item);
   }
 
   /**

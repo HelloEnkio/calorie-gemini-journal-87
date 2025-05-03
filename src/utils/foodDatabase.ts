@@ -259,9 +259,10 @@ const foodDatabase: FoodItem[] = [
 ];
 
 // Initialiser le moteur de recherche floue avec les noms des aliments
-const foodSearchEngine = new FuzzySearch(foodDatabase, ['name'], {
-  threshold: 0.3,
+const foodSearchEngine = new FuzzySearch(foodDatabase, ['name', 'category'], {
+  threshold: 0.2,
   caseSensitive: false,
+  maxResults: 5,
 });
 
 /**
@@ -270,7 +271,10 @@ const foodSearchEngine = new FuzzySearch(foodDatabase, ['name'], {
  * @returns Liste d'aliments correspondants
  */
 export const searchFoods = (query: string): FoodItem[] => {
-  if (!query || query.trim() === '') return [];
+  if (!query || query.trim() === '') {
+    // Renvoyer les 5 premiers aliments par défaut
+    return foodDatabase.slice(0, 5);
+  }
   
   // Utiliser la recherche floue pour trouver des aliments
   return foodSearchEngine.search(query);
