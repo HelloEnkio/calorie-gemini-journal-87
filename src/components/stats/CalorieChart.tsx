@@ -40,7 +40,7 @@ const CalorieChart = ({ logs }: CalorieChartProps) => {
   }, [logs, goals]);
 
   return (
-    <div className="h-64 w-full">
+    <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
@@ -50,6 +50,7 @@ const CalorieChart = ({ logs }: CalorieChartProps) => {
             left: 5,
             bottom: 20,
           }}
+          barSize={logs.length > 20 ? 6 : 12} // Adjust bar width based on number of logs
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
           <XAxis 
@@ -58,6 +59,7 @@ const CalorieChart = ({ logs }: CalorieChartProps) => {
             tickLine={false}
             tick={{ fontSize: 12 }}
             tickMargin={8}
+            interval={logs.length > 14 ? Math.floor(logs.length / 10) : 0} // Show fewer ticks for many logs
           />
           <YAxis 
             axisLine={false}

@@ -26,6 +26,10 @@ const generateMockFoodEntries = (count: number): FoodEntry[] => {
     { name: "Bowl de quinoa", calories: 380, macros: { protein: 15, carbs: 52, fat: 12 } },
     { name: "Smoothie protéiné", calories: 240, macros: { protein: 30, carbs: 25, fat: 5 } },
     { name: "Yaourt grec et fruits", calories: 180, macros: { protein: 12, carbs: 20, fat: 6 } },
+    { name: "Steak et purée", calories: 520, macros: { protein: 35, carbs: 30, fat: 28 } },
+    { name: "Soupe aux légumes", calories: 220, macros: { protein: 8, carbs: 25, fat: 10 } },
+    { name: "Pizza margherita", calories: 650, macros: { protein: 22, carbs: 80, fat: 25 } },
+    { name: "Salade niçoise", calories: 380, macros: { protein: 18, carbs: 22, fat: 24 } },
   ];
   
   const mealTypes: Array<'breakfast' | 'lunch' | 'dinner' | 'snack'> = ['breakfast', 'lunch', 'dinner', 'snack'];
@@ -59,6 +63,8 @@ const generateMockWorkoutEntries = (count: number): WorkoutEntry[] => {
     { type: "Natation", duration: 40, caloriesBurned: 400 },
     { type: "HIIT", duration: 25, caloriesBurned: 350 },
     { type: "Yoga", duration: 50, caloriesBurned: 200 },
+    { type: "Pilates", duration: 45, caloriesBurned: 220 },
+    { type: "Boxe", duration: 60, caloriesBurned: 500 },
   ];
   
   const entries: WorkoutEntry[] = [];
@@ -134,20 +140,36 @@ export const initializeMockData = () => {
   
   console.log('Initializing mock data...');
   
-  // Generate logs for the last 14 days
+  // Generate logs for the last 30 days
   const logs: DailyLog[] = [];
   const baseWeight = 75; // Starting weight
   
-  for (let i = 14; i >= 0; i--) {
+  // Generate a more realistic weight trend that shows a gradual decrease over the month
+  // with occasional fluctuations
+  for (let i = 30; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
     
-    const foodCount = i === 0 ? 3 : randomInt(2, 5);  // Today has 3 meals
-    const workoutCount = Math.random() > 0.6 ? randomInt(1, 2) : 0; // 40% chance of workout
-    const useWeight = i % 3 === 0; // Record weight every 3 days
+    // More realistic food pattern (less on weekends, more meals on some days)
+    const day = date.getDay(); // 0 = Sunday, 6 = Saturday
+    const isWeekend = day === 0 || day === 6;
     
-    // Calculate weight progression: slight decrease over time
-    const weightForDay = baseWeight - (i / 14) * 2;
+    // Some days have more food entries than others
+    const foodCount = isWeekend ? randomInt(3, 5) : randomInt(2, 4);
+    
+    // More workouts during the week, less on weekends
+    const workoutProbability = isWeekend ? 0.3 : 0.6;
+    const workoutCount = Math.random() < workoutProbability ? randomInt(1, 2) : 0;
+    
+    // Record weight every 2-3 days
+    const useWeight = i % 2 === 0 || i % 3 === 0;
+    
+    // Calculate weight progression: overall downward trend with fluctuations
+    // Start at 76kg, end around 74kg with fluctuations
+    const trendWeight = 76 - (i === 0 ? 0 : (30 - i) / 30 * 2);
+    // Add some realistic fluctuations
+    const fluctuation = (Math.random() - 0.5) * 0.6; // +/- 0.3kg fluctuation
+    const weightForDay = parseFloat((trendWeight + fluctuation).toFixed(1));
     
     logs.push(createMockDailyLog(
       date,
@@ -156,6 +178,28 @@ export const initializeMockData = () => {
       useWeight ? weightForDay : undefined
     ));
   }
+  
+  // Add some days with really good diet adherence (close to target macros)
+  const goodDays = [3, 7, 11, 15, 22, 27];
+  goodDays.forEach(dayIndex => {
+    if (logs[dayIndex]) {
+      logs[dayIndex].totalMacros = { protein: 148, carbs: 225, fat: 72 };
+      logs[dayIndex].totalCalories = 2150;
+    }
+  });
+  
+  // Add some days with higher calories (cheat days)
+  const cheatDays = [5, 12, 19, 26];
+  cheatDays.forEach(dayIndex => {
+    if (logs[dayIndex]) {
+      logs[dayIndex].totalCalories = randomInt(2600, 2900);
+      logs[dayIndex].totalMacros = {
+        protein: randomInt(120, 130),
+        carbs: randomInt(300, 350),
+        fat: randomInt(90, 110)
+      };
+    }
+  });
   
   // Save logs to localStorage
   localStorage.setItem('nutrition-tracker-daily-logs', JSON.stringify(logs));
@@ -177,5 +221,6 @@ export const initializeMockData = () => {
     }
   });
   
-  console.log('Mock data initialization complete');
+  console.log('Mock data initialization complete with 30 days of data');
 };
+

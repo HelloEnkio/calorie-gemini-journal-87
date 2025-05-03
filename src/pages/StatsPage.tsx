@@ -16,8 +16,10 @@ import { calculateWeightChange, getDateRangeDescription } from "@/utils/statsHel
 
 const StatsPage = () => {
   const today = new Date();
-  const [dateRange, setDateRange] = useState<"week" | "month" | "custom">("week");
-  const [startDate, setStartDate] = useState(formatDateKey(subDays(today, 7)));
+  // Default to showing all 30 days of data instead of just the week
+  const [dateRange, setDateRange] = useState<"week" | "month" | "custom">("month");
+  // Start from 30 days ago rather than 7 days
+  const [startDate, setStartDate] = useState(formatDateKey(subDays(today, 30)));
   const [endDate, setEndDate] = useState(formatDateKey(today));
   
   // Get data for selected timeframe
