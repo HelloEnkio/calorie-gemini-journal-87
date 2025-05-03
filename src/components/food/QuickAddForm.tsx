@@ -1,18 +1,21 @@
-import { useState } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FoodEntry, MacroNutrients } from "@/types";
 import { addFoodEntry, generateId } from "@/utils/storage";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
+import { searchFoods, FoodItem } from "@/utils/foodDatabase";
+import { cn } from "@/lib/utils";
+
 interface QuickAddFormProps {
   onAdd?: () => void;
 }
-const QuickAddForm = ({
-  onAdd
-}: QuickAddFormProps) => {
+
+const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
   // Form state
   const [foodName, setFoodName] = useState("");
   const [calories, setCalories] = useState<string>("");
@@ -20,6 +23,60 @@ const QuickAddForm = ({
   const [carbs, setCarbs] = useState<string>("");
   const [fat, setFat] = useState<string>("");
   const [weight, setWeight] = useState<string>("");
+  
+  // Autocomplete state
+  const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const suggestionRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Search for food when the user types
+  useEffect(() => {
+    if (foodName.trim().length >= 2) {
+      setIsSearching(true);
+      const results = searchFoods(foodName);
+      setSuggestions(results);
+      setShowSuggestions(results.length > 0);
+      setIsSearching(false);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [foodName]);
+  
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionRef.current && 
+        !suggestionRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  
+  // Handle selecting a suggestion
+  const handleSelectSuggestion = (food: FoodItem) => {
+    setFoodName(food.name);
+    setCalories(food.calories.toString());
+    setProtein(food.macros.protein.toString());
+    setCarbs(food.macros.carbs.toString());
+    setFat(food.macros.fat.toString());
+    if (food.weight) {
+      setWeight(food.weight.toString());
+    }
+    setShowSuggestions(false);
+  };
+
   const handleSubmit = () => {
     if (!foodName.trim()) {
       toast.error("Veuillez saisir un nom d'aliment");
@@ -66,12 +123,51 @@ const QuickAddForm = ({
     setWeight("");
     if (onAdd) onAdd();
   };
-  return <Card className="mb-4">
+  
+  return (
+    <Card className="mb-4">
       <CardContent className="pt-4">
         <div className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <Label htmlFor="food-name">Nom du repas/produit</Label>
-            <Input id="food-name" placeholder="Ex: Salade composée" value={foodName} onChange={e => setFoodName(e.target.value)} />
+            <div className="relative">
+              <Input 
+                id="food-name" 
+                placeholder="Ex: Salade composée" 
+                value={foodName} 
+                onChange={e => setFoodName(e.target.value)}
+                ref={inputRef}
+                autoComplete="off"
+              />
+              {isSearching && (
+                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                  <Search className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            
+            {showSuggestions && (
+              <div 
+                ref={suggestionRef}
+                className="absolute z-10 mt-1 w-full border border-input bg-background shadow-md rounded-md py-1 max-h-60 overflow-auto"
+              >
+                {suggestions.map((food) => (
+                  <div 
+                    key={food.id}
+                    className="px-3 py-2 hover:bg-muted cursor-pointer flex justify-between items-center"
+                    onClick={() => handleSelectSuggestion(food)}
+                  >
+                    <div>
+                      <div className="font-medium">{food.name}</div>
+                      <div className="text-xs text-muted-foreground">{food.category}</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {food.calories} kcal / 100g
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           
           <div className="grid grid-cols-2 gap-2">
@@ -106,6 +202,8 @@ const QuickAddForm = ({
           </Button>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default QuickAddForm;
