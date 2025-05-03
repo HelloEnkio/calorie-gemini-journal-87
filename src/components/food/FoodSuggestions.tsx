@@ -9,6 +9,7 @@ interface FoodSuggestionsProps {
   isSearching: boolean;
   showSuggestions: boolean;
   onSelectSuggestion: (food: FoodItem) => void;
+  setShowSuggestions: (show: boolean) => void;
 }
 
 const FoodSuggestions = ({
@@ -16,12 +17,18 @@ const FoodSuggestions = ({
   isSearching,
   showSuggestions,
   onSelectSuggestion,
+  setShowSuggestions
 }: FoodSuggestionsProps) => {
   const suggestionRef = useRef<HTMLDivElement>(null);
 
   if (!showSuggestions) {
     return null;
   }
+
+  const handleSelectItem = (food: FoodItem) => {
+    onSelectSuggestion(food);
+    setShowSuggestions(false); // Fermer les suggestions immédiatement après la sélection
+  };
 
   return (
     <div 
@@ -39,7 +46,7 @@ const FoodSuggestions = ({
           <div 
             key={food.id}
             className="px-3 py-2 hover:bg-muted cursor-pointer flex justify-between items-center"
-            onClick={() => onSelectSuggestion(food)}
+            onClick={() => handleSelectItem(food)}
           >
             <div>
               <div className="font-medium">{food.name}</div>

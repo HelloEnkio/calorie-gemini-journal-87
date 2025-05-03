@@ -111,8 +111,6 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
       setWeight(food.weight.toString());
       setOriginalQuantity(food.weight.toString());
     }
-    
-    setShowSuggestions(false);
   };
 
   // Form submission handler
@@ -207,6 +205,7 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
             handleInputFocus={handleInputFocus}
             handleSelectSuggestion={handleSelectSuggestion}
             inputRef={inputRef}
+            setShowSuggestions={setShowSuggestions}
           />
           
           <NutritionFields 

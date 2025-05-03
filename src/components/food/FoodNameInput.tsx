@@ -14,6 +14,7 @@ interface FoodNameInputProps {
   handleInputFocus: () => void;
   handleSelectSuggestion: (food: FoodItem) => void;
   inputRef: React.RefObject<HTMLInputElement>;
+  setShowSuggestions: (show: boolean) => void;
 }
 
 const FoodNameInput = ({
@@ -24,7 +25,8 @@ const FoodNameInput = ({
   showSuggestions,
   handleInputFocus,
   handleSelectSuggestion,
-  inputRef
+  inputRef,
+  setShowSuggestions
 }: FoodNameInputProps) => {
   return (
     <div className="space-y-2 relative">
@@ -46,6 +48,7 @@ const FoodNameInput = ({
         isSearching={isSearching}
         showSuggestions={showSuggestions}
         onSelectSuggestion={handleSelectSuggestion}
+        setShowSuggestions={setShowSuggestions}
       />
     </div>
   );
