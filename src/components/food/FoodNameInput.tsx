@@ -1,5 +1,4 @@
 
-import { useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import FoodSuggestions from "./FoodSuggestions";
@@ -15,6 +14,7 @@ interface FoodNameInputProps {
   handleSelectSuggestion: (food: FoodItem) => void;
   inputRef: React.RefObject<HTMLInputElement>;
   setShowSuggestions: (show: boolean) => void;
+  suggestionRef?: React.RefObject<HTMLDivElement>;
 }
 
 const FoodNameInput = ({
@@ -26,7 +26,8 @@ const FoodNameInput = ({
   handleInputFocus,
   handleSelectSuggestion,
   inputRef,
-  setShowSuggestions
+  setShowSuggestions,
+  suggestionRef
 }: FoodNameInputProps) => {
   // Add a handler for input blur to give a small delay before hiding suggestions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +59,7 @@ const FoodNameInput = ({
         showSuggestions={showSuggestions}
         onSelectSuggestion={handleSelectSuggestion}
         setShowSuggestions={setShowSuggestions}
+        suggestionRef={suggestionRef}
       />
     </div>
   );

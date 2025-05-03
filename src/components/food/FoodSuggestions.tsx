@@ -1,8 +1,6 @@
 
-import { useRef, useEffect } from "react";
 import { Search } from "lucide-react";
 import { FoodItem } from "@/utils/foodDatabase";
-import { cn } from "@/lib/utils";
 
 interface FoodSuggestionsProps {
   suggestions: FoodItem[];
@@ -10,6 +8,7 @@ interface FoodSuggestionsProps {
   showSuggestions: boolean;
   onSelectSuggestion: (food: FoodItem) => void;
   setShowSuggestions: (show: boolean) => void;
+  suggestionRef?: React.RefObject<HTMLDivElement>;
 }
 
 const FoodSuggestions = ({
@@ -17,10 +16,9 @@ const FoodSuggestions = ({
   isSearching,
   showSuggestions,
   onSelectSuggestion,
-  setShowSuggestions
+  setShowSuggestions,
+  suggestionRef
 }: FoodSuggestionsProps) => {
-  const suggestionRef = useRef<HTMLDivElement>(null);
-
   // Return null early if suggestions should not be shown
   if (!showSuggestions) {
     return null;
