@@ -9,12 +9,14 @@ import { addWeightEntry } from "@/utils/storage";
 import { generateId } from "@/utils/storage/core";
 import { getTodaysLog } from "@/utils/storage/logs";
 import { toast } from "sonner";
+import { useProtectedAction } from "@/hooks/useProtectedAction";
 
 interface WeightEntryFormProps {
   onAdd?: () => void;
 }
 
 const WeightEntryForm = ({ onAdd }: WeightEntryFormProps) => {
+  const { protectAction } = useProtectedAction();
   const todayLog = getTodaysLog();
   const [weight, setWeight] = useState<string>(
     todayLog.weight ? todayLog.weight.weight.toString() : ""
@@ -45,6 +47,10 @@ const WeightEntryForm = ({ onAdd }: WeightEntryFormProps) => {
     setNotes("");
     
     if (onAdd) onAdd();
+  };
+
+  const handleProtectedSubmit = () => {
+    protectAction(() => handleSubmit());
   };
   
   return (
@@ -77,7 +83,7 @@ const WeightEntryForm = ({ onAdd }: WeightEntryFormProps) => {
           </div>
         </div>
         
-        <Button onClick={handleSubmit} className="w-full">
+        <Button onClick={handleProtectedSubmit} className="w-full">
           Enregistrer
         </Button>
       </CardContent>

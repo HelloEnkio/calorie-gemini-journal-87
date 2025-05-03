@@ -1,7 +1,5 @@
 
-import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NavigationBar from "./NavigationBar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { UserRound } from "lucide-react";
@@ -12,24 +10,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
+import AuthModal from "@/components/auth/AuthModal";
 
 interface MainLayoutProps {
   children?: React.ReactNode;
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {
-  // État pour simuler un utilisateur connecté
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("Utilisateur");
+  const { isLoggedIn, username, logout, setShowAuthModal, subscriptionPlan } = useAuth();
 
   const handleLogin = () => {
-    setIsLoggedIn(true);
-    setUsername("John Doe");
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUsername("Utilisateur");
+    setShowAuthModal(true);
   };
 
   return (
@@ -37,6 +29,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="fixed top-0 left-0 right-0 h-12 border-b bg-background px-4 z-10 flex items-center justify-between">
         <div className="flex items-center">
           <span className="font-medium">Nutrition Tracker</span>
+          {subscriptionPlan === "premium" && (
+            <span className="ml-2 bg-primary/10 text-primary text-xs font-medium px-2 py-0.5 rounded-full">
+              Premium
+            </span>
+          )}
         </div>
         
         <div className="flex items-center">
@@ -51,8 +48,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             <DropdownMenuContent align="end" className="w-56">
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm font-medium">{isLoggedIn ? username : "Non connecté"}</p>
-                {isLoggedIn && (
-                  <p className="text-xs text-muted-foreground">john.doe@example.com</p>
+                {isLoggedIn && subscriptionPlan && (
+                  <p className="text-xs text-muted-foreground">
+                    Plan {subscriptionPlan === "premium" ? "Premium" : "Gratuit"}
+                  </p>
                 )}
               </div>
               <DropdownMenuSeparator />
@@ -62,12 +61,12 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                   <DropdownMenuItem>Mon profil</DropdownMenuItem>
                   <DropdownMenuItem>Mes préférences</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>Déconnexion</DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>Déconnexion</DropdownMenuItem>
                 </>
               ) : (
                 <>
                   <DropdownMenuItem onClick={handleLogin}>Connexion</DropdownMenuItem>
-                  <DropdownMenuItem>Créer un compte</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogin}>Créer un compte</DropdownMenuItem>
                 </>
               )}
             </DropdownMenuContent>
@@ -78,6 +77,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         {children || <Outlet />}
       </div>
       <NavigationBar />
+      <AuthModal />
     </div>
   );
 };

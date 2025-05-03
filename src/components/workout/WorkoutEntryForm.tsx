@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WorkoutEntry } from "@/types";
 import { addWorkoutEntry, generateId } from "@/utils/storage";
 import { toast } from "sonner";
+import { useProtectedAction } from "@/hooks/useProtectedAction";
 
 interface WorkoutEntryFormProps {
   onAdd?: () => void;
@@ -26,6 +27,7 @@ const WORKOUT_TYPES = [
 ];
 
 const WorkoutEntryForm = ({ onAdd }: WorkoutEntryFormProps) => {
+  const { protectAction } = useProtectedAction();
   const [workoutType, setWorkoutType] = useState(WORKOUT_TYPES[0]);
   const [duration, setDuration] = useState<string>("30");
   const [caloriesBurned, setCaloriesBurned] = useState<string>("");
@@ -67,6 +69,10 @@ const WorkoutEntryForm = ({ onAdd }: WorkoutEntryFormProps) => {
     setNotes("");
     
     if (onAdd) onAdd();
+  };
+  
+  const handleProtectedSubmit = () => {
+    protectAction(() => handleSubmit());
   };
   
   return (
@@ -125,7 +131,7 @@ const WorkoutEntryForm = ({ onAdd }: WorkoutEntryFormProps) => {
           </div>
         </div>
         
-        <Button onClick={handleSubmit} className="w-full">
+        <Button onClick={handleProtectedSubmit} className="w-full">
           Ajouter
         </Button>
       </CardContent>

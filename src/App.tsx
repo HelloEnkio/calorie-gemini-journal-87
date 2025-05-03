@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 import { initializeMockData } from "./utils/mockData";
 import { initializeMockAchievements } from "./utils/mockAchievements";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -31,16 +32,18 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/stats" element={<StatsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<MainLayout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/stats" element={<StatsPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
