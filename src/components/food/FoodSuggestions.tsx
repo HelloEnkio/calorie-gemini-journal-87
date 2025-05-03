@@ -21,13 +21,16 @@ const FoodSuggestions = ({
 }: FoodSuggestionsProps) => {
   const suggestionRef = useRef<HTMLDivElement>(null);
 
+  // Return null early if suggestions should not be shown
   if (!showSuggestions) {
     return null;
   }
 
-  const handleSelectItem = (food: FoodItem) => {
+  // Improved handler for selecting an item
+  const handleSelectItem = (food: FoodItem, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent event bubbling
     onSelectSuggestion(food);
-    setShowSuggestions(false); // Fermer les suggestions immédiatement après la sélection
+    setShowSuggestions(false); // Explicitly close suggestions
   };
 
   return (
@@ -46,7 +49,7 @@ const FoodSuggestions = ({
           <div 
             key={food.id}
             className="px-3 py-2 hover:bg-muted cursor-pointer flex justify-between items-center"
-            onClick={() => handleSelectItem(food)}
+            onClick={(e) => handleSelectItem(food, e)}
           >
             <div>
               <div className="font-medium">{food.name}</div>

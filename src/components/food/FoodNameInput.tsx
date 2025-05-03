@@ -28,6 +28,15 @@ const FoodNameInput = ({
   inputRef,
   setShowSuggestions
 }: FoodNameInputProps) => {
+  // Add a handler for input blur to give a small delay before hiding suggestions
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFoodName(e.target.value);
+    // Ensure suggestions are shown when typing
+    if (!showSuggestions && e.target.value) {
+      setShowSuggestions(true);
+    }
+  };
+
   return (
     <div className="space-y-2 relative">
       <Label htmlFor="food-name">Nom du repas/produit</Label>
@@ -36,7 +45,7 @@ const FoodNameInput = ({
           id="food-name" 
           placeholder="Ex: Salade composée" 
           value={foodName} 
-          onChange={e => setFoodName(e.target.value)}
+          onChange={handleInputChange}
           onFocus={handleInputFocus}
           ref={inputRef}
           autoComplete="off"

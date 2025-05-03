@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { FoodEntry, MacroNutrients } from "@/types";
@@ -111,8 +110,10 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
       setWeight(food.weight.toString());
       setOriginalQuantity(food.weight.toString());
     }
+    
+    // We don't need to manually close suggestions here as it's now handled in FoodSuggestions component
   };
-
+  
   // Form submission handler
   const handleSubmit = () => {
     if (!foodName.trim()) {
