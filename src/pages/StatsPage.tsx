@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -252,7 +251,6 @@ const StatsPage = () => {
                   <div className="font-bold">{summary.avgFat}g</div>
                 </div>
               </div>
-            </div>
             
             {weightChange && (
               <div>

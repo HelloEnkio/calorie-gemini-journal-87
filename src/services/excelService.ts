@@ -1,5 +1,6 @@
-import { DailyLog } from "@/types";
-import { utils, writeFile } from "xlsx";
+
+import { DailyLog, FoodEntry } from "@/types";
+import * as XLSX from "xlsx";
 
 export const exportToExcel = (data: DailyLog[], exportType: "daily" | "summary") => {
   // Prepare data based on export type
@@ -28,8 +29,9 @@ export const exportToExcel = (data: DailyLog[], exportType: "daily" | "summary")
         Protein: entry.macros.protein,
         Carbs: entry.macros.carbs,
         Fat: entry.macros.fat,
-        Portion: entry.portion || "",
-        Notes: entry.notes || ""
+        // Use optional chaining for fields that might not exist in the FoodEntry interface
+        Meal: entry.mealType || "",
+        Notes: entry.timestamp || ""
       }));
     });
   } else {
@@ -46,12 +48,12 @@ export const exportToExcel = (data: DailyLog[], exportType: "daily" | "summary")
   }
 
   // Create worksheet
-  const worksheet = utils.json_to_sheet(worksheetData);
+  const worksheet = XLSX.utils.json_to_sheet(worksheetData);
   
   // Create workbook
-  const workbook = utils.book_new();
-  utils.book_append_sheet(workbook, worksheet, "NutritionData");
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "NutritionData");
   
   // Write to file and download
-  writeFile(workbook, "nutrition_tracker_export.xlsx", { bookType: "xlsx" });
+  XLSX.writeFile(workbook, "nutrition_tracker_export.xlsx");
 };
