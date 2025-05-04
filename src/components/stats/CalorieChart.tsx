@@ -112,9 +112,20 @@ const CalorieChart = ({ logs }: CalorieChartProps) => {
           />
           <Bar 
             dataKey="calories" 
-            fill={(data) => data.isOnTarget ? "#10b981" : "#14b8a6"}
-            radius={[4, 4, 0, 0]}
-          />
+            fill="#14b8a6"
+            className="cursor-pointer"
+          >
+            {chartData.map((entry, index) => (
+              <rect 
+                key={`rect-${index}`}
+                x={0}
+                y={0}
+                width={0}
+                height={0}
+                fill={entry.isOnTarget ? "#10b981" : "#14b8a6"}
+              />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
       <div className="text-center mt-2 text-sm text-muted-foreground">

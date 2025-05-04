@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,8 +8,8 @@ import WeightChart from "@/components/stats/WeightChart";
 import WorkoutStats from "@/components/stats/WorkoutStats";
 import StatsSummary from "@/components/stats/StatsSummary";
 import WeightPhotoComparison from "@/components/stats/WeightPhotoComparison";
-import { getDailyLogs, getLogsByDateRange, getUserGoals } from "@/utils/storage";
-import { format, subDays, isWithinInterval } from "date-fns";
+import { getAllLogs, getLogsInDateRange, getUserGoals } from "@/utils/storage";
+import { format, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { DailyLog } from "@/types";
@@ -28,17 +27,17 @@ const StatsPage = () => {
     
     switch (dateRange) {
       case "week":
-        filteredLogs = getLogsByDateRange(7);
+        filteredLogs = getLogsForLastDays(7);
         setStartDate(format(subDays(new Date(), 7), "yyyy-MM-dd"));
         setEndDate(format(new Date(), "yyyy-MM-dd"));
         break;
       case "month":
-        filteredLogs = getLogsByDateRange(30);
+        filteredLogs = getLogsForLastDays(30);
         setStartDate(format(subDays(new Date(), 30), "yyyy-MM-dd"));
         setEndDate(format(new Date(), "yyyy-MM-dd"));
         break;
       case "all":
-        filteredLogs = getDailyLogs();
+        filteredLogs = getAllLogs();
         if (filteredLogs.length > 0) {
           const sortedLogs = [...filteredLogs].sort((a, b) => a.date.localeCompare(b.date));
           setStartDate(sortedLogs[0].date);
@@ -47,7 +46,7 @@ const StatsPage = () => {
         break;
       case "custom":
         // Utiliser les dates sélectionnées
-        filteredLogs = getDailyLogs().filter(log => {
+        filteredLogs = getAllLogs().filter(log => {
           return log.date >= startDate && log.date <= endDate;
         });
         break;
