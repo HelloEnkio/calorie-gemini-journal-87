@@ -24,6 +24,7 @@ const StatsContent = ({ logs }: StatsContentProps) => {
       defaultValue="calories" 
       value={activeTab} 
       onValueChange={setActiveTab}
+      className="mt-6"
     >
       <div className="flex justify-center mb-6">
         <TabsList className="grid grid-cols-3 w-full max-w-xs">

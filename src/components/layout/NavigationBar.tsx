@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -12,14 +12,25 @@ import { cn } from "@/lib/utils";
 const NavigationBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(
-    location.pathname === "/" ? "journal" : 
-    location.pathname === "/stats" ? "stats" :
-    location.pathname === "/settings" ? "settings" : "journal"
-  );
+  
+  // Initialiser l'onglet actif en fonction de l'URL actuelle
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (location.pathname === "/") return "journal";
+    if (location.pathname === "/stats") return "stats";
+    if (location.pathname === "/settings") return "settings";
+    return "journal";
+  });
+  
+  // Mettre à jour l'onglet actif lorsque l'URL change
+  useEffect(() => {
+    if (location.pathname === "/") setActiveTab("journal");
+    else if (location.pathname === "/stats") setActiveTab("stats");
+    else if (location.pathname === "/settings") setActiveTab("settings");
+  }, [location.pathname]);
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);
+    
     switch (value) {
       case "journal":
         navigate("/");

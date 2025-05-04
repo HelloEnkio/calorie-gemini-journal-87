@@ -54,7 +54,7 @@ const Index = () => {
       />
       
       {/* Journal Sub-tabs */}
-      <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="mb-6 mt-4">
+      <Tabs defaultValue={activeSubTab} value={activeSubTab} onValueChange={setActiveSubTab} className="mb-6 mt-4">
         <TabsList className="grid grid-cols-3 mb-6 rounded-xl bg-muted/70 p-1">
           <TabsTrigger value="calories" className="rounded-lg data-[state=active]:shadow-sm">Calories</TabsTrigger>
           <TabsTrigger value="weight" className="rounded-lg data-[state=active]:shadow-sm">Poids</TabsTrigger>
