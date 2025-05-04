@@ -1,7 +1,7 @@
 
 import { FoodEntry, WorkoutEntry, WeightEntry } from "@/types";
 import { generateId } from "./core";
-import { getTodaysLog, saveDailyLog } from "./logs";
+import { getTodaysLog, saveDailyLog, getLogForDate } from "./logs";
 
 // Add food entry
 export const addFoodEntry = (entry: FoodEntry): void => {
@@ -35,6 +35,35 @@ export const removeFoodEntry = (entryId: string): void => {
     todayLog.foodEntries.splice(entryIndex, 1);
     saveDailyLog(todayLog);
   }
+};
+
+// Update food entry
+export const updateFoodEntry = (entryId: string, updatedEntry: FoodEntry): boolean => {
+  // Get log by date from the entry's timestamp
+  const entryDate = new Date(updatedEntry.timestamp);
+  const dateKey = entryDate.toISOString().split('T')[0];
+  const log = getLogForDate(dateKey);
+  
+  const entryIndex = log.foodEntries.findIndex(entry => entry.id === entryId);
+  
+  if (entryIndex >= 0) {
+    const oldEntry = log.foodEntries[entryIndex];
+    
+    // Update totals (subtract old values, add new values)
+    log.totalCalories = log.totalCalories - oldEntry.calories + updatedEntry.calories;
+    log.totalMacros.protein = log.totalMacros.protein - oldEntry.macros.protein + updatedEntry.macros.protein;
+    log.totalMacros.carbs = log.totalMacros.carbs - oldEntry.macros.carbs + updatedEntry.macros.carbs;
+    log.totalMacros.fat = log.totalMacros.fat - oldEntry.macros.fat + updatedEntry.macros.fat;
+    
+    // Update entry
+    log.foodEntries[entryIndex] = updatedEntry;
+    
+    // Save changes
+    saveDailyLog(log);
+    return true;
+  }
+  
+  return false;
 };
 
 // Add workout entry

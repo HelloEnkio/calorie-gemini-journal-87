@@ -8,7 +8,7 @@ import { Star, Trophy, ChevronDown, ChevronUp } from "lucide-react";
 import FoodEntry from "@/components/food/FoodEntry";
 import QuickAddForm from "@/components/food/QuickAddForm";
 import GeminiInputForm from "@/components/food/GeminiInputForm";
-import { DailyLog, UserGoals, FoodEntry as FoodEntryType } from "@/types";
+import { DailyLog, UserGoals } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface CaloriesTabProps {
