@@ -10,7 +10,7 @@ import StatsPage from "./pages/StatsPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
-import { initializeMockData } from "./utils/mockData";
+import { initializeMockData, createMockWeightImages } from "./utils/mockData";
 import { initializeMockAchievements } from "./utils/mockAchievements";
 import { AuthProvider } from "./contexts/AuthContext";
 
@@ -24,6 +24,7 @@ const App = () => {
     localStorage.removeItem('nutrition-tracker-daily-logs');
     
     initializeMockData();
+    createMockWeightImages(); // Créer les images factices
     initializeMockAchievements();
   }, []);
 
