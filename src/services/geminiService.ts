@@ -1,14 +1,19 @@
 
 import { FoodEntry, MacroNutrients, GeminiAnalysisResult } from "@/types";
 
-// Clé API définie par le développeur
-const GEMINI_API_KEY = "DEVELOPER_KEY";
+// Récupération de la clé API depuis le stockage local
+const getGeminiApiKey = (): string => {
+  return localStorage.getItem("gemini_api_key") || "DEVELOPER_KEY";
+};
 
 // Analyse un aliment avec l'API Gemini
 export const analyzeFoodWithGemini = async (
   foodDescription: string,
   weight?: number
 ): Promise<GeminiAnalysisResult> => {
+  // Récupération de la clé API
+  const GEMINI_API_KEY = getGeminiApiKey();
+  
   // Mode démo pour les tests sans clé API valide
   if (GEMINI_API_KEY === "DEVELOPER_KEY") {
     console.log("Using demo mode for Gemini analysis");
