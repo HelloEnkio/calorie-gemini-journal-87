@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,8 @@ import { generateId } from "@/utils/storage/core";
 import { getTodaysLog } from "@/utils/storage/logs";
 import { toast } from "sonner";
 import { useProtectedAction } from "@/hooks/useProtectedAction";
-import { ScaleIcon } from "lucide-react";
+import { ScaleIcon, Upload, Image } from "lucide-react";
+import { saveImage } from "@/utils/imageStorage";
 
 interface WeightEntryFormProps {
   onAdd?: () => void;
@@ -23,31 +24,72 @@ const WeightEntryForm = ({ onAdd }: WeightEntryFormProps) => {
     todayLog.weight ? todayLog.weight.weight.toString() : ""
   );
   const [notes, setNotes] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const handleSubmit = () => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setPhotoPreview(e.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleSubmit = async () => {
     if (!weight || isNaN(Number(weight)) || Number(weight) <= 0) {
       toast.error("Veuillez saisir un poids valide");
       return;
     }
     
-    const newEntry: WeightEntry = {
-      id: generateId(),
-      weight: Number(weight),
-      timestamp: new Date().toISOString(),
-    };
+    setIsUploading(true);
     
-    if (notes.trim()) {
-      newEntry.notes = notes.trim();
+    try {
+      let photoUrl: string | undefined = undefined;
+      
+      if (selectedFile) {
+        photoUrl = await saveImage(selectedFile);
+      }
+      
+      const newEntry: WeightEntry = {
+        id: generateId(),
+        weight: Number(weight),
+        timestamp: new Date().toISOString(),
+      };
+      
+      if (notes.trim()) {
+        newEntry.notes = notes.trim();
+      }
+      
+      if (photoUrl) {
+        newEntry.photoUrl = photoUrl;
+      }
+      
+      addWeightEntry(newEntry);
+      toast.success("Poids enregistré");
+      
+      // Reset form
+      setWeight("");
+      setNotes("");
+      setSelectedFile(null);
+      setPhotoPreview(null);
+      
+      if (onAdd) onAdd();
+    } catch (error) {
+      console.error("Error saving weight entry:", error);
+      toast.error("Erreur lors de l'enregistrement");
+    } finally {
+      setIsUploading(false);
     }
-    
-    addWeightEntry(newEntry);
-    toast.success("Poids enregistré");
-    
-    // Reset form
-    setWeight("");
-    setNotes("");
-    
-    if (onAdd) onAdd();
   };
 
   const handleProtectedSubmit = () => {
@@ -87,13 +129,62 @@ const WeightEntryForm = ({ onAdd }: WeightEntryFormProps) => {
               className="floating-input"
             />
           </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="photo" className="text-sm font-medium text-muted-foreground">Photo (optionnel)</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-xs"
+              >
+                <Upload className="h-3 w-3 mr-1" />
+                Ajouter une photo
+              </Button>
+            </div>
+            <input
+              ref={fileInputRef}
+              id="photo"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
+            {photoPreview && (
+              <div className="relative mt-2">
+                <div className="relative w-24 h-24 overflow-hidden rounded-md border">
+                  <img 
+                    src={photoPreview} 
+                    alt="Aperçu" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-1 right-1 h-6 w-6 p-1 rounded-full bg-background/80"
+                  onClick={() => {
+                    setSelectedFile(null);
+                    setPhotoPreview(null);
+                  }}
+                >
+                  ✕
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
         
         <Button 
           onClick={handleProtectedSubmit} 
           className="w-full modern-button"
+          disabled={isUploading}
         >
-          Enregistrer
+          {isUploading ? "Enregistrement..." : "Enregistrer"}
         </Button>
       </CardContent>
     </Card>

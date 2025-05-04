@@ -11,7 +11,6 @@ import {
 } from "recharts";
 import { format, parse } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 interface WeightChartProps {
   logs: DailyLog[];
@@ -46,11 +45,11 @@ const WeightChart = ({ logs }: WeightChartProps) => {
   }
 
   return (
-    <ChartContainer config={{}} className="h-72">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-72">
+      <ResponsiveContainer width="99%" height="100%">
         <LineChart
           data={chartData}
-          margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+          margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis
@@ -100,7 +99,7 @@ const WeightChart = ({ logs }: WeightChartProps) => {
           />
         </LineChart>
       </ResponsiveContainer>
-    </ChartContainer>
+    </div>
   );
 };
 

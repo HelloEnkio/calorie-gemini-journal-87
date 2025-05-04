@@ -1,12 +1,7 @@
 
-// Type pour les macronutriments
-export interface MacroNutrients {
-  protein: number;
-  carbs: number;
-  fat: number;
-}
+// Types for the application
 
-// Type pour un repas ou un aliment
+// Food entry with macros and calories
 export interface FoodEntry {
   id: string;
   name: string;
@@ -14,67 +9,63 @@ export interface FoodEntry {
   macros: MacroNutrients;
   timestamp: string;
   weight?: number;
-  mealType?: string;
   geminiData?: {
     prompt: string;
     response: any;
   };
 }
 
-// Type pour une entrée de poids
+// Macro nutrients (protein, carbs, fat)
+export interface MacroNutrients {
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+// Weight entry
 export interface WeightEntry {
   id: string;
   weight: number;
   timestamp: string;
   notes?: string;
+  photoUrl?: string;
 }
 
-// Type pour une activité sportive
+// Workout entry
 export interface WorkoutEntry {
   id: string;
   type: string;
   duration: number;
-  timestamp: string;
   caloriesBurned?: number;
   notes?: string;
+  timestamp: string;
 }
 
-// Type pour un succès
-export interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  category: "nutrition" | "fitness" | "consistency" | "weight";
-  unlocked: boolean;
-  level: "bronze" | "silver" | "gold";
-  progress?: number;
-  maxProgress?: number;
-  date?: string;
-}
-
-// Type pour le journal quotidien
+// Daily log with all entries for a specific day
 export interface DailyLog {
   date: string;
   totalCalories: number;
   totalMacros: MacroNutrients;
   foodEntries: FoodEntry[];
-  workouts: WorkoutEntry[];
   weight?: WeightEntry;
+  workouts: WorkoutEntry[];
 }
 
-// Type pour les objectifs utilisateur
+// User goals for calories, macros, etc.
 export interface UserGoals {
   dailyCalories: number;
   macros?: MacroNutrients;
-  macroPercentages?: MacroNutrients;
+  targetWeight?: number;
 }
 
-// Type pour la réponse de l'analyse Gemini
-export interface GeminiAnalysisResult {
-  success: boolean;
-  foodName?: string;
-  calories?: number;
-  macros?: MacroNutrients;
-  errorMessage?: string;
+// Achievement data
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  progress?: number;
+  maxProgress?: number;
+  level: 'bronze' | 'silver' | 'gold' | 'platinum';
 }

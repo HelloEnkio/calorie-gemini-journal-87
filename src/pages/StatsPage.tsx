@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import StatsSummary from "@/components/stats/StatsSummary";
 import { calculateWeightChange, getDateRangeDescription } from "@/utils/statsHelpers";
 import WeightChart from "@/components/stats/WeightChart";
 import WorkoutStats from "@/components/stats/WorkoutStats";
+import WeightPhotoComparison from "@/components/stats/WeightPhotoComparison";
 
 const StatsPage = () => {
   const today = new Date();
@@ -134,6 +134,8 @@ const StatsPage = () => {
                 <WeightChart logs={logs} />
               </CardContent>
             </Card>
+            
+            <WeightPhotoComparison logs={logs} />
           </TabsContent>
           
           <TabsContent value="workout">
