@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface DateRangeSelectorProps {
-  dateRange: "week" | "month" | "custom";
+  dateRange: "week" | "month" | "all" | "custom";
   startDate: string;
   endDate: string;
   logsCount: number;
@@ -25,12 +25,6 @@ const DateRangeSelector = ({
 }: DateRangeSelectorProps) => {
   return (
     <>
-      <TabsList className="grid grid-cols-3 mb-6">
-        <TabsTrigger value="week">7 jours</TabsTrigger>
-        <TabsTrigger value="month">30 jours</TabsTrigger>
-        <TabsTrigger value="custom">Personnalisé</TabsTrigger>
-      </TabsList>
-      
       {dateRange === "custom" && (
         <div className="mb-4 grid grid-cols-2 gap-4">
           <div className="space-y-2">

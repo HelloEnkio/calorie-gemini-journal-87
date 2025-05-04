@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import WeightPhotoComparison from "@/components/stats/WeightPhotoComparison";
 
 const StatsPage = () => {
   const today = new Date();
-  const [dateRange, setDateRange] = useState<"week" | "month" | "custom">("month");
+  const [dateRange, setDateRange] = useState<"week" | "month" | "all" | "custom">("month");
   const [startDate, setStartDate] = useState(formatDateKey(subDays(today, 30)));
   const [endDate, setEndDate] = useState(formatDateKey(today));
   const [activeStatTab, setActiveStatTab] = useState("calories");
@@ -36,6 +37,8 @@ const StatsPage = () => {
           formatDateKey(subDays(today, 30)),
           formatDateKey(today)
         );
+      case "all":
+        return getAllLogs();
       case "custom":
         return getLogsInDateRange(startDate, endDate);
       default:
@@ -87,7 +90,14 @@ const StatsPage = () => {
         </Button>
       </div>
       
-      <Tabs value={dateRange} onValueChange={(v) => setDateRange(v as "week" | "month" | "custom")}>
+      <Tabs value={dateRange} onValueChange={(v) => setDateRange(v as "week" | "month" | "all" | "custom")}>
+        <TabsList className="grid grid-cols-4 mb-6">
+          <TabsTrigger value="week">7 jours</TabsTrigger>
+          <TabsTrigger value="month">30 jours</TabsTrigger>
+          <TabsTrigger value="all">Tout</TabsTrigger>
+          <TabsTrigger value="custom">Personnalisé</TabsTrigger>
+        </TabsList>
+        
         <DateRangeSelector 
           dateRange={dateRange}
           startDate={startDate}

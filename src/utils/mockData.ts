@@ -1,4 +1,3 @@
-
 import { FoodEntry, WorkoutEntry, WeightEntry, Achievement, DailyLog } from "@/types";
 import { generateId, formatDateKey } from "./storage/core";
 import { getUserGoals, saveUserGoals } from "./storage/goals";
@@ -87,16 +86,29 @@ const generateMockWorkoutEntries = (count: number): WorkoutEntry[] => {
   return entries;
 };
 
-// Generate a mock weight entry
-const generateMockWeightEntry = (baseWeight: number): WeightEntry => {
+// Generate a mock weight entry with photo
+const generateMockWeightEntry = (baseWeight: number, date: Date): WeightEntry => {
   // Variation of +/- 0.5kg
   const variation = (Math.random() - 0.5);
   const weight = parseFloat((baseWeight + variation).toFixed(1));
   
+  // Assign photos to specific dates (first day of each month for the last few months)
+  let photoUrl: string | undefined;
+  const monthStart = new Date(date);
+  monthStart.setDate(1);
+  
+  // Add a photo roughly once a month
+  if (date.getDate() <= 2 || randomInt(1, 30) === 1) {
+    // Generate a timestamp for the 1st of the month
+    const timestamp = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+    photoUrl = `weight-photo-${timestamp}`;
+  }
+  
   return {
     id: generateId(),
     weight,
-    timestamp: new Date().toISOString()
+    timestamp: date.toISOString(),
+    photoUrl
   };
 };
 
@@ -123,7 +135,7 @@ const createMockDailyLog = (date: Date, foodCount: number, workoutCount: number,
   
   // Add weight entry if baseWeight is provided
   if (baseWeight) {
-    log.weight = generateMockWeightEntry(baseWeight);
+    log.weight = generateMockWeightEntry(baseWeight, date);
   }
   
   return log;
@@ -201,6 +213,50 @@ export const initializeMockData = () => {
     }
   });
   
+  // Add historical data for weight tracking (last 12 months)
+  // This will allow us to show longer-term trends
+  const historicalMonths = 11; // Additional months of history
+  let currentWeight = 76; // Starting weight a year ago
+  
+  for (let month = historicalMonths; month > 0; month--) {
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - month);
+    
+    // Generate between 7-10 entries per historical month
+    const entriesPerMonth = randomInt(7, 10);
+    
+    for (let i = 0; i < entriesPerMonth; i++) {
+      const date = new Date(startDate);
+      date.setDate(randomInt(1, 28)); // Random day in the month
+      
+      // Weight trend: slight increase until 6 months ago, then gradual decrease
+      const monthTrend = month > 6 ? 0.1 : -0.3; // Monthly weight change direction
+      const weightTarget = 76 + ((6 - Math.min(month, 6)) * monthTrend);
+      const dailyFluctuation = (Math.random() - 0.5) * 0.8;
+      
+      currentWeight = parseFloat((weightTarget + dailyFluctuation).toFixed(1));
+      
+      // Create a simplified daily log for historical data
+      const log: DailyLog = {
+        date: formatDateKey(date),
+        totalCalories: randomInt(1800, 2500),
+        totalMacros: {
+          protein: randomInt(100, 150),
+          carbs: randomInt(200, 250),
+          fat: randomInt(60, 90),
+        },
+        foodEntries: [],
+        workouts: [],
+        weight: generateMockWeightEntry(currentWeight, date),
+      };
+      
+      logs.push(log);
+    }
+  }
+  
+  // Sort logs by date before saving
+  logs.sort((a, b) => a.date.localeCompare(b.date));
+  
   // Save logs to localStorage
   localStorage.setItem('nutrition-tracker-daily-logs', JSON.stringify(logs));
   
@@ -221,6 +277,5 @@ export const initializeMockData = () => {
     }
   });
   
-  console.log('Mock data initialization complete with 30 days of data');
+  console.log('Mock data initialization complete with extended history data');
 };
-

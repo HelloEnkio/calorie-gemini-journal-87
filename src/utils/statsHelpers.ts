@@ -32,7 +32,7 @@ export const formatDisplayDate = (dateStr: string): string => {
 
 // Get date range description
 export const getDateRangeDescription = (
-  dateRange: "week" | "month" | "custom",
+  dateRange: "week" | "month" | "all" | "custom",
   startDate: string,
   endDate: string
 ): string => {
@@ -41,6 +41,8 @@ export const getDateRangeDescription = (
       return "7 derniers jours";
     case "month":
       return "30 derniers jours";
+    case "all":
+      return "Toutes les données";
     case "custom":
       return `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
     default:
