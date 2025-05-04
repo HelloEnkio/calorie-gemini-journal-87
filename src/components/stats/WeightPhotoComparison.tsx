@@ -58,7 +58,7 @@ const WeightPhotoComparison = ({ logs }: WeightPhotoComparisonProps) => {
     
     setPhotoEntries(entriesWithPhotos);
     
-    // Définir la photo la plus ancienne
+    // Définir la photo la plus ancienne et la plus récente
     if (entriesWithPhotos.length > 0) {
       setOldestPhoto(entriesWithPhotos[0]);
       setCurrentPhoto(entriesWithPhotos[entriesWithPhotos.length - 1]);
@@ -103,11 +103,11 @@ const WeightPhotoComparison = ({ logs }: WeightPhotoComparisonProps) => {
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Photos avant/après */}
-          <div className="grid grid-cols-2 gap-3 flex-1">
+          <div className="grid grid-cols-2 gap-3 w-full">
             {oldestPhoto && (
               <div className="space-y-1">
                 <div className="text-xs text-muted-foreground text-center">Début</div>
-                <div className="relative aspect-square overflow-hidden rounded-md border">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-md border">
                   <img 
                     src={oldestPhoto.imageData} 
                     alt={`Photo du ${oldestPhoto.formattedDate}`}
@@ -126,7 +126,7 @@ const WeightPhotoComparison = ({ logs }: WeightPhotoComparisonProps) => {
                 <div className="text-xs text-muted-foreground text-center">
                   {currentPhoto === oldestPhoto ? "Même jour" : "Actuel"}
                 </div>
-                <div className="relative aspect-square overflow-hidden rounded-md border">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-md border">
                   <img 
                     src={currentPhoto.imageData} 
                     alt={`Photo du ${currentPhoto.formattedDate}`}
@@ -146,13 +146,17 @@ const WeightPhotoComparison = ({ logs }: WeightPhotoComparisonProps) => {
         {photoEntries.length > 1 && (
           <div className="mt-6">
             <Separator className="mb-4" />
-            <div className="space-y-2">
+            <div className="space-y-4">
+              <div className="text-sm text-center font-medium">
+                Navigation temporelle
+              </div>
               <Slider
                 value={[selectedIndex]}
                 min={0}
                 max={photoEntries.length - 1}
                 step={1}
                 onValueChange={handleSliderChange}
+                className="my-4"
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{photoEntries[0].formattedDate}</span>

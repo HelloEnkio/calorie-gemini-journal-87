@@ -19,13 +19,20 @@ const queryClient = new QueryClient();
 const App = () => {
   // Initialize mock data on first load
   useEffect(() => {
-    // Clear existing data to ensure our new 30-day dataset gets applied
-    // Comment out this line if you want to preserve existing data
+    // Clear existing data to ensure our new dataset gets applied
     localStorage.removeItem('nutrition-tracker-daily-logs');
+    localStorage.removeItem('nutrition-tracker-image-weight-photo-day-0.png');
     
+    // Initialiser les données
     initializeMockData();
-    createMockWeightImages(); // Créer les images factices
+    
+    // Créer les images factices (maintenant avec plus d'images)
+    createMockWeightImages();
+    
+    // Initialiser les succès
     initializeMockAchievements();
+    
+    console.log("Mock data and images initialized successfully");
   }, []);
 
   return (

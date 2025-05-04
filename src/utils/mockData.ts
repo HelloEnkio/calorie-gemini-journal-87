@@ -2,6 +2,7 @@
 import { DailyLog, FoodEntry, WeightEntry, WorkoutEntry, MacroNutrients } from "@/types";
 import { generateId } from "./storage/core";
 import { format, subDays } from "date-fns";
+import { createColoredImageBase64, createMockWeightImages } from "./imageStorage";
 
 // Fonction pour générer une entrée alimentaire aléatoire
 const generateRandomFoodEntry = (date: Date): FoodEntry => {
@@ -35,8 +36,8 @@ const generateRandomFoodEntry = (date: Date): FoodEntry => {
 
 // Fonction pour générer une entrée de poids aléatoire
 const generateRandomWeightEntry = (date: Date, baseWeight: number, dayIndex: number): WeightEntry | null => {
-  // On ne génère un poids que tous les 3-5 jours pour être réaliste
-  if (dayIndex % Math.floor(Math.random() * 3 + 3) !== 0) {
+  // On génère plus régulièrement des poids pour avoir plus de points de données
+  if (dayIndex % Math.floor(Math.random() * 2 + 1) !== 0) {
     return null;
   }
 
@@ -44,12 +45,15 @@ const generateRandomWeightEntry = (date: Date, baseWeight: number, dayIndex: num
   const fluctuation = Math.random() * 0.8 - 0.5;
   const weight = baseWeight + fluctuation;
 
-  // Ajoutons des photos pour certaines entrées de poids
+  // Ajoutons des photos pour plus d'entrées de poids
   let photoUrl: string | undefined = undefined;
   
-  // Pour les jours 0 (aujourd'hui), 7, 14, 21 et 28 ajoutons une photo
-  if (dayIndex === 0 || dayIndex === 7 || dayIndex === 14 || dayIndex === 21 || dayIndex === 28) {
-    // Utilisons des noms standardisés pour les photos
+  // Pour les intervalles de 7 jours, ajoutons une photo
+  // Pour les autres jours, 30% de chance d'avoir une photo
+  if (dayIndex === 0 || dayIndex === 7 || dayIndex === 14 || dayIndex === 21 || 
+      dayIndex === 28 || dayIndex === 35 || dayIndex === 42 || dayIndex === 49 || 
+      (Math.random() > 0.7)) {
+    // Format standard pour les photos
     photoUrl = `weight-photo-day-${dayIndex}.png`;
   }
 
@@ -157,8 +161,8 @@ export const initializeMockData = () => {
   // Poids de départ (légèrement aléatoire entre 70 et 80 kg)
   const startingWeight = 70 + Math.random() * 10;
   
-  // Générer des données pour les 30 derniers jours
-  for (let i = 29; i >= 0; i--) {
+  // Générer des données pour les 60 derniers jours (au lieu de 30) pour avoir plus de données
+  for (let i = 59; i >= 0; i--) {
     const date = subDays(today, i);
     // Réduire légèrement le poids au fil du temps (tendance à la perte)
     const adjustedBaseWeight = startingWeight - (i * 0.07);
@@ -172,42 +176,5 @@ export const initializeMockData = () => {
   console.info("Mock data initialization complete with extended history data");
 };
 
-// Créer des images en base64 pour simuler des photos de poids
-export const createMockWeightImages = () => {
-  // Simuler la création d'images pour le stockage local
-  const mockImages = {
-    "weight-photo-day-0.png": createColoredImageBase64(200, 200, "#3b82f6", "Aujourd'hui"),
-    "weight-photo-day-7.png": createColoredImageBase64(200, 200, "#10b981", "Il y a 7 jours"),
-    "weight-photo-day-14.png": createColoredImageBase64(200, 200, "#f59e0b", "Il y a 14 jours"),
-    "weight-photo-day-21.png": createColoredImageBase64(200, 200, "#8b5cf6", "Il y a 21 jours"),
-    "weight-photo-day-28.png": createColoredImageBase64(200, 200, "#ec4899", "Il y a 28 jours"),
-  };
-
-  // Enregistrer les images dans le stockage local
-  for (const [key, value] of Object.entries(mockImages)) {
-    localStorage.setItem(`nutrition-tracker-image-${key}`, value);
-  }
-};
-
-// Fonction utilitaire pour créer des images colorées en base64
-function createColoredImageBase64(width: number, height: number, color: string, text: string): string {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  
-  if (ctx) {
-    // Remplir le fond
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, width, height);
-    
-    // Ajouter du texte
-    ctx.fillStyle = 'white';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, width/2, height/2);
-  }
-  
-  return canvas.toDataURL('image/png');
-}
+// Création des images factices
+export { createMockWeightImages };
