@@ -9,6 +9,7 @@ export interface FoodEntry {
   macros: MacroNutrients;
   timestamp: string;
   weight?: number;
+  mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   geminiData?: {
     prompt: string;
     response: any;
@@ -56,6 +57,11 @@ export interface UserGoals {
   dailyCalories: number;
   macros?: MacroNutrients;
   targetWeight?: number;
+  macroPercentages?: {
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
 }
 
 // Achievement data
@@ -68,4 +74,14 @@ export interface Achievement {
   progress?: number;
   maxProgress?: number;
   level: 'bronze' | 'silver' | 'gold' | 'platinum';
+  category: 'nutrition' | 'fitness' | 'consistency' | 'weight';
+}
+
+// Gemini analysis result
+export interface GeminiAnalysisResult {
+  success: boolean;
+  foodName?: string;
+  calories?: number;
+  macros?: MacroNutrients;
+  errorMessage?: string;
 }
