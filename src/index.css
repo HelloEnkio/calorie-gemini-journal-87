@@ -5,65 +5,65 @@
 
 @layer base {
   :root {
-    --background: 180 20% 99%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 240 33% 99%;
+    --foreground: 264 23% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 264 23% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 264 23% 15%;
 
-    --primary: 176 56% 36%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 5.9% 95%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 172 77% 64%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 264 25% 95%;
+    --muted-foreground: 264 10% 45%;
 
-    --accent: 262 83% 58%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 12 90% 65%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 176 56% 36%;
+    --border: 264 28% 92%;
+    --input: 264 28% 92%;
+    --ring: 262 83% 58%;
 
     --radius: 1rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 264 35% 8%;
+    --foreground: 0 0% 98%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 264 35% 12%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 264 35% 12%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 176 56% 46%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 262 83% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 172 77% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 264 25% 20%;
+    --muted-foreground: 264 10% 75%;
 
-    --accent: 262 83% 68%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 12 90% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 176 56% 46%;
+    --border: 264 23% 22%;
+    --input: 264 23% 22%;
+    --ring: 262 83% 65%;
   }
 }
 
@@ -71,96 +71,75 @@
   * {
     @apply border-border;
   }
-  
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  html, body {
-    @apply h-full overflow-hidden;
-  }
-
-  #root {
-    @apply h-full max-h-full;
   }
 }
 
+/* Modern UI Elements */
 @layer components {
-  .achievement {
-    @apply relative flex items-center justify-center rounded-full overflow-hidden;
-  }
-
-  .achievement-bronze {
-    @apply bg-achievement-bronze text-white;
-  }
-
-  .achievement-silver {
-    @apply bg-achievement-silver text-white;
-  }
-
-  .achievement-gold {
-    @apply bg-achievement-gold text-black;
-  }
-
-  .achievement-locked {
-    @apply bg-muted text-muted-foreground opacity-70;
-  }
-
-  .mobile-container {
-    @apply px-4 py-3 md:px-6 md:py-4 max-w-md mx-auto w-full;
-  }
-
-  .card-gradient {
-    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  }
-
-  .main-layout {
-    @apply flex flex-col h-full max-h-full overflow-hidden;
-  }
-
-  .page-container {
-    @apply flex-1 overflow-y-auto pb-20;
-  }
-  
-  .full-screen-input {
-    @apply fixed inset-0 z-50 flex flex-col bg-background;
-  }
-
-  .tab-content {
-    @apply animate-fade-in pt-2;
-  }
-  
-  /* New modern styles */
   .modern-card {
-    @apply rounded-xl border-0 shadow-md bg-white;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  }
-  
-  .modern-input-field {
-    @apply border-0 bg-gray-50 rounded-lg focus:ring-primary focus:ring-2 transition-all duration-200;
-  }
-  
-  .primary-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    @apply bg-gradient-to-br from-white to-muted rounded-2xl shadow-md border border-border/50 transition-all hover:shadow-lg;
   }
   
   .floating-input {
-    @apply shadow-sm border-0 rounded-xl transition-all focus:ring-2 focus:ring-primary/50;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    @apply transition-all focus:ring-2 focus:ring-primary/25 focus:border-primary;
   }
   
   .modern-button {
-    @apply rounded-xl font-medium transition-all duration-300 hover:translate-y-[-2px] hover:shadow-md;
+    @apply bg-gradient-to-r from-primary to-primary/90 hover:shadow-md hover:from-primary/90 hover:to-primary transition-all;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-md bg-white/50 border border-white/20 shadow-sm;
   }
   
   .food-input-highlight {
-    @apply border-2 border-primary/20 bg-primary/5 focus-within:bg-white focus-within:border-primary;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-    transition: all 0.3s ease;
+    @apply bg-gradient-to-r from-primary/30 via-secondary/30 to-accent/30 p-1;
   }
+  
+  .achievement {
+    @apply flex items-center justify-center rounded-full;
+  }
+  
+  .achievement-1 {
+    @apply bg-gradient-to-br from-amber-200 to-amber-400 text-amber-900;
+  }
+  
+  .achievement-2 {
+    @apply bg-gradient-to-br from-slate-200 to-slate-400 text-slate-900;
+  }
+  
+  .achievement-3 {
+    @apply bg-gradient-to-br from-orange-200 to-orange-500 text-orange-900;
+  }
+  
+  .achievement-locked {
+    @apply bg-muted text-muted-foreground;
+  }
+}
+
+/* Page container with max width and bottom padding for navigation */
+.page-container {
+  @apply max-w-md mx-auto px-4 pb-24;
+}
+
+/* Main layout */
+.main-layout {
+  @apply min-h-screen bg-gradient-to-b from-background to-muted/50;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted/50;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/30 rounded-full hover:bg-primary/50;
 }
