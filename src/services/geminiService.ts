@@ -1,25 +1,16 @@
 
 import { FoodEntry, MacroNutrients, GeminiAnalysisResult } from "@/types";
 
-// Récupère la clé API depuis le localStorage
-export const getGeminiApiKey = (): string => {
-  return localStorage.getItem("gemini-api-key") || "DEMO_KEY";
-};
-
-// Enregistre la clé API dans le localStorage
-export const setGeminiApiKey = (key: string): void => {
-  localStorage.setItem("gemini-api-key", key);
-};
+// Clé API définie par le développeur
+const GEMINI_API_KEY = "DEVELOPER_KEY";
 
 // Analyse un aliment avec l'API Gemini
 export const analyzeFoodWithGemini = async (
   foodDescription: string,
   weight?: number
 ): Promise<GeminiAnalysisResult> => {
-  const apiKey = getGeminiApiKey();
-  
-  // Mode démo pour les tests sans clé API
-  if (apiKey === "DEMO_KEY") {
+  // Mode démo pour les tests sans clé API valide
+  if (GEMINI_API_KEY === "DEVELOPER_KEY") {
     console.log("Using demo mode for Gemini analysis");
     return simulateDemoAnalysis(foodDescription, weight);
   }
@@ -45,7 +36,7 @@ export const analyzeFoodWithGemini = async (
       Return ONLY the JSON without any additional text.`;
     
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {
