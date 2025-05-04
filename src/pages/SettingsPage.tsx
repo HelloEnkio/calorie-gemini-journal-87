@@ -1,14 +1,11 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
 import { SaveIcon } from "lucide-react";
 import { getUserGoals, saveUserGoals } from "@/utils/storage";
 import { toast } from "sonner";
+import CalorieGoalCard from "@/components/settings/CalorieGoalCard";
+import MacrosDistributionCard from "@/components/settings/MacrosDistributionCard";
 
 const SettingsPage = () => {
   const [dailyCalories, setDailyCalories] = useState<string>("2000");
@@ -126,98 +123,23 @@ const SettingsPage = () => {
     <div className="mobile-container pt-4 pb-20">
       <h1 className="text-2xl font-bold mb-6">Paramètres</h1>
       
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Objectifs caloriques</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="daily-calories">Calories quotidiennes</Label>
-              <Input
-                id="daily-calories"
-                type="number"
-                value={dailyCalories}
-                onChange={(e) => setDailyCalories(e.target.value)}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <CalorieGoalCard 
+        dailyCalories={dailyCalories} 
+        onCaloriesChange={setDailyCalories} 
+      />
       
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Répartition des macronutriments</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <Label>Protéines ({proteinPercentage}%)</Label>
-                <span className="font-medium">{proteinGrams}g</span>
-              </div>
-              <Slider
-                value={[proteinPercentage]}
-                min={10}
-                max={50}
-                step={1}
-                onValueChange={handleProteinChange}
-                className="bg-teal-100"
-              />
-              
-              <div className="flex justify-between">
-                <Label>Glucides ({carbsPercentage}%)</Label>
-                <span className="font-medium">{carbsGrams}g</span>
-              </div>
-              <Slider
-                value={[carbsPercentage]}
-                min={10}
-                max={60}
-                step={1}
-                onValueChange={handleCarbsChange}
-                className="bg-amber-100"
-              />
-              
-              <div className="flex justify-between">
-                <Label>Lipides ({fatPercentage}%)</Label>
-                <span className="font-medium">{fatGrams}g</span>
-              </div>
-              <Slider
-                value={[fatPercentage]}
-                min={10}
-                max={50}
-                step={1}
-                onValueChange={handleFatChange}
-                className="bg-rose-100"
-              />
-            </div>
-            
-            <div className="flex h-6 w-full overflow-hidden rounded-full">
-              <div 
-                className="bg-teal-500" 
-                style={{ width: `${proteinPercentage}%` }}
-              ></div>
-              <div 
-                className="bg-amber-500" 
-                style={{ width: `${carbsPercentage}%` }}
-              ></div>
-              <div 
-                className="bg-rose-500" 
-                style={{ width: `${fatPercentage}%` }}
-              ></div>
-            </div>
-            
-            <div className="text-xs text-muted-foreground">
-              <p className="mb-1">Distribution calorique recommandée:</p>
-              <ul className="list-disc pl-5">
-                <li>Protéines: 10-35%</li>
-                <li>Glucides: 45-65%</li>
-                <li>Lipides: 20-35%</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <MacrosDistributionCard 
+        dailyCalories={dailyCalories}
+        proteinPercentage={proteinPercentage}
+        carbsPercentage={carbsPercentage}
+        fatPercentage={fatPercentage}
+        proteinGrams={proteinGrams}
+        carbsGrams={carbsGrams}
+        fatGrams={fatGrams}
+        onProteinChange={handleProteinChange}
+        onCarbsChange={handleCarbsChange}
+        onFatChange={handleFatChange}
+      />
       
       <Button onClick={handleSaveSettings} className="w-full">
         <SaveIcon className="mr-2 h-4 w-4" />
