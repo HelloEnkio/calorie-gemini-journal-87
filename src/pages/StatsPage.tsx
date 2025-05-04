@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +9,7 @@ import WeightChart from "@/components/stats/WeightChart";
 import WorkoutStats from "@/components/stats/WorkoutStats";
 import StatsSummary from "@/components/stats/StatsSummary";
 import WeightPhotoComparison from "@/components/stats/WeightPhotoComparison";
-import { getAllLogs, getLogsInDateRange, getUserGoals } from "@/utils/storage";
+import { getAllLogs, getLogsInDateRange, getUserGoals, getLogsForLastDays } from "@/utils/storage";
 import { format, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
