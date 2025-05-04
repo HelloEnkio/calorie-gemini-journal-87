@@ -30,7 +30,7 @@ const Carousel = React.forwardRef<
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
 
-    const onSelect = React.useCallback((api: typeof useEmblaCarousel[1]) => {
+    const onSelect = React.useCallback((api: any) => {
       if (!api) {
         return
       }
@@ -113,3 +113,4 @@ const Carousel = React.forwardRef<
 Carousel.displayName = "Carousel"
 
 export { Carousel }
+
