@@ -12,6 +12,8 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import { format, parseISO } from "date-fns";
+import { Star } from "lucide-react";
 
 interface CalorieChartProps {
   logs: DailyLog[];
@@ -31,12 +33,19 @@ const CalorieChart = ({ logs }: CalorieChartProps) => {
   const chartData = useMemo(() => {
     return logs
       .sort((a, b) => a.date.localeCompare(b.date)) // Sort by date
-      .map((log) => ({
-        date: log.date,
-        formattedDate: formatDate(log.date),
-        calories: log.totalCalories,
-        goal: goals.dailyCalories,
-      }));
+      .map((log) => {
+        // Vérifier si l'objectif est atteint à ±10%
+        const isOnTarget = log.totalCalories >= goals.dailyCalories * 0.9 && 
+                         log.totalCalories <= goals.dailyCalories * 1.1;
+        
+        return {
+          date: log.date,
+          formattedDate: formatDate(log.date),
+          calories: log.totalCalories,
+          goal: goals.dailyCalories,
+          isOnTarget,
+        };
+      });
   }, [logs, goals]);
 
   return (
@@ -46,7 +55,7 @@ const CalorieChart = ({ logs }: CalorieChartProps) => {
           data={chartData}
           margin={{
             top: 10,
-            right: 5,
+            right: 10,
             left: 5,
             bottom: 20,
           }}
@@ -68,7 +77,14 @@ const CalorieChart = ({ logs }: CalorieChartProps) => {
             width={30}
           />
           <Tooltip 
-            formatter={(value) => [`${value} kcal`, "Calories"]}
+            formatter={(value, name, props) => {
+              // @ts-ignore
+              const isOnTarget = props.payload?.isOnTarget;
+              return [
+                `${value} kcal ${isOnTarget ? '✨' : ''}`, 
+                "Calories"
+              ];
+            }}
             labelFormatter={(label) => `Date: ${label}`}
           />
           <ReferenceLine 
@@ -83,13 +99,34 @@ const CalorieChart = ({ logs }: CalorieChartProps) => {
               fontSize: 12
             }} 
           />
+          {/* Zone cible (±10% de l'objectif) */}
+          <ReferenceLine 
+            y={goals.dailyCalories * 0.9} 
+            stroke="rgba(24, 182, 155, 0.2)" 
+            strokeWidth={1}
+          />
+          <ReferenceLine 
+            y={goals.dailyCalories * 1.1} 
+            stroke="rgba(24, 182, 155, 0.2)" 
+            strokeWidth={1}
+          />
           <Bar 
             dataKey="calories" 
-            fill="#14b8a6"
+            fill={(data) => data.isOnTarget ? "#10b981" : "#14b8a6"}
             radius={[4, 4, 0, 0]}
           />
         </BarChart>
       </ResponsiveContainer>
+      <div className="text-center mt-2 text-sm text-muted-foreground">
+        <span className="inline-flex items-center">
+          <span className="h-3 w-3 rounded-full bg-emerald-500 mr-1"></span>
+          Objectif atteint (±10%)
+        </span>
+        <span className="inline-flex items-center ml-3">
+          <span className="h-3 w-3 rounded-full bg-teal-500 mr-1"></span>
+          Hors objectif
+        </span>
+      </div>
     </div>
   );
 };
