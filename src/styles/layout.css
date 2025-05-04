@@ -1,0 +1,24 @@
+
+/* Page container with max width and bottom padding for navigation */
+.page-container {
+  @apply max-w-md mx-auto px-4 pb-24;
+}
+
+/* Main layout */
+.main-layout {
+  @apply min-h-screen bg-gradient-to-b from-background to-muted/30;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted/30;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/20 rounded-full hover:bg-primary/40;
+}

@@ -1,0 +1,64 @@
+
+/* Modern UI Elements */
+@layer components {
+  .modern-card {
+    @apply bg-gradient-to-br from-white to-muted/40 rounded-2xl shadow-lg border border-white/70 backdrop-blur-sm transition-all hover:shadow-xl;
+  }
+  
+  .floating-input {
+    @apply transition-all focus:ring-2 focus:ring-primary/25 focus:border-primary;
+  }
+  
+  .modern-button {
+    @apply bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg hover:from-primary hover:to-primary/80 transition-all transform hover:-translate-y-0.5;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-md bg-white/70 border border-white/30 shadow-md;
+  }
+  
+  .food-input-highlight {
+    @apply bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 p-1;
+  }
+  
+  .achievement {
+    @apply flex items-center justify-center rounded-full;
+  }
+  
+  .achievement-1 {
+    @apply bg-gradient-to-br from-amber-200 to-amber-400 text-amber-900;
+  }
+  
+  .achievement-2 {
+    @apply bg-gradient-to-br from-slate-200 to-slate-400 text-slate-900;
+  }
+  
+  .achievement-3 {
+    @apply bg-gradient-to-br from-orange-200 to-orange-500 text-orange-900;
+  }
+  
+  .achievement-locked {
+    @apply bg-muted text-muted-foreground;
+  }
+
+  /* New modern UI components */
+  .neo-card {
+    @apply bg-gradient-to-br from-white via-white to-muted/20 backdrop-blur rounded-2xl border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  .neo-button {
+    @apply bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-medium px-6 py-2.5 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5;
+  }
+  
+  .ultra-card {
+    @apply bg-gradient-to-tl from-primary/10 via-background to-secondary/10 backdrop-filter backdrop-blur-sm border border-white/30 rounded-3xl shadow-xl;
+  }
+  
+  .luxury-card {
+    @apply bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white border border-white/10 rounded-2xl shadow-xl;
+  }
+  
+  .elegant-button {
+    @apply bg-gradient-to-r from-[#8A2BE2] to-[#4B0082] text-white shadow-lg hover:shadow-primary/20 transition-all duration-300 transform hover:-translate-y-0.5;
+  }
+}
