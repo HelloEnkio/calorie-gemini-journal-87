@@ -38,7 +38,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Dans une vraie application, on ferait une requête API ici
     setIsLoggedIn(true);
     setUsername(email.split('@')[0]);
-    setSubscriptionPlan(plan);
+    // Si un plan est spécifié (lors de l'inscription), on l'utilise
+    // Sinon, on utilise simplement "free" comme valeur par défaut pour la connexion
+    setSubscriptionPlan(plan || "free");
     setShowAuthModal(false);
   };
 

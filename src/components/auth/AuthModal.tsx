@@ -13,31 +13,38 @@ import { Label } from "@/components/ui/label";
 import { CheckCircle } from "lucide-react";
 import { useAuth, SubscriptionPlan } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AuthModal = () => {
   const { showAuthModal, setShowAuthModal, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("free");
-  const [step, setStep] = useState<"plan" | "details">("plan");
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [step, setStep] = useState<"plan" | "details">("details");
 
   const handleContinue = () => {
-    if (step === "plan") {
+    if (mode === "register" && step === "plan") {
       setStep("details");
-    } else {
-      if (!email || !validateEmail(email)) {
-        toast.error("Veuillez saisir une adresse email valide");
-        return;
-      }
-      if (!password || password.length < 6) {
-        toast.error("Le mot de passe doit contenir au moins 6 caractères");
-        return;
-      }
-      
-      login(email, password, selectedPlan);
-      toast.success(`Compte créé avec succès ! Plan: ${selectedPlan === "premium" ? "Premium" : "Gratuit"}`);
-      setStep("plan");
+      return;
     }
+    
+    if (!email || !validateEmail(email)) {
+      toast.error("Veuillez saisir une adresse email valide");
+      return;
+    }
+    
+    if (!password || password.length < 6) {
+      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+      return;
+    }
+    
+    login(email, password, mode === "register" ? selectedPlan : null);
+    const successMessage = mode === "login" 
+      ? "Connexion réussie !" 
+      : `Compte créé avec succès ! Plan: ${selectedPlan === "premium" ? "Premium" : "Gratuit"}`;
+    toast.success(successMessage);
+    resetAndClose();
   };
 
   const validateEmail = (email: string) => {
@@ -46,27 +53,98 @@ const AuthModal = () => {
   };
 
   const resetAndClose = () => {
-    setStep("plan");
+    setStep("details");
+    if (mode === "register") {
+      setStep("plan");
+    }
     setShowAuthModal(false);
+  };
+
+  const handleModeChange = (newMode: "login" | "register") => {
+    setMode(newMode);
+    setStep(newMode === "register" ? "plan" : "details");
+  };
+
+  const handleSignupClick = () => {
+    setMode("register");
+    setStep("plan");
   };
 
   return (
     <Dialog open={showAuthModal} onOpenChange={resetAndClose}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {step === "plan" ? "Choisissez votre plan" : "Créez votre compte"}
-          </DialogTitle>
-          <DialogDescription>
-            {step === "plan" 
-              ? "Sélectionnez l'option qui vous convient le mieux"
-              : "Renseignez vos informations pour continuer"}
-          </DialogDescription>
-        </DialogHeader>
+        {mode === "login" || (mode === "register" && step === "details") ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>
+                {mode === "login" ? "Connexion" : "Créez votre compte"}
+              </DialogTitle>
+              <DialogDescription>
+                {mode === "login" 
+                  ? "Connectez-vous à votre compte"
+                  : "Renseignez vos informations pour continuer"}
+              </DialogDescription>
+            </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {step === "plan" ? (
-            <div className="space-y-4">
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="votre@email.com" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Mot de passe</Label>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              {mode === "login" && (
+                <div className="text-sm">
+                  <span>Pas encore de compte ? </span>
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto" 
+                    onClick={handleSignupClick}
+                  >
+                    S'inscrire
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-between">
+              {mode === "register" && step === "details" && (
+                <Button variant="outline" onClick={() => setStep("plan")}>
+                  Retour
+                </Button>
+              )}
+              <Button 
+                className={mode === "login" ? "w-full" : ""} 
+                onClick={handleContinue}
+              >
+                {mode === "login" ? "Se connecter" : "Créer mon compte"}
+              </Button>
+            </div>
+          </>
+        ) : (
+          // Mode inscription - Étape du choix du plan
+          <>
+            <DialogHeader>
+              <DialogTitle>Choisissez votre plan</DialogTitle>
+              <DialogDescription>
+                Sélectionnez l'option qui vous convient le mieux
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
               <div 
                 className={`border p-4 rounded-md cursor-pointer ${
                   selectedPlan === "free" ? "border-primary ring-2 ring-primary" : ""
@@ -120,42 +198,24 @@ const AuthModal = () => {
                   </li>
                 </ul>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="votre@email.com" 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+              
+              <div className="text-sm">
+                <span>Déjà un compte ? </span>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto" 
+                  onClick={() => handleModeChange("login")}
+                >
+                  Se connecter
+                </Button>
               </div>
             </div>
-          )}
-        </div>
 
-        <div className="flex justify-between">
-          {step === "details" && (
-            <Button variant="outline" onClick={() => setStep("plan")}>
-              Retour
+            <Button className="w-full" onClick={() => setStep("details")}>
+              Continuer
             </Button>
-          )}
-          <Button className={step === "plan" ? "w-full" : ""} onClick={handleContinue}>
-            {step === "plan" ? "Continuer" : "Créer mon compte"}
-          </Button>
-        </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

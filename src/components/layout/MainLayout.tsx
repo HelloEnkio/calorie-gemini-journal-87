@@ -24,6 +24,15 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     setShowAuthModal(true);
   };
 
+  const handleSignup = () => {
+    setShowAuthModal(true);
+    // On définit un délai pour laisser le modal s'ouvrir d'abord
+    setTimeout(() => {
+      // Simuler un clic sur le bouton "S'inscrire"
+      document.getElementById("signup-button")?.click();
+    }, 100);
+  };
+
   return (
     <div className="main-layout">
       <div className="fixed top-0 left-0 right-0 h-16 backdrop-blur-md bg-background/80 px-4 z-10 flex items-center justify-between shadow-sm">
@@ -66,7 +75,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               ) : (
                 <>
                   <DropdownMenuItem onClick={handleLogin} className="rounded-lg">Connexion</DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogin} className="rounded-lg">Créer un compte</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignup} className="rounded-lg">Créer un compte</DropdownMenuItem>
                 </>
               )}
             </DropdownMenuContent>
@@ -78,6 +87,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       </div>
       <NavigationBar />
       <AuthModal />
+      
+      {/* Bouton caché pour déclencher l'inscription */}
+      <button 
+        id="signup-button" 
+        onClick={() => document.getElementById("register-trigger")?.click()} 
+        className="hidden"
+      />
     </div>
   );
 };
