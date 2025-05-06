@@ -194,7 +194,7 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Créer un nouvel aliment ou une recette</DialogTitle>
           <DialogDescription>
@@ -263,7 +263,7 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
               
               <div className="border p-3 rounded-md space-y-2">
                 <Label>Ajouter des ingrédients</Label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <div className="relative flex-grow">
                     <Input
                       value={currentIngredient}
@@ -286,13 +286,16 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
                       />
                     )}
                   </div>
-                  <Input
-                    type="number"
-                    className="w-24"
-                    value={currentQuantity}
-                    onChange={(e) => setCurrentQuantity(e.target.value)}
-                    placeholder="Qté (g)"
-                  />
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      type="number"
+                      className="w-24"
+                      value={currentQuantity}
+                      onChange={(e) => setCurrentQuantity(e.target.value)}
+                      placeholder="Qté"
+                    />
+                    <span className="text-sm whitespace-nowrap">grammes</span>
+                  </div>
                 </div>
                 
                 <div className="max-h-40 overflow-y-auto">
@@ -353,10 +356,11 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
           </TabsContent>
         </Tabs>
         
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
+        <DialogFooter className="mt-4 flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={onClose} className="sm:order-1 order-2 w-full sm:w-auto">Annuler</Button>
           <Button 
             onClick={activeTab === "aliment" ? handleCreateSingleFood : handleCreateRecipe}
+            className="sm:order-2 order-1 w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             {activeTab === "aliment" ? "Créer l'aliment" : "Créer la recette"}
