@@ -1,8 +1,6 @@
-
-import { DailyLog } from "@/types";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { getUserGoals } from "@/utils/storage";
+import { DailyLog, MacroNutrients, WeightEntry } from "@/types";
+import { format, parse, isWithinInterval, subDays } from "date-fns";
+import { getUserGoals } from "@/utils/storage/index";
 
 export type DateRangeType = "week" | "month" | "all" | "custom";
 

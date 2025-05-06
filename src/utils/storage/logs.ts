@@ -1,5 +1,4 @@
-
-import { DailyLog, FoodEntry, WorkoutEntry } from '@/types';
+import { DailyLog, FoodEntry, WorkoutEntry, WeightEntry } from '@/types';
 import { format } from 'date-fns';
 
 const DAILY_LOGS_KEY = 'nutrition-tracker-daily-logs';
@@ -133,6 +132,13 @@ export const removeWorkoutEntry = (date: Date, entryId: string): void => {
   dayLog.workouts = dayLog.workouts.filter(entry => entry.id !== entryId);
   
   updateDailyLog(dateKey, dayLog);
+};
+
+// Add weight entry
+export const addWeightEntry = (entry: WeightEntry): void => {
+  const todayLog = getTodaysLog();
+  todayLog.weight = entry;
+  saveDailyLog(todayLog);
 };
 
 // Helper functions for date ranges

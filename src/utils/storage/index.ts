@@ -9,18 +9,22 @@ export {
   getLogsForLastDays,
   getLogsInDateRange,
   getAllLogs,
-  saveDailyLog
-} from './logs';
-export {
+  saveDailyLog,
   addFoodEntry,
   removeFoodEntry,
   updateFoodEntry,
   addWorkoutEntry,
   removeWorkoutEntry,
   addWeightEntry
-} from './entries';
-export * from './achievements';
-export * from './goals';
+} from './logs';
+export {
+  getAchievements,
+  checkAndUpdateAchievements
+} from './achievements';
+export {
+  getUserGoals,
+  saveUserGoals
+} from './goals';
 
 // Export the generate ID function for convenience
 export { generateId } from './core';
