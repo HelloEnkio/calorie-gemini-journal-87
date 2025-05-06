@@ -51,6 +51,13 @@ const AddIngredientForm = ({
     setCurrentIngredient(value);
     searchIngredients(value);
   };
+  
+  // Custom handler to properly close the suggestions after selecting
+  const handleSelectSuggestion = (food: FoodItem) => {
+    setCurrentIngredient(food.name);
+    setShowSuggestions(false);
+    addIngredient(food);
+  };
 
   return (
     <div className="flex flex-col sm:flex-row gap-2">
@@ -67,11 +74,7 @@ const AddIngredientForm = ({
             suggestions={suggestions}
             isSearching={isSearching}
             showSuggestions={showSuggestions}
-            onSelectSuggestion={(food) => {
-              setCurrentIngredient(food.name);
-              setShowSuggestions(false);
-              addIngredient(food);
-            }}
+            onSelectSuggestion={handleSelectSuggestion}
             setShowSuggestions={setShowSuggestions}
           />
         )}

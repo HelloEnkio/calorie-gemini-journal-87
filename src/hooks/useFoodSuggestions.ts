@@ -41,13 +41,18 @@ export const useFoodSuggestions = (foodName: string) => {
 
   // Show default suggestions when input is focused
   const handleInputFocus = () => {
-    if (!showSuggestions) {
+    if (foodName.length > 0) {
       setIsSearching(true);
       const results = searchFoods(foodName);
       setSuggestions(results);
       setShowSuggestions(true);
       setIsSearching(false);
     }
+  };
+  
+  // Hide suggestions explicitly
+  const hideSuggestions = () => {
+    setShowSuggestions(false);
   };
 
   return {
@@ -56,6 +61,7 @@ export const useFoodSuggestions = (foodName: string) => {
     setShowSuggestions,
     isSearching,
     handleInputFocus,
+    hideSuggestions,
     inputRef,
     suggestionRef
   };

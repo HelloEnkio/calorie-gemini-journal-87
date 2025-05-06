@@ -19,6 +19,7 @@ interface FoodNameInputProps {
   inputRef: React.RefObject<HTMLInputElement>;
   setShowSuggestions: (show: boolean) => void;
   suggestionRef?: React.RefObject<HTMLDivElement>;
+  hideSuggestions?: () => void;
 }
 
 const FoodNameInput = ({
@@ -31,16 +32,23 @@ const FoodNameInput = ({
   handleSelectSuggestion,
   inputRef,
   setShowSuggestions,
-  suggestionRef
+  suggestionRef,
+  hideSuggestions
 }: FoodNameInputProps) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   
   // Add a handler for input blur to give a small delay before hiding suggestions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFoodName(e.target.value);
-    // Ensure suggestions are shown when typing
-    if (!showSuggestions && e.target.value) {
-      setShowSuggestions(true);
+  };
+  
+  // Custom handler to properly close the suggestions after selecting
+  const onSelectSuggestion = (food: FoodItem) => {
+    handleSelectSuggestion(food);
+    if (hideSuggestions) {
+      hideSuggestions();
+    } else {
+      setShowSuggestions(false);
     }
   };
   
@@ -91,7 +99,7 @@ const FoodNameInput = ({
         suggestions={suggestions}
         isSearching={isSearching}
         showSuggestions={showSuggestions}
-        onSelectSuggestion={handleSelectSuggestion}
+        onSelectSuggestion={onSelectSuggestion}
         setShowSuggestions={setShowSuggestions}
         suggestionRef={suggestionRef}
       />
@@ -101,7 +109,7 @@ const FoodNameInput = ({
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         initialFoodName={foodName}
-        onCreated={handleSelectSuggestion}
+        onCreated={onSelectSuggestion}
       />
     </div>
   );

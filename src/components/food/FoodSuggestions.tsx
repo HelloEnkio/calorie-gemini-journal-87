@@ -25,8 +25,7 @@ const FoodSuggestions = ({
   }
 
   // Improved handler for selecting an item
-  const handleSelectItem = (food: FoodItem, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent event bubbling
+  const handleSelectItem = (food: FoodItem) => {
     onSelectSuggestion(food);
     setShowSuggestions(false); // Explicitly close suggestions
   };
@@ -47,7 +46,7 @@ const FoodSuggestions = ({
           <div 
             key={food.id}
             className="px-3 py-2 hover:bg-muted cursor-pointer flex justify-between items-center"
-            onClick={(e) => handleSelectItem(food, e)}
+            onClick={() => handleSelectItem(food)}
           >
             <div>
               <div className="font-medium">{food.name}</div>
