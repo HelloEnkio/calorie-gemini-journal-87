@@ -50,8 +50,17 @@ export const addFoodItem = (newFood: FoodItem): boolean => {
 export const createRecipe = (newRecipe: RecipeItem): boolean => {
   if (foodExists(newRecipe.name)) return false;
   
+  // S'assurer que tous les ingrédients ont une unité de mesure
+  const validatedRecipe: RecipeItem = {
+    ...newRecipe,
+    ingredients: newRecipe.ingredients.map(ingredient => ({
+      ...ingredient,
+      unit: ingredient.unit || 'g' // Ajouter une unité par défaut si elle n'existe pas
+    }))
+  };
+  
   // Ajouter la recette à la base de données
-  recipeDatabase.push(newRecipe);
+  recipeDatabase.push(validatedRecipe);
   
   return true;
 };

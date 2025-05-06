@@ -121,6 +121,9 @@ export interface GeminiAnalysisResult {
   confidence?: number;
 }
 
+// Types d'unités de mesure disponibles
+export type MeasureUnit = 'g' | 'ml' | 'cup' | 'tbsp' | 'tsp' | 'oz' | 'piece';
+
 // Food-related types
 export interface FoodItem {
   id: string;
@@ -141,6 +144,7 @@ export interface RecipeItem extends FoodItem {
 // Recipe ingredient
 export interface RecipeIngredient {
   foodItemId: string;
-  quantity: number; // in grams
+  quantity: number;
+  unit: MeasureUnit; // Nouvelle propriété pour l'unité de mesure
   name: string;
 }
