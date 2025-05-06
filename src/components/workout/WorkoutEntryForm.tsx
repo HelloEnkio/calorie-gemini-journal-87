@@ -47,6 +47,7 @@ const WorkoutEntryForm = ({ onAdd }: WorkoutEntryFormProps) => {
     
     const newEntry: WorkoutEntry = {
       id: generateId(),
+      name: workoutType, // Set name to workoutType to satisfy the type requirement
       type: workoutType,
       duration: Number(duration),
       timestamp: new Date().toISOString(),

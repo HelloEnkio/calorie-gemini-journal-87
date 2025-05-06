@@ -7,7 +7,7 @@ import { Star, Trophy, ChevronDown, ChevronUp } from "lucide-react";
 import FoodEntry from "@/components/food/FoodEntry";
 import QuickAddForm from "@/components/food/QuickAddForm";
 import GeminiInputForm from "@/components/food/GeminiInputForm";
-import { DailyLog, UserGoals } from "@/types";
+import { DailyLog, UserGoals, FoodEntry as FoodEntryType } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface CaloriesTabProps {
@@ -77,6 +77,12 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
           near: "text-green-800",
           success: "text-green-800 font-semibold",
           far: "text-green-700"
+        },
+        ring: {
+          default: "",
+          near: "",
+          success: "ring-2 ring-green-500",
+          far: ""
         }
       },
       carbs: {
@@ -91,6 +97,12 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
           near: "text-amber-800",
           success: "text-amber-800 font-semibold",
           far: "text-amber-700"
+        },
+        ring: {
+          default: "",
+          near: "",
+          success: "ring-2 ring-amber-500",
+          far: ""
         }
       },
       fat: {
@@ -105,6 +117,12 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
           near: "text-rose-800",
           success: "text-rose-800 font-semibold",
           far: "text-rose-700"
+        },
+        ring: {
+          default: "",
+          near: "",
+          success: "ring-2 ring-rose-500",
+          far: ""
         }
       }
     };
@@ -281,7 +299,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
         
         {safeLog.foodEntries.length > 0 ? (
           <div className="space-y-3">
-            {safeLog.foodEntries.map((entry) => (
+            {safeLog.foodEntries.map((entry: FoodEntryType) => (
               <div key={entry.id}>
                 <div 
                   className="cursor-pointer" 

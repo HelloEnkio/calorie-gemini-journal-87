@@ -157,3 +157,11 @@ export interface Achievement {
   level: 'bronze' | 'silver' | 'gold' | 1 | 2 | 3;
   category: string;
 }
+
+export interface GeminiAnalysisResponse {
+  success: boolean;
+  foodName?: string;
+  calories?: number;
+  macros?: MacroNutrients;
+  errorMessage?: string;
+}

@@ -12,28 +12,38 @@ import HabitCard from "@/components/habits/HabitCard";
 interface HabitsTabProps {
   dayLog: DailyLog;
   refreshData: () => void;
+  onRefresh?: () => void;
+  currentDate?: Date;
 }
 
-const HabitsTab = ({ dayLog, refreshData }: HabitsTabProps) => {
+const HabitsTab = ({ dayLog, refreshData, onRefresh, currentDate }: HabitsTabProps) => {
   const [habits, setHabits] = useState<Habit[]>([]);
 
   useEffect(() => {
-    // Charger les habitudes actives
+    // Load active habits
     const allHabits = getAllHabits();
     setHabits(allHabits.filter(habit => habit.active));
   }, [dayLog]);
 
   const handleComplete = (habitId: string) => {
-    completeHabit(habitId, new Date(dayLog.date));
-    refreshData();
+    completeHabit(habitId, currentDate || new Date(dayLog.date));
+    if (onRefresh) {
+      onRefresh();
+    } else {
+      refreshData();
+    }
   };
 
   const handleUncomplete = (habitId: string) => {
-    uncompleteHabit(habitId, new Date(dayLog.date));
-    refreshData();
+    uncompleteHabit(habitId, currentDate || new Date(dayLog.date));
+    if (onRefresh) {
+      onRefresh();
+    } else {
+      refreshData();
+    }
   };
 
-  // Calcul du pourcentage d'habitudes terminées
+  // Calculate percentage of habits completed
   const completedCount = Object.values(dayLog.habits || {}).filter(entry => entry.completed).length;
   const totalCount = habits.length;
   const completionPercentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;

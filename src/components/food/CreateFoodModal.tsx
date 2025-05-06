@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FoodItem, RecipeItem } from "@/types";
+import { FoodItem, RecipeItem, RecipeIngredient, MeasureUnit, MacroNutrients } from "@/types";
 import { addFoodItem, createRecipe } from "@/utils/foodDatabase";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
@@ -16,6 +16,18 @@ interface CreateFoodModalProps {
   onClose: () => void;
   initialFoodName?: string;
   onCreated: (foodItem: FoodItem) => void;
+}
+
+interface IngredientState {
+  id: string;
+  foodId: string;
+  foodItemId?: string;
+  name: string;
+  amount: number;
+  quantity: number;
+  unit: MeasureUnit;
+  calories: number;
+  macros: MacroNutrients;
 }
 
 const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: CreateFoodModalProps) => {
@@ -33,12 +45,7 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
   
   // Recipe state
   const [recipeName, setRecipeName] = useState(initialFoodName);
-  const [ingredients, setIngredients] = useState<Array<{
-    foodItemId: string;
-    quantity: number;
-    unit: "g" | "ml" | "cup" | "tbsp" | "tsp" | "oz" | "piece";
-    name: string;
-  }>>([]);
+  const [ingredients, setIngredients] = useState<IngredientState[]>([]);
   
   // Create a simple food item
   const handleCreateSingleFood = () => {
@@ -89,15 +96,15 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
     }
     
     // Calculate recipe nutrition information using RecipeForm's helper functions
-    const getConversionFactor = (unit: "g" | "ml" | "cup" | "tbsp" | "tsp" | "oz" | "piece"): number => {
+    const getConversionFactor = (unit: MeasureUnit): number => {
       switch (unit) {
-        case 'g': return 1;
-        case 'ml': return 1;
-        case 'cup': return 240;
-        case 'tbsp': return 15;
-        case 'tsp': return 5;
-        case 'oz': return 28;
-        case 'piece': return 100;
+        case MeasureUnit.GRAMS: return 1;
+        case MeasureUnit.MILLILITERS: return 1;
+        case MeasureUnit.CUP: return 240;
+        case MeasureUnit.TABLESPOON: return 15;
+        case MeasureUnit.TEASPOON: return 5;
+        case MeasureUnit.OUNCE: return 28;
+        case MeasureUnit.PIECE: return 100;
         default: return 1;
       }
     };
@@ -105,7 +112,7 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
     const totalMacros = ingredients.reduce((acc, ingredient) => {
       const foodItem = searchFoods(ingredient.name)[0];
       if (foodItem) {
-        const gramEquivalent = ingredient.quantity * getConversionFactor(ingredient.unit);
+        const gramEquivalent = ingredient.amount * getConversionFactor(ingredient.unit);
         const ratio = gramEquivalent / (foodItem.weight || 100);
         
         acc.calories += foodItem.calories * ratio;
@@ -117,9 +124,22 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
     }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
     
     const totalWeight = ingredients.reduce((sum, ing) => {
-      const gramEquivalent = ing.quantity * getConversionFactor(ing.unit);
+      const gramEquivalent = ing.amount * getConversionFactor(ing.unit);
       return sum + gramEquivalent;
     }, 0);
+    
+    // Convert ingredients to RecipeIngredient[] type
+    const recipeIngredients: RecipeIngredient[] = ingredients.map(ing => ({
+      id: ing.id,
+      foodId: ing.foodId,
+      name: ing.name,
+      amount: ing.amount,
+      quantity: ing.quantity,
+      unit: ing.unit,
+      calories: ing.calories,
+      macros: ing.macros,
+      foodItemId: ing.foodItemId
+    }));
     
     const newRecipe: RecipeItem = {
       id: uuidv4(),
@@ -132,8 +152,9 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
       },
       weight: totalWeight,
       category: "Recette",
-      ingredients,
-      isRecipe: true
+      ingredients: recipeIngredients,
+      isRecipe: true,
+      servings: 1
     };
     
     const success = createRecipe(newRecipe);
@@ -188,8 +209,8 @@ const CreateFoodModal = ({ isOpen, onClose, initialFoodName = "", onCreated }: C
             <RecipeForm
               recipeName={recipeName}
               setRecipeName={setRecipeName}
-              ingredients={ingredients}
-              setIngredients={setIngredients}
+              ingredients={ingredients as any}
+              setIngredients={setIngredients as any}
             />
           </TabsContent>
         </Tabs>

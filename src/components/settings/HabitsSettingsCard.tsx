@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Habit } from "@/types";
-import { getAllHabits, addHabit, updateHabit, deleteHabit, initializeDefaultHabits } from "@/utils/habitsStorage";
+import { getAllHabits, addHabit, updateHabit, deleteHabit } from "@/utils/habitsStorage";
 import {
   Card,
   CardContent,
@@ -56,12 +56,40 @@ const HabitsSettingsCard = () => {
   }, []);
 
   const loadHabits = () => {
-    // Initialiser les habitudes par défaut si nécessaire
-    initializeDefaultHabits();
+    // Initialize default habits if necessary
+    const currentHabits = getAllHabits();
+    if (currentHabits.length === 0) {
+      // Create some default habits here
+      addHabit({
+        name: "Boire 2L d'eau",
+        description: "Boire suffisamment d'eau chaque jour",
+        icon: "💧",
+        color: "#3b82f6",
+        frequency: "daily",
+        active: true
+      });
+      
+      addHabit({
+        name: "Méditation",
+        description: "10 minutes de méditation par jour",
+        icon: "🧘",
+        color: "#8b5cf6",
+        frequency: "daily",
+        active: true
+      });
+      
+      addHabit({
+        name: "5 fruits et légumes",
+        description: "Consommer au moins 5 portions de fruits et légumes",
+        icon: "🥗",
+        color: "#10b981",
+        frequency: "daily",
+        active: true
+      });
+    }
     
-    // Charger toutes les habitudes
-    const allHabits = getAllHabits();
-    setHabits(allHabits);
+    // Load all habits
+    setHabits(getAllHabits());
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -77,7 +105,15 @@ const HabitsSettingsCard = () => {
       return;
     }
 
-    addHabit(formData);
+    addHabit({
+      name: formData.name,
+      description: formData.description,
+      icon: formData.icon,
+      color: formData.color,
+      frequency: formData.frequency,
+      active: formData.active
+    });
+    
     loadHabits();
     setNewHabitDialogOpen(false);
     resetForm();
@@ -90,7 +126,15 @@ const HabitsSettingsCard = () => {
       return;
     }
 
-    updateHabit(editingHabit.id, formData);
+    updateHabit(editingHabit.id, {
+      name: formData.name,
+      description: formData.description,
+      icon: formData.icon,
+      color: formData.color,
+      frequency: formData.frequency,
+      active: formData.active
+    });
+    
     loadHabits();
     setEditHabitDialogOpen(false);
     setEditingHabit(null);

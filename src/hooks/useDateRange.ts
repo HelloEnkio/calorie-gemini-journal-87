@@ -30,6 +30,15 @@ export const useDateRange = () => {
       fetchedLogs = getLogsForLastDays(days);
     }
 
+    // Make sure each log has required values to prevent errors
+    fetchedLogs = fetchedLogs.map(log => ({
+      ...log,
+      totalCalories: log.totalCalories || 0,
+      totalMacros: log.totalMacros || { protein: 0, carbs: 0, fat: 0 },
+      foodEntries: log.foodEntries || [],
+      workouts: log.workouts || [],
+    }));
+
     // Sort logs by date in ascending order
     fetchedLogs.sort((a, b) => {
       return new Date(a.date).getTime() - new Date(b.date).getTime();

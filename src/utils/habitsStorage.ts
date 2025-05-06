@@ -1,10 +1,45 @@
 
-import { Habit, HabitEntry } from "@/types";
+import { Habit, HabitEntry, HabitStats } from "@/types";
 import { generateId } from "./storage/core";
 import { getDailyLog, saveDailyLog } from "./storage/logs";
 import { format } from "date-fns";
 
 const HABITS_KEY = "nutrition-tracker-habits";
+const DEFAULT_HABITS = [
+  {
+    id: "habit-water",
+    name: "Boire 2L d'eau",
+    description: "Boire au moins 2 litres d'eau par jour",
+    icon: "💧",
+    color: "#3b82f6",
+    frequency: "daily",
+    active: true,
+    streak: 0,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "habit-meditation",
+    name: "Méditation",
+    description: "Prendre 10 minutes pour méditer",
+    icon: "🧘",
+    color: "#8b5cf6",
+    frequency: "daily",
+    active: true,
+    streak: 0,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "habit-veggies",
+    name: "5 fruits et légumes",
+    description: "Manger au moins 5 portions de fruits et légumes",
+    icon: "🥦",
+    color: "#10b981",
+    frequency: "daily",
+    active: true,
+    streak: 0,
+    createdAt: new Date().toISOString()
+  }
+];
 
 // Get all habits
 export const getAllHabits = (): Habit[] => {
@@ -17,31 +52,48 @@ export const getAllHabits = (): Habit[] => {
   }
 };
 
+// Initialize default habits if none exist
+export const initializeDefaultHabits = (): void => {
+  const habits = getAllHabits();
+  if (habits.length === 0) {
+    saveHabits(DEFAULT_HABITS as Habit[]);
+  }
+};
+
 // Save habits
 export const saveHabits = (habits: Habit[]): void => {
   localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
 };
 
 // Add new habit
-export const addHabit = (habit: Habit): void => {
+export const addHabit = (habitData: Partial<Habit>): void => {
   const habits = getAllHabits();
-  habits.push({
-    ...habit,
-    id: habit.id || generateId(),
-    createdAt: habit.createdAt || new Date().toISOString(),
-    active: habit.active !== undefined ? habit.active : true,
-    streak: habit.streak || 0
-  });
+  const newHabit: Habit = {
+    id: habitData.id || generateId(),
+    name: habitData.name || "Nouvelle habitude",
+    description: habitData.description || "",
+    icon: habitData.icon || "✅",
+    color: habitData.color || "#3b82f6",
+    frequency: habitData.frequency || "daily",
+    active: habitData.active !== undefined ? habitData.active : true,
+    streak: habitData.streak || 0,
+    createdAt: habitData.createdAt || new Date().toISOString()
+  };
+  
+  habits.push(newHabit);
   saveHabits(habits);
 };
 
 // Update habit
-export const updateHabit = (updatedHabit: Habit): boolean => {
+export const updateHabit = (habitId: string, updatedData: Partial<Habit>): boolean => {
   const habits = getAllHabits();
-  const habitIndex = habits.findIndex(habit => habit.id === updatedHabit.id);
+  const habitIndex = habits.findIndex(habit => habit.id === habitId);
   
   if (habitIndex >= 0) {
-    habits[habitIndex] = updatedHabit;
+    habits[habitIndex] = {
+      ...habits[habitIndex],
+      ...updatedData
+    };
     saveHabits(habits);
     return true;
   }
@@ -63,7 +115,7 @@ export const deleteHabit = (habitId: string): boolean => {
 };
 
 // Complete a habit for the day
-export const completeHabit = (habitId: string, date: Date = new Date(), value?: number): void => {
+export const completeHabit = (habitId: string, date: Date = new Date()): void => {
   const dateKey = format(date, "yyyy-MM-dd");
   const dayLog = getDailyLog(dateKey);
   
@@ -78,15 +130,14 @@ export const completeHabit = (habitId: string, date: Date = new Date(), value?: 
     habitId,
     completed: true,
     timestamp: new Date().toISOString(),
-    date: dateKey,
-    value
   };
   
   // Update streak
-  const habit = getAllHabits().find(h => h.id === habitId);
-  if (habit) {
-    habit.streak = (habit.streak || 0) + 1;
-    updateHabit(habit);
+  const habits = getAllHabits();
+  const habitIndex = habits.findIndex(h => h.id === habitId);
+  if (habitIndex >= 0) {
+    habits[habitIndex].streak = (habits[habitIndex].streak || 0) + 1;
+    saveHabits(habits);
   }
   
   saveDailyLog(dayLog);
@@ -106,10 +157,11 @@ export const uncompleteHabit = (habitId: string, date: Date = new Date()): void 
   dayLog.habits[habitId].completed = false;
   
   // Update streak
-  const habit = getAllHabits().find(h => h.id === habitId);
-  if (habit && habit.streak && habit.streak > 0) {
-    habit.streak -= 1;
-    updateHabit(habit);
+  const habits = getAllHabits();
+  const habitIndex = habits.findIndex(h => h.id === habitId);
+  if (habitIndex >= 0 && habits[habitIndex].streak && habits[habitIndex].streak > 0) {
+    habits[habitIndex].streak -= 1;
+    saveHabits(habits);
   }
   
   saveDailyLog(dayLog);

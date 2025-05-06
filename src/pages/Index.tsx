@@ -5,9 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import FoodEntry from "@/components/food/FoodEntry";
-import QuickAddForm from "@/components/food/QuickAddForm";
-import { format, addDays, subDays, isSameDay, parseISO } from "date-fns";
+import { format, addDays, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAllLogs, getUserGoals } from "@/utils/storage";
@@ -16,6 +14,7 @@ import CaloriesTab from "@/components/journal/CaloriesTab";
 import WorkoutTab from "@/components/journal/WorkoutTab";
 import HabitsTab from "@/components/journal/HabitsTab";
 import WeightTab from "@/components/journal/WeightTab";
+import { CalendarIcon } from "lucide-react";
 
 const Index = () => {
   const [date, setDate] = useState<Date>(new Date());
@@ -52,9 +51,14 @@ const Index = () => {
           </CardHeader>
           <CardContent className="grid gap-4">
             <JournalDateNavigator
-              currentDate={date}
-              onPrevious={() => navigateToDate(subDays(date, 1))}
-              onNext={() => navigateToDate(addDays(date, 1))}
+              date={date}
+              onDateChange={(newDate: Date) => {
+                if (newDate > date) {
+                  navigateToDate(addDays(date, 1));
+                } else {
+                  navigateToDate(subDays(date, 1));
+                }
+              }}
             />
             <Popover>
               <PopoverTrigger asChild>
@@ -74,7 +78,7 @@ const Index = () => {
                   mode="single"
                   locale={fr}
                   selected={date}
-                  onSelect={setDate}
+                  onSelect={(newDate) => newDate && setDate(newDate)}
                   disabled={(date) =>
                     date > new Date() || date < new Date("2024-01-01")
                   }
@@ -99,13 +103,20 @@ const Index = () => {
           <CaloriesTab dayLog={dailyLog} goals={userGoals} refreshData={refreshData} />
         </TabsContent>
         <TabsContent value="workout">
-          <WorkoutTab currentDate={date} dayLog={dailyLog} onRefresh={refreshData} />
+          <WorkoutTab dayLog={dailyLog} refreshData={refreshData} />
         </TabsContent>
         <TabsContent value="habits">
-          <HabitsTab currentDate={date} dayLog={dailyLog} onRefresh={refreshData} />
+          <HabitsTab dayLog={dailyLog || {
+            date: formattedDate,
+            totalCalories: 0,
+            totalMacros: { protein: 0, carbs: 0, fat: 0 },
+            foodEntries: [],
+            workouts: []
+          }} 
+          refreshData={refreshData} />
         </TabsContent>
         <TabsContent value="weight">
-          <WeightTab currentDate={date} dayLog={dailyLog} onRefresh={refreshData} />
+          <WeightTab dayLog={dailyLog} refreshData={refreshData} />
         </TabsContent>
       </Tabs>
     </div>
@@ -114,4 +125,5 @@ const Index = () => {
 
 export default Index;
 
-import { CalendarIcon } from "lucide-react";
+// Import QuickAddForm component
+import QuickAddForm from "@/components/food/QuickAddForm";
