@@ -1,60 +1,123 @@
 
-import { DailyLog } from "@/types";
-import { formatDateKey, getAllLogs, DAILY_LOGS_KEY } from "./core";
+import { DailyLog, FoodEntry, WorkoutEntry } from '@/types';
+import { format } from 'date-fns';
 
-// Get today's log or create a new one
-export const getTodaysLog = (): DailyLog => {
-  return getLogForDate(formatDateKey());
+const DAILY_LOGS_KEY = 'nutrition-tracker-daily-logs';
+
+export const getAllLogs = (): DailyLog[] => {
+  try {
+    const logsJson = localStorage.getItem(DAILY_LOGS_KEY);
+    
+    if (!logsJson) {
+      return [];
+    }
+    
+    return JSON.parse(logsJson);
+  } catch (error) {
+    console.error("Error loading logs:", error);
+    return [];
+  }
 };
 
-// Get log for a specific date
-export const getLogForDate = (dateKey: string): DailyLog => {
-  const allLogs = getAllLogs();
+export const getDailyLog = (date: Date | string): DailyLog => {
+  const dateKey = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
+  const logs = getAllLogs();
   
-  const dayLog = allLogs.find(log => log.date === dateKey);
+  const existingLog = logs.find(log => log.date === dateKey);
   
-  if (dayLog) {
-    return dayLog;
+  if (existingLog) {
+    return existingLog;
   }
   
-  // Create new log for the date
-  const newLog: DailyLog = {
+  return {
     date: dateKey,
     totalCalories: 0,
     totalMacros: { protein: 0, carbs: 0, fat: 0 },
     foodEntries: [],
     workouts: [],
+    habits: {}
   };
-  
-  // Save and return the new log
-  saveDailyLog(newLog);
-  return newLog;
 };
 
-// Save/update a daily log
-export const saveDailyLog = (log: DailyLog): void => {
-  const allLogs = getAllLogs();
-  const logIndex = allLogs.findIndex(l => l.date === log.date);
+export const updateDailyLog = (date: Date | string, updatedLog: DailyLog): void => {
+  const dateKey = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
+  const logs = getAllLogs();
+  
+  const logIndex = logs.findIndex(log => log.date === dateKey);
   
   if (logIndex >= 0) {
-    allLogs[logIndex] = log;
+    logs[logIndex] = updatedLog;
   } else {
-    allLogs.push(log);
+    logs.push(updatedLog);
   }
   
-  localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(allLogs));
+  localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(logs));
 };
 
-// Get logs for a date range
-export const getLogsInDateRange = (startDate: string, endDate: string): DailyLog[] => {
-  return getAllLogs().filter(log => log.date >= startDate && log.date <= endDate);
-};
-
-// Get logs for last N days
-export const getLogsForLastDays = (days: number): DailyLog[] => {
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
+// Helpers for handling food entries
+export const addFoodEntry = (date: Date, entry: FoodEntry): void => {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  const dayLog = getDailyLog(dateKey);
   
-  return getLogsInDateRange(formatDateKey(startDate), formatDateKey(endDate));
+  // Add the entry
+  dayLog.foodEntries = [...dayLog.foodEntries, entry];
+  
+  // Recalculate totals
+  dayLog.totalCalories = dayLog.foodEntries.reduce((sum, entry) => sum + entry.calories, 0);
+  
+  // Recalculate macros
+  dayLog.totalMacros = dayLog.foodEntries.reduce(
+    (sum, entry) => ({
+      protein: sum.protein + entry.macros.protein,
+      carbs: sum.carbs + entry.macros.carbs,
+      fat: sum.fat + entry.macros.fat,
+    }),
+    { protein: 0, carbs: 0, fat: 0 }
+  );
+  
+  updateDailyLog(dateKey, dayLog);
+};
+
+export const removeFoodEntry = (date: Date, entryId: string): void => {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  const dayLog = getDailyLog(dateKey);
+  
+  // Remove the entry
+  dayLog.foodEntries = dayLog.foodEntries.filter(entry => entry.id !== entryId);
+  
+  // Recalculate totals
+  dayLog.totalCalories = dayLog.foodEntries.reduce((sum, entry) => sum + entry.calories, 0);
+  
+  // Recalculate macros
+  dayLog.totalMacros = dayLog.foodEntries.reduce(
+    (sum, entry) => ({
+      protein: sum.protein + entry.macros.protein,
+      carbs: sum.carbs + entry.macros.carbs,
+      fat: sum.fat + entry.macros.fat,
+    }),
+    { protein: 0, carbs: 0, fat: 0 }
+  );
+  
+  updateDailyLog(dateKey, dayLog);
+};
+
+// Helpers for handling workout entries
+export const addWorkoutEntry = (date: Date, entry: WorkoutEntry): void => {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  const dayLog = getDailyLog(dateKey);
+  
+  // Add the entry
+  dayLog.workouts = [...dayLog.workouts, entry];
+  
+  updateDailyLog(dateKey, dayLog);
+};
+
+export const removeWorkoutEntry = (date: Date, entryId: string): void => {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  const dayLog = getDailyLog(dateKey);
+  
+  // Remove the entry
+  dayLog.workouts = dayLog.workouts.filter(entry => entry.id !== entryId);
+  
+  updateDailyLog(dateKey, dayLog);
 };

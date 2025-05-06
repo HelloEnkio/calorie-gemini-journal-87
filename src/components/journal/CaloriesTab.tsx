@@ -151,7 +151,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
             </div>
           </div>
           
-          <Progress value={caloriePercentage} className="h-2 mb-2 bg-slate-100" />
+          <Progress value={caloriePercentage} className="h-2 mb-2 bg-slate-200" />
           
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>0%</span>

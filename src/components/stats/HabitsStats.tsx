@@ -23,7 +23,7 @@ const HabitProgress = ({ percentage, label, timeframe }: HabitProgressProps) => 
     <Progress 
       value={percentage} 
       className={cn("h-1.5", 
-        percentage >= 80 ? "bg-slate-100" : "bg-slate-100"
+        percentage >= 80 ? "bg-slate-200" : "bg-slate-200"
       )}
     />
     <div className="text-xs text-muted-foreground">{timeframe}</div>

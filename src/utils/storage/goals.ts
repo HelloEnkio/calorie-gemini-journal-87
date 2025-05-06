@@ -1,25 +1,31 @@
 
-import { UserGoals, MacroNutrients } from "@/types";
-import { USER_GOALS_KEY } from "./core";
+import { UserGoals } from '@/types';
 
-// User goals
+const USER_GOALS_KEY = 'nutrition-tracker-user-goals';
+
 export const getUserGoals = (): UserGoals => {
-  const goalsJson = localStorage.getItem(USER_GOALS_KEY);
-  if (goalsJson) {
+  try {
+    const goalsJson = localStorage.getItem(USER_GOALS_KEY);
+    
+    if (!goalsJson) {
+      return {
+        dailyCalories: 2000,
+      };
+    }
+    
     return JSON.parse(goalsJson);
+  } catch (error) {
+    console.error("Error loading user goals:", error);
+    return {
+      dailyCalories: 2000,
+    };
   }
-  
-  // Default goals
-  const defaultGoals: UserGoals = {
-    dailyCalories: 2000,
-    macros: { protein: 140, carbs: 220, fat: 65 },
-    macroPercentages: { protein: 25, carbs: 45, fat: 30 }
-  };
-  
-  localStorage.setItem(USER_GOALS_KEY, JSON.stringify(defaultGoals));
-  return defaultGoals;
 };
 
 export const saveUserGoals = (goals: UserGoals): void => {
-  localStorage.setItem(USER_GOALS_KEY, JSON.stringify(goals));
+  try {
+    localStorage.setItem(USER_GOALS_KEY, JSON.stringify(goals));
+  } catch (error) {
+    console.error("Error saving user goals:", error);
+  }
 };

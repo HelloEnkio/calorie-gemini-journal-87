@@ -107,4 +107,16 @@ export interface Achievement {
   progress?: number;
   maxProgress?: number;
   level: 1 | 2 | 3;
+  category?: string; // Make category optional to fix type errors
+}
+
+// Add GeminiAnalysisResult type to fix import errors
+export interface GeminiAnalysisResult {
+  calories: number;
+  macros: {
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  confidence: number;
 }
