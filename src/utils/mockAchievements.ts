@@ -1,74 +1,79 @@
 
 import { Achievement } from "@/types";
+import { generateId } from "./storage";
 
-const ACHIEVEMENTS_KEY = 'nutrition-tracker-achievements';
-
-// Initialize mock achievements
+// Create mock achievements
 export const initializeMockAchievements = () => {
   const achievements: Achievement[] = [
     {
-      id: "food-tracker-1",
-      name: "Gourmet débutant",
-      description: "Enregistrer 5 repas",
-      icon: "🍽️",
+      id: generateId(),
+      title: "Premier jour parfait",
+      name: "Premier jour parfait",
+      description: "Atteindre tous les objectifs nutritionnels en une journée",
+      icon: "🌟",
       unlocked: true,
       level: 1,
-      category: "alimentation"
+      category: "nutrition"
     },
     {
-      id: "food-tracker-2",
-      name: "Chef cuisinier",
-      description: "Enregistrer 25 repas",
-      icon: "👨‍🍳",
+      id: generateId(),
+      title: "Sur la bonne voie",
+      name: "Sur la bonne voie",
+      description: "Maintenir un déficit calorique pendant 5 jours consécutifs",
+      icon: "🔥",
       unlocked: false,
-      progress: 15,
-      maxProgress: 25,
+      progress: 3,
+      maxProgress: 5,
       level: 2,
-      category: "alimentation"
+      category: "nutrition"
     },
     {
-      id: "workout-1",
-      name: "Premier pas sportif",
-      description: "Enregistrer 3 séances d'entraînement",
-      icon: "🏃‍♂️",
+      id: generateId(),
+      title: "Charge protéinée",
+      name: "Charge protéinée",
+      description: "Atteindre votre objectif de protéines pendant 10 jours",
+      icon: "💪",
       unlocked: false,
-      progress: 1,
-      maxProgress: 3,
+      progress: 6,
+      maxProgress: 10,
       level: 3,
-      category: "sport"
+      category: "nutrition"
     },
     {
-      id: "consistency-1",
-      name: "Régulier",
-      description: "Utiliser l'application pendant 7 jours consécutifs",
-      icon: "📅",
+      id: generateId(),
+      title: "Premier entraînement",
+      name: "Premier entraînement",
+      description: "Enregistrer votre première séance d'entraînement",
+      icon: "🏋️",
       unlocked: false,
       level: 3,
-      category: "constance"
+      category: "fitness"
     },
     {
-      id: "weight-1",
-      name: "Suivi débutant",
-      description: "Enregistrer votre poids 3 fois",
+      id: generateId(),
+      title: "Perte de poids",
+      name: "Perte de poids",
+      description: "Perdre 1 kg de poids corporel",
       icon: "⚖️",
       unlocked: false,
-      progress: 1,
-      maxProgress: 3,
+      progress: 0.5,
+      maxProgress: 1,
       level: 1,
-      category: "poids"
+      category: "weight"
     },
     {
-      id: "weight-2",
-      name: "Suivi régulier",
-      description: "Enregistrer votre poids 14 jours consécutifs",
-      icon: "📊",
+      id: generateId(),
+      title: "L'habitude fait le moine",
+      name: "L'habitude fait le moine",
+      description: "Accomplir une habitude pendant 7 jours consécutifs",
+      icon: "📆",
       unlocked: false,
-      progress: 5,
-      maxProgress: 14,
+      progress: 3,
+      maxProgress: 7,
       level: 2,
-      category: "poids"
+      category: "consistency"
     }
   ];
   
-  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
+  localStorage.setItem("nutrition-tracker-achievements", JSON.stringify(achievements));
 };

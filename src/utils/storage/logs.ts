@@ -68,31 +68,60 @@ export const saveDailyLog = (log: DailyLog): void => {
 };
 
 // Helpers for handling food entries
-export const addFoodEntry = (date: Date, entry: FoodEntry): void => {
-  const dateKey = format(date, 'yyyy-MM-dd');
-  const dayLog = getDailyLog(dateKey);
-  
-  // Add the entry
-  dayLog.foodEntries = [...dayLog.foodEntries, entry];
-  
-  // Recalculate totals
-  dayLog.totalCalories = dayLog.foodEntries.reduce((sum, entry) => sum + entry.calories, 0);
-  
-  // Recalculate macros
-  dayLog.totalMacros = dayLog.foodEntries.reduce(
-    (sum, entry) => ({
-      protein: sum.protein + entry.macros.protein,
-      carbs: sum.carbs + entry.macros.carbs,
-      fat: sum.fat + entry.macros.fat,
-    }),
-    { protein: 0, carbs: 0, fat: 0 }
-  );
-  
-  updateDailyLog(dateKey, dayLog);
+// Support both function signatures for backward compatibility
+export const addFoodEntry = (dateOrEntry: Date | FoodEntry, entry?: FoodEntry): void => {
+  // If only one argument is provided, assume it's the entry and use today's date
+  if (!entry) {
+    const entry = dateOrEntry as FoodEntry;
+    const entryDate = new Date(entry.timestamp);
+    const dateKey = format(entryDate, 'yyyy-MM-dd');
+    const dayLog = getDailyLog(dateKey);
+    
+    // Add the entry
+    dayLog.foodEntries = [...dayLog.foodEntries, entry];
+    
+    // Recalculate totals
+    dayLog.totalCalories = dayLog.foodEntries.reduce((sum, entry) => sum + entry.calories, 0);
+    
+    // Recalculate macros
+    dayLog.totalMacros = dayLog.foodEntries.reduce(
+      (sum, entry) => ({
+        protein: sum.protein + entry.macros.protein,
+        carbs: sum.carbs + entry.macros.carbs,
+        fat: sum.fat + entry.macros.fat,
+      }),
+      { protein: 0, carbs: 0, fat: 0 }
+    );
+    
+    updateDailyLog(dateKey, dayLog);
+  } else {
+    // Original function signature with date and entry
+    const date = dateOrEntry as Date;
+    const dateKey = format(date, 'yyyy-MM-dd');
+    const dayLog = getDailyLog(dateKey);
+    
+    // Add the entry
+    dayLog.foodEntries = [...dayLog.foodEntries, entry];
+    
+    // Recalculate totals
+    dayLog.totalCalories = dayLog.foodEntries.reduce((sum, entry) => sum + entry.calories, 0);
+    
+    // Recalculate macros
+    dayLog.totalMacros = dayLog.foodEntries.reduce(
+      (sum, entry) => ({
+        protein: sum.protein + entry.macros.protein,
+        carbs: sum.carbs + entry.macros.carbs,
+        fat: sum.fat + entry.macros.fat,
+      }),
+      { protein: 0, carbs: 0, fat: 0 }
+    );
+    
+    updateDailyLog(dateKey, dayLog);
+  }
 };
 
-export const removeFoodEntry = (date: Date, entryId: string): void => {
-  const dateKey = format(date, 'yyyy-MM-dd');
+export const removeFoodEntry = (date: Date | string, entryId: string): void => {
+  const dateKey = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
   const dayLog = getDailyLog(dateKey);
   
   // Remove the entry
@@ -114,7 +143,7 @@ export const removeFoodEntry = (date: Date, entryId: string): void => {
   updateDailyLog(dateKey, dayLog);
 };
 
-// Add the missing updateFoodEntry function
+// Export the updateFoodEntry function
 export const updateFoodEntry = (entryId: string, updatedEntry: FoodEntry): boolean => {
   const logs = getAllLogs();
   
@@ -149,14 +178,28 @@ export const updateFoodEntry = (entryId: string, updatedEntry: FoodEntry): boole
 };
 
 // Helpers for handling workout entries
-export const addWorkoutEntry = (date: Date, entry: WorkoutEntry): void => {
-  const dateKey = format(date, 'yyyy-MM-dd');
-  const dayLog = getDailyLog(dateKey);
-  
-  // Add the entry
-  dayLog.workouts = [...dayLog.workouts, entry];
-  
-  updateDailyLog(dateKey, dayLog);
+export const addWorkoutEntry = (dateOrEntry: Date | WorkoutEntry, entry?: WorkoutEntry): void => {
+  // Support both function signatures for backward compatibility
+  if (!entry) {
+    const entry = dateOrEntry as WorkoutEntry;
+    const entryDate = new Date(entry.timestamp);
+    const dateKey = format(entryDate, 'yyyy-MM-dd');
+    const dayLog = getDailyLog(dateKey);
+    
+    // Add the entry
+    dayLog.workouts = [...dayLog.workouts, entry];
+    
+    updateDailyLog(dateKey, dayLog);
+  } else {
+    const date = dateOrEntry as Date;
+    const dateKey = format(date, 'yyyy-MM-dd');
+    const dayLog = getDailyLog(dateKey);
+    
+    // Add the entry
+    dayLog.workouts = [...dayLog.workouts, entry];
+    
+    updateDailyLog(dateKey, dayLog);
+  }
 };
 
 export const removeWorkoutEntry = (date: Date, entryId: string): void => {
@@ -169,11 +212,27 @@ export const removeWorkoutEntry = (date: Date, entryId: string): void => {
   updateDailyLog(dateKey, dayLog);
 };
 
-// Add weight entry
-export const addWeightEntry = (entry: WeightEntry): void => {
-  const todayLog = getTodaysLog();
-  todayLog.weight = entry;
-  saveDailyLog(todayLog);
+// Add weight entry with flexible signature
+export const addWeightEntry = (dateOrEntry: Date | WeightEntry, entry?: WeightEntry): void => {
+  // Support both function signatures for backward compatibility
+  if (!entry) {
+    // If only one argument is provided, assume it's the entry
+    const entry = dateOrEntry as WeightEntry;
+    const entryDate = new Date(entry.timestamp);
+    const dateKey = format(entryDate, 'yyyy-MM-dd');
+    const dayLog = getDailyLog(dateKey);
+    
+    dayLog.weight = entry;
+    saveDailyLog(dayLog);
+  } else {
+    // Original function signature
+    const date = dateOrEntry as Date;
+    const dateKey = format(date, 'yyyy-MM-dd');
+    const dayLog = getDailyLog(dateKey);
+    
+    dayLog.weight = entry;
+    saveDailyLog(dayLog);
+  }
 };
 
 // Helper functions for date ranges

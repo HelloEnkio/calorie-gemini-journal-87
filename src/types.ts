@@ -27,6 +27,7 @@ export interface FoodItem {
   macros: MacroNutrients;
   weight?: number;
   category?: string;
+  isRecipe?: boolean;
 }
 
 export enum MeasureUnit {
@@ -49,7 +50,7 @@ export interface RecipeItem {
   servings: number;
   weight?: number;
   category?: string;
-  isRecipe?: boolean;
+  isRecipe: boolean;
 }
 
 export interface RecipeIngredient {
@@ -74,7 +75,7 @@ export interface Habit {
   goal?: number;
   unit?: string;
   color?: string;
-  active?: boolean;
+  active: boolean;
   streak?: number;
   createdAt: string;
 }
@@ -96,6 +97,15 @@ export interface HabitStats {
   streakCurrent: number;
   streakLongest: number;
   averageValue?: number;
+  streak: number;
+  longestStreak: number;
+  completionRates: {
+    week: number;
+    month: number;
+    threeMonths: number;
+    sixMonths?: number;
+    year: number;
+  };
 }
 
 export interface FoodEntry {
@@ -105,6 +115,7 @@ export interface FoodEntry {
   macros: MacroNutrients;
   timestamp: string;
   weight?: number;
+  mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   geminiData?: {
     ingredients?: string[];
     category?: string;

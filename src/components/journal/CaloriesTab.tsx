@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,13 +11,22 @@ import { DailyLog, UserGoals } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface CaloriesTabProps {
-  dayLog: DailyLog;
+  dayLog?: DailyLog;
   goals: UserGoals;
   refreshData: () => void;
 }
 
 const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
+
+  // Create a default dayLog if not provided
+  const safeLog = dayLog || {
+    date: new Date().toISOString().split('T')[0],
+    totalCalories: 0,
+    totalMacros: { protein: 0, carbs: 0, fat: 0 },
+    foodEntries: [],
+    workouts: []
+  };
 
   // Toggle expanded entry
   const toggleEntryDetails = (entryId: string) => {
@@ -31,21 +39,21 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
   
   // Calculate percentage of goal
   const caloriePercentage = Math.min(
-    Math.round((dayLog.totalCalories / goals.dailyCalories) * 100),
+    Math.round((safeLog.totalCalories / goals.dailyCalories) * 100),
     100
   );
   
   // Calculate macro target percentages
-  const getMacroTargetPercentage = (macro: keyof typeof dayLog.totalMacros) => {
+  const getMacroTargetPercentage = (macro: keyof typeof safeLog.totalMacros) => {
     if (!goals.macros || !goals.macros[macro]) return 0;
-    return Math.min(Math.round((dayLog.totalMacros[macro] / goals.macros[macro]!) * 100), 100);
+    return Math.min(Math.round((safeLog.totalMacros[macro] / goals.macros[macro]!) * 100), 100);
   };
   
   // Get macro status 
-  const getMacroStatus = (macro: keyof typeof dayLog.totalMacros) => {
+  const getMacroStatus = (macro: keyof typeof safeLog.totalMacros) => {
     if (!goals.macros || !goals.macros[macro]) return "default";
     
-    const percentage = (dayLog.totalMacros[macro] / goals.macros[macro]!) * 100;
+    const percentage = (safeLog.totalMacros[macro] / goals.macros[macro]!) * 100;
     if (percentage >= 90 && percentage <= 110) return "success";
     if (percentage > 80 && percentage < 90) return "near";
     if (percentage > 110 && percentage < 120) return "near";
@@ -53,7 +61,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
   };
   
   // Get macro classes based on status
-  const getMacroStatusClasses = (macro: keyof typeof dayLog.totalMacros, type: 'bg' | 'text' | 'ring') => {
+  const getMacroStatusClasses = (macro: keyof typeof safeLog.totalMacros, type: 'bg' | 'text' | 'ring') => {
     const status = getMacroStatus(macro);
     
     const classes = {
@@ -111,7 +119,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
   
   // Format macros as percentages
   const getTotalMacrosPercentage = () => {
-    const { protein, carbs, fat } = dayLog.totalMacros;
+    const { protein, carbs, fat } = safeLog.totalMacros;
     const total = protein + carbs + fat;
     
     if (total === 0) {
@@ -146,7 +154,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
               </p>
             </div>
             <div className="text-right">
-              <span className="text-2xl font-bold">{dayLog.totalCalories}</span>
+              <span className="text-2xl font-bold">{safeLog.totalCalories}</span>
               <span className="text-sm ml-1">kcal</span>
             </div>
           </div>
@@ -180,7 +188,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
             getMacroStatusClasses("protein", "text")
           )}>
             <div className="font-medium">Protéines</div>
-            <div className="text-xl font-bold">{dayLog.totalMacros.protein}g</div>
+            <div className="text-xl font-bold">{safeLog.totalMacros.protein}g</div>
             <div className="text-xs mb-1">{macroPercentages.protein}%</div>
             
             {goals.macros?.protein && (
@@ -206,7 +214,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
             getMacroStatusClasses("carbs", "text")
           )}>
             <div className="font-medium">Glucides</div>
-            <div className="text-xl font-bold">{dayLog.totalMacros.carbs}g</div>
+            <div className="text-xl font-bold">{safeLog.totalMacros.carbs}g</div>
             <div className="text-xs mb-1">{macroPercentages.carbs}%</div>
             
             {goals.macros?.carbs && (
@@ -232,7 +240,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
             getMacroStatusClasses("fat", "text")
           )}>
             <div className="font-medium">Lipides</div>
-            <div className="text-xl font-bold">{dayLog.totalMacros.fat}g</div>
+            <div className="text-xl font-bold">{safeLog.totalMacros.fat}g</div>
             <div className="text-xs mb-1">{macroPercentages.fat}%</div>
             
             {goals.macros?.fat && (
@@ -260,7 +268,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
           <h2 className="text-lg font-medium">Repas ou aliments</h2>
           
           <Badge variant="outline">
-            {dayLog.foodEntries.length} {dayLog.foodEntries.length > 1 ? 'éléments' : 'élément'}
+            {safeLog.foodEntries.length} {safeLog.foodEntries.length > 1 ? 'éléments' : 'élément'}
           </Badge>
         </div>
         
@@ -271,9 +279,9 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
         
         <Separator className="my-4" />
         
-        {dayLog.foodEntries.length > 0 ? (
+        {safeLog.foodEntries.length > 0 ? (
           <div className="space-y-3">
-            {dayLog.foodEntries.map((entry) => (
+            {safeLog.foodEntries.map((entry) => (
               <div key={entry.id}>
                 <div 
                   className="cursor-pointer" 
@@ -284,23 +292,27 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
                     onDelete={refreshData}
                     hasDetails={!!entry.geminiData} 
                     isExpanded={expandedEntryId === entry.id}
-                    totalDailyCalories={dayLog.totalCalories}
+                    totalDailyCalories={safeLog.totalCalories}
                   />
                 </div>
                 {expandedEntryId === entry.id && entry.geminiData && (
                   <Card className="mt-2 mb-4 p-3 bg-slate-50">
                     <div className="space-y-2 text-sm">
-                      <div>
-                        <strong className="text-xs text-slate-500">Prompt :</strong>
-                        <p className="text-slate-700 mt-1">{entry.geminiData.prompt}</p>
-                      </div>
+                      {entry.geminiData.prompt && (
+                        <div>
+                          <strong className="text-xs text-slate-500">Prompt :</strong>
+                          <p className="text-slate-700 mt-1">{entry.geminiData.prompt}</p>
+                        </div>
+                      )}
                       <Separator className="my-2" />
-                      <div>
-                        <strong className="text-xs text-slate-500">Réponse Gemini :</strong>
-                        <pre className="text-xs bg-slate-100 p-2 rounded mt-1 overflow-x-auto">
-                          {JSON.stringify(entry.geminiData.response, null, 2)}
-                        </pre>
-                      </div>
+                      {entry.geminiData.response && (
+                        <div>
+                          <strong className="text-xs text-slate-500">Réponse Gemini :</strong>
+                          <pre className="text-xs bg-slate-100 p-2 rounded mt-1 overflow-x-auto">
+                            {JSON.stringify(entry.geminiData.response, null, 2)}
+                          </pre>
+                        </div>
+                      )}
                     </div>
                   </Card>
                 )}

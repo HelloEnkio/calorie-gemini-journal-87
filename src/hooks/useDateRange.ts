@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { DailyLog } from "@/types";
-import { getLogsForLastDays, getLogsInDateRange } from "@/utils/storage/index";
+import { getLogsForLastDays, getLogsInDateRange } from "@/utils/storage";
 import { DateRangeType } from "@/utils/statsCalculations";
 
 export const useDateRange = () => {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -32,9 +33,6 @@ const Index = () => {
   // Find the log for the current date
   const dailyLog = dailyLogs.find((log) => log.date === formattedDate);
   
-  // Calculate total daily calories
-  const totalDailyCalories = dailyLog ? dailyLog.totalCalories : 0;
-  
   // Function to handle date navigation
   const navigateToDate = (newDate: Date) => {
     setDate(newDate);
@@ -54,7 +52,7 @@ const Index = () => {
           </CardHeader>
           <CardContent className="grid gap-4">
             <JournalDateNavigator
-              date={date}
+              currentDate={date}
               onPrevious={() => navigateToDate(subDays(date, 1))}
               onNext={() => navigateToDate(addDays(date, 1))}
             />
@@ -98,16 +96,16 @@ const Index = () => {
           <TabsTrigger value="weight">Poids</TabsTrigger>
         </TabsList>
         <TabsContent value="calories">
-          <CaloriesTab date={date} dailyLog={dailyLog} totalDailyCalories={totalDailyCalories} onUpdate={refreshData} />
+          <CaloriesTab dayLog={dailyLog} goals={userGoals} refreshData={refreshData} />
         </TabsContent>
         <TabsContent value="workout">
-          <WorkoutTab date={date} dailyLog={dailyLog} onUpdate={refreshData} />
+          <WorkoutTab currentDate={date} dayLog={dailyLog} onRefresh={refreshData} />
         </TabsContent>
         <TabsContent value="habits">
-          <HabitsTab date={date} dailyLog={dailyLog} onUpdate={refreshData} />
+          <HabitsTab currentDate={date} dayLog={dailyLog} onRefresh={refreshData} />
         </TabsContent>
         <TabsContent value="weight">
-          <WeightTab date={date} dailyLog={dailyLog} onUpdate={refreshData} />
+          <WeightTab currentDate={date} dayLog={dailyLog} onRefresh={refreshData} />
         </TabsContent>
       </Tabs>
     </div>

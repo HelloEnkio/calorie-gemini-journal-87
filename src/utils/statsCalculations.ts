@@ -1,5 +1,7 @@
+
 import { DailyLog } from "@/types";
 import { format, subDays } from "date-fns";
+import { fr } from "date-fns/locale";
 import { getUserGoals } from "@/utils/storage";
 
 export type DateRangeType = "week" | "month" | "all" | "custom";
