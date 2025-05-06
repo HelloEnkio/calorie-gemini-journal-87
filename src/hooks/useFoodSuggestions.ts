@@ -13,12 +13,15 @@ export const useFoodSuggestions = (foodName: string) => {
 
   // Search for food items when user types
   useEffect(() => {
-    setIsSearching(true);
-    const results = searchFoods(foodName);
-    setSuggestions(results);
-    setShowSuggestions(foodName.length > 0);
-    setIsSearching(false);
-  }, [foodName]);
+    if (foodName.length > 0 && showSuggestions) {
+      setIsSearching(true);
+      const results = searchFoods(foodName);
+      setSuggestions(results);
+      setIsSearching(false);
+    } else if (foodName.length === 0) {
+      setSuggestions([]);
+    }
+  }, [foodName, showSuggestions]);
   
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -39,7 +42,7 @@ export const useFoodSuggestions = (foodName: string) => {
     };
   }, []);
 
-  // Show default suggestions when input is focused
+  // Show suggestions when input is focused
   const handleInputFocus = () => {
     if (foodName.length > 0) {
       setIsSearching(true);

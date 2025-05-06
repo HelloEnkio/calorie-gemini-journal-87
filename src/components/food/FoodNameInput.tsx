@@ -37,7 +37,6 @@ const FoodNameInput = ({
 }: FoodNameInputProps) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   
-  // Add a handler for input blur to give a small delay before hiding suggestions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFoodName(e.target.value);
   };

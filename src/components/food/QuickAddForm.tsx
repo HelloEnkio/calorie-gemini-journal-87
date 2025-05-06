@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
@@ -45,6 +44,7 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
     setShowSuggestions,
     isSearching,
     handleInputFocus,
+    hideSuggestions,
     inputRef,
     suggestionRef
   } = useFoodSuggestions(foodName);
@@ -68,6 +68,7 @@ const QuickAddForm = ({ onAdd }: QuickAddFormProps) => {
             inputRef={inputRef}
             setShowSuggestions={setShowSuggestions}
             suggestionRef={suggestionRef}
+            hideSuggestions={hideSuggestions}
           />
           
           <NutritionFields 

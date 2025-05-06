@@ -24,10 +24,9 @@ const FoodSuggestions = ({
     return null;
   }
 
-  // Improved handler for selecting an item
+  // Handler for selecting an item
   const handleSelectItem = (food: FoodItem) => {
     onSelectSuggestion(food);
-    setShowSuggestions(false); // Explicitly close suggestions
   };
 
   return (

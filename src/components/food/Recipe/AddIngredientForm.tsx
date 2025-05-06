@@ -49,7 +49,12 @@ const AddIngredientForm = ({
   const handleIngredientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCurrentIngredient(value);
-    searchIngredients(value);
+    if (value.length > 0) {
+      searchIngredients(value);
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
   };
   
   // Custom handler to properly close the suggestions after selecting
@@ -59,6 +64,14 @@ const AddIngredientForm = ({
     addIngredient(food);
   };
 
+  // Handle input focus
+  const handleFocus = () => {
+    if (currentIngredient.length > 0) {
+      searchIngredients(currentIngredient);
+      setShowSuggestions(true);
+    }
+  };
+
   return (
     <div className="flex flex-col sm:flex-row gap-2">
       <div className="relative flex-grow">
@@ -66,18 +79,16 @@ const AddIngredientForm = ({
           value={currentIngredient}
           onChange={handleIngredientChange}
           placeholder="Rechercher un ingrédient"
-          onFocus={() => searchIngredients(currentIngredient)}
+          onFocus={handleFocus}
         />
         
-        {showSuggestions && (
-          <FoodSuggestions
-            suggestions={suggestions}
-            isSearching={isSearching}
-            showSuggestions={showSuggestions}
-            onSelectSuggestion={handleSelectSuggestion}
-            setShowSuggestions={setShowSuggestions}
-          />
-        )}
+        <FoodSuggestions
+          suggestions={suggestions}
+          isSearching={isSearching}
+          showSuggestions={showSuggestions}
+          onSelectSuggestion={handleSelectSuggestion}
+          setShowSuggestions={setShowSuggestions}
+        />
       </div>
       <div className="flex gap-2 items-center">
         <Input
