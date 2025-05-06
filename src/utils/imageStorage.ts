@@ -5,10 +5,10 @@ const IMAGE_PREFIX = "nutrition-tracker-image-";
 /**
  * Convertit une image en chaîne Base64 et la stocke dans le localStorage
  * @param file Le fichier image à stocker
- * @param name Le nom sous lequel l'image sera stockée
+ * @param name Le nom sous lequel l'image sera stockée (optional)
  * @returns Promise qui résout le nom de l'image stockée
  */
-export const storeImage = (file: File, name: string): Promise<string> => {
+export const storeImage = (file: File, name: string = Date.now().toString()): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
@@ -60,4 +60,15 @@ export const removeImage = (name: string): boolean => {
   }
   
   return false;
+};
+
+/**
+ * Sauvegarde une image et retourne son identifiant
+ * @param file Le fichier image à sauvegarder
+ * @returns Promise résolvant l'identifiant de l'image
+ */
+export const saveImage = async (file: File): Promise<string> => {
+  const imageId = `img_${Date.now()}`;
+  await storeImage(file, imageId);
+  return imageId;
 };

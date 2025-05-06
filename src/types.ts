@@ -42,6 +42,7 @@ export interface FoodEntry {
   macros: MacroNutrients;
   timestamp: string;
   weight?: number;
+  mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   geminiData?: {
     prompt: string;
     response: any;
@@ -50,8 +51,10 @@ export interface FoodEntry {
 
 // Type pour une entrée d'habitude
 export interface HabitEntry {
+  id?: string;
   completed: boolean;
   timestamp: string;
+  notes?: string;
 }
 
 // Type pour une habitude
@@ -63,10 +66,27 @@ export interface Habit {
   color?: string;
   active: boolean;
   streak?: number;
+  frequency?: string;
+  createdAt?: string;
+}
+
+// Type pour les statistiques d'habitude
+export interface HabitStats {
+  habitId: string;
+  streak: number;
+  longestStreak: number;
+  completionRates: {
+    week: number;
+    month: number;
+    threeMonths: number;
+    sixMonths?: number;
+    year: number;
+  };
 }
 
 // Type pour une entrée de poids
 export interface WeightEntry {
+  id?: string;
   weight: number;
   timestamp: string;
   notes?: string;
@@ -103,6 +123,11 @@ export interface UserGoals {
     fat?: number;
   };
   targetWeight?: number;
+  macroPercentages?: {
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
 }
 
 // Type pour une réalisation (achievement)
@@ -115,4 +140,5 @@ export interface Achievement {
   progress?: number;
   maxProgress?: number;
   level: 1 | 2 | 3;  // 1=bronze, 2=silver, 3=gold
+  category: 'nutrition' | 'fitness' | 'consistency' | 'weight';
 }

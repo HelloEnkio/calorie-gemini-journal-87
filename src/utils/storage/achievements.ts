@@ -1,205 +1,148 @@
 
 import { Achievement } from "@/types";
-import { ACHIEVEMENTS_KEY } from "./core";
-import { getUserGoals } from "./goals";
-import { getAllLogs, formatDateKey } from "./core";
+import { getAllLogs } from "./logs";
 
-// Get achievements
+const ACHIEVEMENTS_KEY = 'nutrition-tracker-achievements';
+
+// Get all achievements
 export const getAchievements = (): Achievement[] => {
-  const achievementsJson = localStorage.getItem(ACHIEVEMENTS_KEY);
-  if (achievementsJson) {
+  try {
+    const achievementsJson = localStorage.getItem(ACHIEVEMENTS_KEY);
+    
+    if (!achievementsJson) {
+      return initializeAchievements();
+    }
+    
     return JSON.parse(achievementsJson);
+  } catch (error) {
+    console.error("Error loading achievements:", error);
+    return initializeAchievements();
   }
-  
-  // Default achievements
-  const defaultAchievements: Achievement[] = [
+};
+
+// Initialize default achievements
+export const initializeAchievements = (): Achievement[] => {
+  const achievements: Achievement[] = [
     {
-      id: 'first-entry',
-      name: 'Premier pas',
-      description: 'Enregistrer votre premier repas',
-      icon: '🍽️',
+      id: "achievement-1",
+      name: "Premier pas",
+      description: "Enregistrer votre première entrée alimentaire",
+      icon: "🍽️",
       unlocked: false,
-      category: 'nutrition',
-      level: 1
+      level: 1,
+      category: 'nutrition'
     },
     {
-      id: 'calorie-goal-streak',
-      name: 'Sur la bonne voie',
-      description: 'Atteindre votre objectif calorique 3 jours de suite',
-      icon: '🔥',
+      id: "achievement-2",
+      name: "Régime équilibré",
+      description: "Atteindre un équilibre parfait entre protéines, lipides et glucides",
+      icon: "⚖️",
       unlocked: false,
-      progress: 0,
-      maxProgress: 3,
-      category: 'nutrition',
-      level: 2
+      level: 2,
+      category: 'nutrition'
     },
     {
-      id: 'first-workout',
-      name: 'En mouvement',
-      description: 'Enregistrer votre première séance d\'entraînement',
-      icon: '💪',
-      unlocked: false,
-      category: 'fitness',
-      level: 1
-    },
-    {
-      id: 'weight-tracking',
-      name: 'Suivi de poids',
-      description: 'Enregistrer votre poids 5 jours d\'affilée',
-      icon: '⚖️',
+      id: "achievement-3",
+      name: "Sportif en herbe",
+      description: "Enregistrer 5 séances d'entraînement",
+      icon: "🏃",
       unlocked: false,
       progress: 0,
       maxProgress: 5,
-      category: 'consistency',
-      level: 3
+      level: 1,
+      category: 'fitness'
     },
     {
-      id: 'macro-balance',
-      name: 'Équilibre parfait',
-      description: 'Atteindre tous vos objectifs de macronutriments en une journée',
-      icon: '⭐',
+      id: "achievement-4",
+      name: "Suivi régulier",
+      description: "Utiliser l'application 7 jours consécutifs",
+      icon: "📊",
       unlocked: false,
-      category: 'nutrition',
-      level: 3
+      progress: 0,
+      maxProgress: 7,
+      level: 1,
+      category: 'consistency'
+    },
+    {
+      id: "achievement-5",
+      name: "Objectif atteint",
+      description: "Atteindre votre objectif calorique 5 jours de suite",
+      icon: "🎯",
+      unlocked: false,
+      progress: 0,
+      maxProgress: 5,
+      level: 2,
+      category: 'nutrition'
     }
   ];
   
-  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(defaultAchievements));
-  return defaultAchievements;
+  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
+  return achievements;
 };
 
-export const updateAchievement = (achievementId: string, updates: Partial<Achievement>): void => {
+// Update achievement
+export const updateAchievement = (id: string, updates: Partial<Achievement>): void => {
   const achievements = getAchievements();
-  const achievementIndex = achievements.findIndex(a => a.id === achievementId);
+  const index = achievements.findIndex(a => a.id === id);
   
-  if (achievementIndex >= 0) {
-    achievements[achievementIndex] = { 
-      ...achievements[achievementIndex], 
-      ...updates 
-    };
-    
+  if (index !== -1) {
+    achievements[index] = { ...achievements[index], ...updates };
     localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
   }
 };
 
-export const checkAndUpdateAchievements = (): Achievement[] => {
+// Unlock achievement
+export const unlockAchievement = (id: string): Achievement | null => {
   const achievements = getAchievements();
-  const allLogs = getAllLogs();
-  const todayLog = allLogs.find(log => log.date === formatDateKey()) || {
-    foodEntries: [],
-    workouts: [],
-    weight: undefined
-  };
+  const achievement = achievements.find(a => a.id === id);
   
-  // Check "first-entry"
-  if (!achievements.find(a => a.id === 'first-entry')?.unlocked && 
-      todayLog.foodEntries.length > 0) {
-    updateAchievement('first-entry', { unlocked: true });
+  if (achievement && !achievement.unlocked) {
+    achievement.unlocked = true;
+    localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
+    return achievement;
   }
   
-  // Check "first-workout"
-  if (!achievements.find(a => a.id === 'first-workout')?.unlocked && 
-      todayLog.workouts.length > 0) {
-    updateAchievement('first-workout', { unlocked: true });
-  }
-  
-  // Check "weight-tracking"
-  const consecutiveWeightEntries = getConsecutiveDaysWithWeightEntries();
-  const weightTracking = achievements.find(a => a.id === 'weight-tracking');
-  if (weightTracking && !weightTracking.unlocked) {
-    const newProgress = Math.min(consecutiveWeightEntries, weightTracking.maxProgress || 5);
-    updateAchievement('weight-tracking', { 
-      progress: newProgress,
-      unlocked: newProgress >= (weightTracking.maxProgress || 5)
-    });
-  }
-  
-  // Check "calorie-goal-streak"
-  const calorieGoalStreak = getCalorieGoalStreak();
-  const calorieAchievement = achievements.find(a => a.id === 'calorie-goal-streak');
-  if (calorieAchievement && !calorieAchievement.unlocked) {
-    const newProgress = Math.min(calorieGoalStreak, calorieAchievement.maxProgress || 3);
-    updateAchievement('calorie-goal-streak', { 
-      progress: newProgress,
-      unlocked: newProgress >= (calorieAchievement.maxProgress || 3)
-    });
-  }
-  
-  // Check "macro-balance"
-  const macroBalanceAchievement = achievements.find(a => a.id === 'macro-balance');
-  if (macroBalanceAchievement && !macroBalanceAchievement.unlocked) {
-    const allMacrosOnTarget = checkAllMacrosOnTarget(todayLog);
-    if (allMacrosOnTarget) {
-      updateAchievement('macro-balance', { unlocked: true });
-    }
-  }
-  
-  return getAchievements();
+  return null;
 };
 
-// Helper functions for achievements
-const getConsecutiveDaysWithWeightEntries = (): number => {
-  const allLogs = getAllLogs().sort((a, b) => a.date.localeCompare(b.date));
-  let streak = 0;
-  const today = formatDateKey();
+// Check and update all achievements based on user data
+export const checkAndUpdateAchievements = (): void => {
+  const logs = getAllLogs();
+  const achievements = getAchievements();
   
-  // Start from today and go backwards
-  for (let i = allLogs.length - 1; i >= 0; i--) {
-    const log = allLogs[i];
-    
-    // Stop if we reach a day earlier than today with no weight entry
-    if (log.date !== today && !log.weight) {
-      break;
+  // Check each achievement
+  achievements.forEach(achievement => {
+    switch (achievement.id) {
+      case "achievement-1":
+        // Premier pas - Enregistrer votre première entrée alimentaire
+        if (!achievement.unlocked && logs.some(log => log.foodEntries.length > 0)) {
+          unlockAchievement(achievement.id);
+        }
+        break;
+        
+      case "achievement-3":
+        // Sportif en herbe - Enregistrer 5 séances d'entraînement
+        const workoutsCount = logs.reduce((total, log) => total + log.workouts.length, 0);
+        
+        if (!achievement.unlocked) {
+          updateAchievement(achievement.id, { progress: workoutsCount });
+          
+          if (workoutsCount >= 5) {
+            unlockAchievement(achievement.id);
+          }
+        }
+        break;
+        
+      // Add more achievement checks as needed
+      
+      default:
+        break;
     }
-    
-    if (log.weight) {
-      streak++;
-    }
-  }
-  
-  return streak;
+  });
 };
 
-const getCalorieGoalStreak = (): number => {
-  const allLogs = getAllLogs().sort((a, b) => a.date.localeCompare(b.date));
-  let streak = 0;
-  const goals = getUserGoals();
-  const today = formatDateKey();
-  
-  // Start from today and go backwards
-  for (let i = allLogs.length - 1; i >= 0; i--) {
-    const log = allLogs[i];
-    
-    // Goal is met if calories are within 10% of target
-    const calorieGoal = goals.dailyCalories;
-    const isWithinGoal = log.totalCalories >= calorieGoal * 0.9 && 
-                         log.totalCalories <= calorieGoal * 1.1;
-    
-    if (log.date === today || isWithinGoal) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-  
-  return streak;
-};
-
-// Helper to check if all macros are on target (within 10% margin)
-const checkAllMacrosOnTarget = (log: any): boolean => {
-  const goals = getUserGoals();
-  
-  if (!goals.macros || !log.totalMacros) return false;
-  
-  const { protein, carbs, fat } = log.totalMacros;
-  const proteinGoal = goals.macros.protein;
-  const carbsGoal = goals.macros.carbs;
-  const fatGoal = goals.macros.fat;
-  
-  // Check if all macros are within 10% of target
-  const isProteinOnTarget = protein >= proteinGoal * 0.9 && protein <= proteinGoal * 1.1;
-  const isCarbsOnTarget = carbs >= carbsGoal * 0.9 && carbs <= carbsGoal * 1.1;
-  const isFatOnTarget = fat >= fatGoal * 0.9 && fat <= fatGoal * 1.1;
-  
-  return isProteinOnTarget && isCarbsOnTarget && isFatOnTarget;
+// Reset all achievements (for testing)
+export const resetAchievements = (): void => {
+  localStorage.removeItem(ACHIEVEMENTS_KEY);
+  initializeAchievements();
 };

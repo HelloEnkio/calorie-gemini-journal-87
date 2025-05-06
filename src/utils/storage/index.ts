@@ -7,7 +7,9 @@ export {
   getTodaysLog, 
   getLogForDate,
   getLogsForLastDays,
-  getLogsInDateRange
+  getLogsInDateRange,
+  getAllLogs,
+  saveDailyLog
 } from './logs';
 export {
   addFoodEntry,

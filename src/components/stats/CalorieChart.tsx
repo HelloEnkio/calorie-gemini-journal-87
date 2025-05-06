@@ -1,7 +1,7 @@
 
 import { useMemo } from "react";
 import { DailyLog } from "@/types";
-import { getUserGoals } from "@/utils/storage";
+import { getUserGoals } from "@/utils/storage/goals";
 import {
   BarChart,
   Bar,

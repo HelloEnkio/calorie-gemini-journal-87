@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +61,7 @@ const WeightEntryForm = ({ onAdd }: WeightEntryFormProps) => {
       }
       
       const newEntry: WeightEntry = {
+        id: generateId(),
         weight: Number(weight),
         timestamp: new Date().toISOString(),
       };
