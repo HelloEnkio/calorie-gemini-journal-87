@@ -1,3 +1,4 @@
+
 import { DailyLog, FoodEntry, WorkoutEntry, WeightEntry } from '@/types';
 import { format } from 'date-fns';
 
@@ -111,6 +112,40 @@ export const removeFoodEntry = (date: Date, entryId: string): void => {
   );
   
   updateDailyLog(dateKey, dayLog);
+};
+
+// Add the missing updateFoodEntry function
+export const updateFoodEntry = (entryId: string, updatedEntry: FoodEntry): boolean => {
+  const logs = getAllLogs();
+  
+  // Look for the entry in all logs
+  for (const log of logs) {
+    const entryIndex = log.foodEntries.findIndex(entry => entry.id === entryId);
+    
+    if (entryIndex >= 0) {
+      // Update the entry
+      log.foodEntries[entryIndex] = updatedEntry;
+      
+      // Recalculate totals
+      log.totalCalories = log.foodEntries.reduce((sum, entry) => sum + entry.calories, 0);
+      
+      // Recalculate macros
+      log.totalMacros = log.foodEntries.reduce(
+        (sum, entry) => ({
+          protein: sum.protein + entry.macros.protein,
+          carbs: sum.carbs + entry.macros.carbs,
+          fat: sum.fat + entry.macros.fat,
+        }),
+        { protein: 0, carbs: 0, fat: 0 }
+      );
+      
+      // Save the updated log
+      updateDailyLog(log.date, log);
+      return true;
+    }
+  }
+  
+  return false;
 };
 
 // Helpers for handling workout entries

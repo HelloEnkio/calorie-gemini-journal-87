@@ -1,242 +1,242 @@
 
-import { format } from "date-fns";
-import { Habit, HabitEntry, HabitStats } from "@/types";
-import { getDailyLog, saveDailyLog } from "@/utils/storage/logs";
-import { formatDateKey } from "@/utils/storage/core";
+import { format } from 'date-fns';
+import { DailyLog } from '@/types';
+import { Habit, HabitEntry, HabitStats } from '@/types';
+import { getAllLogs, saveDailyLog, getLogForDate } from './storage';
 
-// Clé de stockage pour les habitudes
-const HABITS_KEY = "nutrition-tracker-habits";
-const HABIT_STATS_KEY = "nutrition-tracker-habit-stats";
+const HABITS_KEY = 'nutrition-tracker-habits';
 
-// Initialiser les habitudes par défaut si nécessaire
-export const initializeDefaultHabits = (): void => {
-  const storedHabits = localStorage.getItem(HABITS_KEY);
-  
-  if (!storedHabits) {
-    // Habitudes par défaut
-    const defaultHabits: Habit[] = [
-      {
-        id: "habit-1",
-        name: "Boire 2L d'eau",
-        description: "Hydratation quotidienne",
-        icon: "💧",
-        color: "#3b82f6",
-        active: true,
-        streak: 0,
-        frequency: "daily"
-      },
-      {
-        id: "habit-2",
-        name: "Manger 5 fruits et légumes",
-        description: "Pour un apport en vitamines et fibres",
-        icon: "🥗",
-        color: "#22c55e",
-        active: true,
-        streak: 0,
-        frequency: "daily"
-      },
-      {
-        id: "habit-3",
-        name: "Protéines à chaque repas",
-        description: "Pour maintenir ou développer la masse musculaire",
-        icon: "🍗",
-        color: "#ef4444",
-        active: true,
-        streak: 0,
-        frequency: "daily"
-      }
-    ];
-    
-    localStorage.setItem(HABITS_KEY, JSON.stringify(defaultHabits));
-  }
-};
-
-// Charger toutes les habitudes
+// Get all habits
 export const getAllHabits = (): Habit[] => {
-  initializeDefaultHabits();
-  const storedHabits = localStorage.getItem(HABITS_KEY);
-  
   try {
-    return JSON.parse(storedHabits || "[]");
+    const habitsJson = localStorage.getItem(HABITS_KEY);
+    return habitsJson ? JSON.parse(habitsJson) : [];
   } catch (error) {
-    console.error("Erreur lors du chargement des habitudes:", error);
+    console.error("Error loading habits:", error);
     return [];
   }
 };
 
-// Ajouter une nouvelle habitude
-export const addHabit = (habit: Omit<Habit, "id" | "streak">): Habit => {
-  const habits = getAllHabits();
-  
-  const newHabit: Habit = {
-    ...habit,
-    id: `habit-${Date.now()}`,
-    streak: 0,
-    createdAt: new Date().toISOString()
-  };
-  
-  habits.push(newHabit);
+// Save habits
+export const saveHabits = (habits: Habit[]): void => {
   localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
-  
-  return newHabit;
 };
 
-// Supprimer une habitude
-export const removeHabit = (habitId: string): boolean => {
+// Add a new habit
+export const addHabit = (habit: Habit): void => {
   const habits = getAllHabits();
-  const habitIndex = habits.findIndex(h => h.id === habitId);
-  
-  if (habitIndex === -1) return false;
-  
-  habits.splice(habitIndex, 1);
-  localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
-  
-  return true;
+  habits.push(habit);
+  saveHabits(habits);
 };
 
-// Alias pour removeHabit pour compatibilité avec le code existant
-export const deleteHabit = removeHabit;
-
-// Mettre à jour une habitude
-export const updateHabit = (habitId: string, updates: Partial<Habit>): boolean => {
+// Update a habit
+export const updateHabit = (habitId: string, updatedHabit: Habit): boolean => {
   const habits = getAllHabits();
-  const habitIndex = habits.findIndex(h => h.id === habitId);
+  const index = habits.findIndex(h => h.id === habitId);
   
-  if (habitIndex === -1) return false;
-  
-  habits[habitIndex] = {
-    ...habits[habitIndex],
-    ...updates
-  };
-  
-  localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
-  
-  return true;
-};
-
-// Marquer une habitude comme terminée pour un jour spécifique
-export const completeHabit = (habitId: string, date: Date): void => {
-  const dailyLog = getDailyLog(date);
-  
-  // Initialiser la section des habitudes si elle n'existe pas
-  if (!dailyLog.habits) {
-    dailyLog.habits = {};
+  if (index >= 0) {
+    habits[index] = updatedHabit;
+    saveHabits(habits);
+    return true;
   }
   
-  // Créer ou mettre à jour l'entrée d'habitude
-  dailyLog.habits[habitId] = {
-    id: `habit-entry-${Date.now()}`,
-    completed: true,
-    timestamp: new Date().toISOString()
-  };
-  
-  // Mettre à jour le streak de l'habitude
-  updateHabitStreak(habitId, true);
-  
-  // Sauvegarder le journal quotidien
-  saveDailyLog(dailyLog);
+  return false;
 };
 
-// Marquer une habitude comme non terminée pour un jour spécifique
-export const uncompleteHabit = (habitId: string, date: Date): void => {
-  const dailyLog = getDailyLog(date);
+// Delete a habit
+export const deleteHabit = (habitId: string): boolean => {
+  const habits = getAllHabits();
+  const newHabits = habits.filter(h => h.id !== habitId);
   
-  // Si les habitudes n'existent pas ou si cette habitude n'est pas marquée, ne rien faire
-  if (!dailyLog.habits || !dailyLog.habits[habitId]) {
-    return;
+  if (newHabits.length < habits.length) {
+    saveHabits(newHabits);
+    
+    // Also remove habit entries from daily logs
+    const logs = getAllLogs();
+    let modified = false;
+    
+    for (const log of logs) {
+      if (log.habits && log.habits[habitId]) {
+        delete log.habits[habitId];
+        saveDailyLog(log);
+        modified = true;
+      }
+    }
+    
+    return true;
   }
   
-  // Mettre à jour l'entrée d'habitude
-  dailyLog.habits[habitId] = {
-    id: dailyLog.habits[habitId].id || `habit-entry-${Date.now()}`,
-    completed: false,
-    timestamp: new Date().toISOString()
-  };
-  
-  // Mettre à jour le streak de l'habitude
-  updateHabitStreak(habitId, false);
-  
-  // Sauvegarder le journal quotidien
-  saveDailyLog(dailyLog);
+  return false;
 };
 
-// Mettre à jour le streak d'une habitude
-const updateHabitStreak = (habitId: string, completed: boolean): void => {
-  const habits = getAllHabits();
-  const habitIndex = habits.findIndex(h => h.id === habitId);
+// Initialize default habits
+export const initializeDefaultHabits = (): void => {
+  const existingHabits = getAllHabits();
   
-  if (habitIndex === -1) return;
+  // Only initialize if no habits exist
+  if (existingHabits.length === 0) {
+    const defaultHabits: Habit[] = [
+      {
+        id: 'water',
+        name: 'Drink Water',
+        icon: 'droplet',
+        frequency: 'daily',
+        goal: 8,
+        unit: 'glasses',
+        category: 'health',
+        color: 'blue'
+      },
+      {
+        id: 'steps',
+        name: '10,000 Steps',
+        icon: 'footprints',
+        frequency: 'daily',
+        goal: 10000,
+        unit: 'steps',
+        category: 'fitness',
+        color: 'green'
+      },
+      {
+        id: 'meditation',
+        name: 'Meditation',
+        icon: 'brain',
+        frequency: 'daily',
+        goal: 10,
+        unit: 'minutes',
+        category: 'wellness',
+        color: 'purple'
+      }
+    ];
+    
+    saveHabits(defaultHabits);
+  }
+};
+
+// Toggle a habit's completion status for a specific date
+export const toggleHabitCompletion = (habitId: string, date: Date, value: number | boolean = true): void => {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  const dayLog = getLogForDate(dateKey);
   
-  if (completed) {
-    // Augmenter le streak
-    habits[habitIndex].streak = (habits[habitIndex].streak || 0) + 1;
+  // Initialize habits object if it doesn't exist
+  if (!dayLog.habits) {
+    dayLog.habits = {};
+  }
+  
+  // Toggle the completion status
+  if (dayLog.habits[habitId]) {
+    delete dayLog.habits[habitId];
   } else {
-    // Réinitialiser le streak
-    habits[habitIndex].streak = 0;
-  }
-  
-  // Sauvegarder les habitudes mises à jour
-  localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
-  
-  // Mettre à jour les statistiques
-  updateHabitStats(habitId);
-};
-
-// Obtenir les statistiques d'une habitude
-export const getHabitStats = (habitId: string): HabitStats | null => {
-  try {
-    const statsJson = localStorage.getItem(HABIT_STATS_KEY);
-    const allStats = statsJson ? JSON.parse(statsJson) : {};
-    
-    return allStats[habitId] || createDefaultHabitStats(habitId);
-  } catch (error) {
-    console.error("Erreur lors du chargement des statistiques d'habitude:", error);
-    return createDefaultHabitStats(habitId);
-  }
-};
-
-// Créer des statistiques par défaut pour une habitude
-const createDefaultHabitStats = (habitId: string): HabitStats => ({
-  habitId,
-  streak: 0,
-  longestStreak: 0,
-  completionRates: {
-    week: 0,
-    month: 0,
-    threeMonths: 0,
-    year: 0
-  }
-});
-
-// Mettre à jour les statistiques d'une habitude
-const updateHabitStats = (habitId: string): void => {
-  try {
-    const habit = getAllHabits().find(h => h.id === habitId);
-    if (!habit) return;
-    
-    const statsJson = localStorage.getItem(HABIT_STATS_KEY);
-    const allStats = statsJson ? JSON.parse(statsJson) : {};
-    
-    // Récupérer ou créer les stats pour cette habitude
-    const habitStats = allStats[habitId] || createDefaultHabitStats(habitId);
-    
-    // Mettre à jour le streak actuel et le record
-    habitStats.streak = habit.streak || 0;
-    habitStats.longestStreak = Math.max(habitStats.longestStreak || 0, habitStats.streak);
-    
-    // Calculer les taux de complétion (à implémenter de manière plus complète)
-    // Pour l'exemple, on utilise des valeurs factices
-    habitStats.completionRates = {
-      week: Math.min(100, (habitStats.streak || 0) * 15),
-      month: Math.min(100, (habitStats.streak || 0) * 5),
-      threeMonths: Math.min(100, (habitStats.streak || 0) * 2),
-      year: Math.min(100, (habitStats.streak || 0))
+    const entry: HabitEntry = {
+      id: `${habitId}-${dateKey}`,
+      habitId: habitId,
+      date: dateKey,
+      completed: true,
+      value: typeof value === 'number' ? value : undefined
     };
     
-    // Sauvegarder les statistiques mises à jour
-    allStats[habitId] = habitStats;
-    localStorage.setItem(HABIT_STATS_KEY, JSON.stringify(allStats));
-  } catch (error) {
-    console.error("Erreur lors de la mise à jour des statistiques d'habitude:", error);
+    dayLog.habits[habitId] = entry;
   }
+  
+  saveDailyLog(dayLog);
+};
+
+// Update a habit's progress value
+export const updateHabitProgress = (habitId: string, date: Date, value: number): void => {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  const dayLog = getLogForDate(dateKey);
+  
+  // Initialize habits object if it doesn't exist
+  if (!dayLog.habits) {
+    dayLog.habits = {};
+  }
+  
+  // If the habit entry exists, update its value; otherwise, create a new one
+  if (dayLog.habits[habitId]) {
+    const entry = dayLog.habits[habitId];
+    entry.value = value;
+    entry.completed = value > 0;
+  } else {
+    const entry: HabitEntry = {
+      id: `${habitId}-${dateKey}`,
+      habitId,
+      date: dateKey,
+      completed: value > 0,
+      value
+    };
+    
+    dayLog.habits[habitId] = entry;
+  }
+  
+  saveDailyLog(dayLog);
+};
+
+// Get habit statistics
+export const getHabitStats = (habitId: string, days: number = 30): HabitStats => {
+  const logs = getAllLogs();
+  const today = new Date();
+  const startDate = new Date();
+  startDate.setDate(today.getDate() - days);
+  
+  const relevantLogs = logs.filter(log => {
+    const logDate = new Date(log.date);
+    return logDate >= startDate && logDate <= today;
+  });
+  
+  let completedCount = 0;
+  let totalValues = 0;
+  let valueCount = 0;
+  let currentStreak = 0;
+  let longestStreak = 0;
+  let tempStreak = 0;
+  
+  // Sort logs by date (oldest first)
+  relevantLogs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  // Count completed habits and calculate streaks
+  for (const log of relevantLogs) {
+    if (log.habits && log.habits[habitId]) {
+      const entry = log.habits[habitId];
+      if (entry.completed) {
+        completedCount++;
+        tempStreak++;
+        
+        if (entry.value !== undefined) {
+          totalValues += entry.value;
+          valueCount++;
+        }
+      } else {
+        // Break in streak
+        longestStreak = Math.max(longestStreak, tempStreak);
+        tempStreak = 0;
+      }
+    } else {
+      // No entry for this day means incomplete
+      longestStreak = Math.max(longestStreak, tempStreak);
+      tempStreak = 0;
+    }
+  }
+  
+  // Update longest streak if the current one is longer
+  longestStreak = Math.max(longestStreak, tempStreak);
+  
+  // Calculate current streak (from today backwards)
+  const reversedLogs = [...relevantLogs].reverse();
+  currentStreak = 0;
+  
+  for (const log of reversedLogs) {
+    if (log.habits && log.habits[habitId] && log.habits[habitId].completed) {
+      currentStreak++;
+    } else {
+      break; // Break in streak
+    }
+  }
+  
+  return {
+    habitId,
+    completedCount,
+    totalCount: relevantLogs.length,
+    streakCurrent: currentStreak,
+    streakLongest: longestStreak,
+    averageValue: valueCount > 0 ? totalValues / valueCount : undefined
+  };
 };

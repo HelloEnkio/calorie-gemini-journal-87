@@ -1,116 +1,113 @@
-
-import { useState, useEffect } from "react";
-import { format, isToday, parseISO } from "date-fns";
+import React, { useState, useEffect } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import FoodEntry from "@/components/food/FoodEntry";
+import QuickAddForm from "@/components/food/QuickAddForm";
+import { format, addDays, subDays, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAllLogs, getUserGoals } from "@/utils/storage";
 import JournalDateNavigator from "@/components/journal/JournalDateNavigator";
 import CaloriesTab from "@/components/journal/CaloriesTab";
-import WeightTab from "@/components/journal/WeightTab";
 import WorkoutTab from "@/components/journal/WorkoutTab";
 import HabitsTab from "@/components/journal/HabitsTab";
-import { DailyLog, UserGoals } from "@/types";
+import WeightTab from "@/components/journal/WeightTab";
 
 const Index = () => {
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [dayLog, setDayLog] = useState<DailyLog | null>(null);
-  const [goals, setGoals] = useState<UserGoals>({ dailyCalories: 2000 });
-  const [activeTab, setActiveTab] = useState<string>("calories");
+  const [date, setDate] = useState<Date>(new Date());
+  const [dailyLogs, setDailyLogs] = useState(() => getAllLogs());
+  const [userGoals, setUserGoals] = useState(() => getUserGoals());
   
-  const dateFormatted = format(currentDate, "EEEE d MMMM", { locale: fr });
-  const isCurrentDateToday = isToday(currentDate);
-  
-  const navigateToDay = (date: Date) => {
-    setCurrentDate(date);
-  };
-  
-  const goToToday = () => {
-    setCurrentDate(new Date());
-  };
-  
-  const loadDayData = () => {
-    const formattedDate = format(currentDate, "yyyy-MM-dd");
-    const logs = getAllLogs();
-    const log = logs.find(l => l.date === formattedDate) || {
-      date: formattedDate,
-      totalCalories: 0,
-      totalMacros: { protein: 0, carbs: 0, fat: 0 },
-      foodEntries: [],
-      workouts: [],
-      habits: {}
-    };
-    
-    setDayLog(log);
-  };
-  
-  const loadGoals = () => {
-    const userGoals = getUserGoals();
-    setGoals(userGoals);
-  };
-  
+  // Update dailyLogs when date changes
   useEffect(() => {
-    loadDayData();
-    loadGoals();
-  }, [currentDate]);
+    setDailyLogs(getAllLogs());
+    setUserGoals(getUserGoals());
+  }, [date]);
   
-  if (!dayLog) {
-    return <div>Chargement...</div>;
-  }
+  const formattedDate = format(date, "yyyy-MM-dd");
   
+  // Find the log for the current date
+  const dailyLog = dailyLogs.find((log) => log.date === formattedDate);
+  
+  // Calculate total daily calories
+  const totalDailyCalories = dailyLog ? dailyLog.totalCalories : 0;
+  
+  // Function to handle date navigation
+  const navigateToDate = (newDate: Date) => {
+    setDate(newDate);
+  };
+  
+  // Function to refresh data
+  const refreshData = () => {
+    setDailyLogs(getAllLogs());
+  };
+
   return (
-    <div className="max-w-lg mx-auto px-4 pb-20">
-      <JournalDateNavigator
-        currentDate={currentDate}
-        dateFormatted={dateFormatted}
-        navigateToDay={navigateToDay}
-        goToToday={goToToday}
-        isToday={isCurrentDateToday}
-      />
+    <div className="container mx-auto py-10">
+      <div className="mb-8 flex justify-between items-center">
+        <Card>
+          <CardHeader>
+            <CardTitle>Sélectionner une date</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <JournalDateNavigator
+              date={date}
+              onPrevious={() => navigateToDate(subDays(date, 1))}
+              onNext={() => navigateToDate(addDays(date, 1))}
+            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[280px] justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP", { locale: fr }) : <span>Choisir une date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  locale={fr}
+                  selected={date}
+                  onSelect={setDate}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("2024-01-01")
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </CardContent>
+        </Card>
+      </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <div className="border-b flex justify-center overflow-x-auto -mx-4 px-4">
-          <TabsList className="inline-flex h-9 p-1 text-muted-foreground">
-            <TabsTrigger
-              value="calories"
-              className="h-8 rounded-full px-3 text-sm data-[state=active]:bg-primary data-[state=active]:text-white"
-            >
-              Calories
-            </TabsTrigger>
-            <TabsTrigger
-              value="weight"
-              className="h-8 rounded-full px-3 text-sm data-[state=active]:bg-primary data-[state=active]:text-white"
-            >
-              Poids
-            </TabsTrigger>
-            <TabsTrigger
-              value="workout"
-              className="h-8 rounded-full px-3 text-sm data-[state=active]:bg-primary data-[state=active]:text-white"
-            >
-              Sport
-            </TabsTrigger>
-            <TabsTrigger
-              value="habits"
-              className="h-8 rounded-full px-3 text-sm data-[state=active]:bg-primary data-[state=active]:text-white"
-            >
-              Habitudes
-            </TabsTrigger>
-          </TabsList>
-        </div>
-        
-        <TabsContent value="calories" className="space-y-4">
-          <CaloriesTab dayLog={dayLog} goals={goals} refreshData={loadDayData} />
+      <QuickAddForm onAdd={refreshData} />
+      
+      <Tabs defaultValue="calories" className="w-full mt-4">
+        <TabsList>
+          <TabsTrigger value="calories">Calories</TabsTrigger>
+          <TabsTrigger value="workout">Entraînement</TabsTrigger>
+          <TabsTrigger value="habits">Habitudes</TabsTrigger>
+          <TabsTrigger value="weight">Poids</TabsTrigger>
+        </TabsList>
+        <TabsContent value="calories">
+          <CaloriesTab date={date} dailyLog={dailyLog} totalDailyCalories={totalDailyCalories} onUpdate={refreshData} />
         </TabsContent>
-        
-        <TabsContent value="weight" className="space-y-4">
-          <WeightTab dayLog={dayLog} refreshData={loadDayData} />
+        <TabsContent value="workout">
+          <WorkoutTab date={date} dailyLog={dailyLog} onUpdate={refreshData} />
         </TabsContent>
-        
-        <TabsContent value="workout" className="space-y-4">
-          <WorkoutTab dayLog={dayLog} refreshData={loadDayData} />
+        <TabsContent value="habits">
+          <HabitsTab date={date} dailyLog={dailyLog} onUpdate={refreshData} />
         </TabsContent>
-        
-        <TabsContent value="habits" className="space-y-4">
-          <HabitsTab dayLog={dayLog} refreshData={loadDayData} />
+        <TabsContent value="weight">
+          <WeightTab date={date} dailyLog={dailyLog} onUpdate={refreshData} />
         </TabsContent>
       </Tabs>
     </div>
@@ -118,3 +115,5 @@ const Index = () => {
 };
 
 export default Index;
+
+import { CalendarIcon } from "lucide-react";

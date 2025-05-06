@@ -1,8 +1,7 @@
-
-import { useState, useEffect } from "react";
-import { getAchievements, checkAndUpdateAchievements } from "@/utils/storage";
-import { Achievement } from "@/types";
-import AchievementCard from "@/components/achievements/AchievementCard";
+import { useState, useEffect } from 'react';
+import { getAchievements, checkAndUpdateAchievements } from '@/utils/storage';
+import AchievementCard from '@/components/achievements/AchievementCard';
+import { Achievement } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AchievementsPage = () => {
