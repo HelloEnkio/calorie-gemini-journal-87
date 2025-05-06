@@ -50,6 +50,7 @@ export interface DailyLog {
   foodEntries: FoodEntry[];
   weight?: WeightEntry;
   workouts: WorkoutEntry[];
+  habits?: Record<string, HabitEntry>;
 }
 
 // User goals for calories, macros, etc.
@@ -84,5 +85,40 @@ export interface GeminiAnalysisResult {
   calories?: number;
   macros?: MacroNutrients;
   errorMessage?: string;
-  confidence?: number; // Added from the other definition
+  confidence?: number;
+}
+
+// Habit data
+export interface Habit {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  frequency: string;
+  active: boolean;
+  streak?: number;
+  createdAt: string;
+}
+
+// Habit entry for a specific day
+export interface HabitEntry {
+  id: string;
+  completed: boolean;
+  timestamp: string;
+  notes?: string;
+}
+
+// Habit statistics
+export interface HabitStats {
+  habitId: string;
+  streak: number;
+  longestStreak: number;
+  completionRates: {
+    week: number;
+    month: number;
+    threeMonths: number;
+    sixMonths?: number;
+    year: number;
+  };
 }

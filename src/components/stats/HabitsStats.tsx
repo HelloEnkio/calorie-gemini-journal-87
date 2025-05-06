@@ -82,23 +82,29 @@ const HabitsStats = ({ logs }: HabitsStatsProps) => {
         onValueChange={setSelectedHabit}
         className="w-full"
       >
-        <TabsList className="grid" style={{ gridTemplateColumns: `repeat(${Math.min(habits.length, 4)}, 1fr)` }}>
-          {habits.slice(0, 4).map(habit => (
-            <TabsTrigger key={habit.id} value={habit.id} className="flex items-center gap-1">
-              <span>{habit.icon || "✅"}</span>
-              <span className="hidden sm:inline truncate">{habit.name}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="overflow-x-auto pb-2">
+          <TabsList className="w-full flex flex-nowrap">
+            {habits.map(habit => (
+              <TabsTrigger 
+                key={habit.id} 
+                value={habit.id} 
+                className="flex items-center gap-1 min-w-fit whitespace-nowrap px-3"
+              >
+                <span>{habit.icon || "✅"}</span>
+                <span className="truncate max-w-[100px]">{habit.name}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
         
         {habits.map(habit => (
           <TabsContent key={habit.id} value={habit.id}>
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-base">
-                    <span className="mr-2">{habit.icon || "✅"}</span>
-                    {habit.name}
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <span>{habit.icon || "✅"}</span>
+                    <span className="truncate">{habit.name}</span>
                   </CardTitle>
                 </div>
               </CardHeader>
