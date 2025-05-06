@@ -23,19 +23,30 @@ export const saveHabits = (habits: Habit[]): void => {
 };
 
 // Add a new habit
-export const addHabit = (habit: Habit): void => {
+export const addHabit = (habitData: Partial<Habit>): void => {
   const habits = getAllHabits();
-  habits.push(habit);
+  const newHabit: Habit = {
+    id: crypto.randomUUID(),
+    name: habitData.name || 'New Habit',
+    description: habitData.description,
+    icon: habitData.icon || '✅',
+    color: habitData.color || '#3b82f6',
+    frequency: habitData.frequency || 'daily',
+    active: habitData.active !== undefined ? habitData.active : true,
+    createdAt: new Date().toISOString()
+  };
+  
+  habits.push(newHabit);
   saveHabits(habits);
 };
 
 // Update a habit
-export const updateHabit = (habitId: string, updatedHabit: Habit): boolean => {
+export const updateHabit = (habitId: string, updatedData: Partial<Habit>): boolean => {
   const habits = getAllHabits();
   const index = habits.findIndex(h => h.id === habitId);
   
   if (index >= 0) {
-    habits[index] = updatedHabit;
+    habits[index] = { ...habits[index], ...updatedData };
     saveHabits(habits);
     return true;
   }
@@ -80,35 +91,74 @@ export const initializeDefaultHabits = (): void => {
         id: 'water',
         name: 'Drink Water',
         icon: 'droplet',
+        description: 'Drink 8 glasses of water daily',
         frequency: 'daily',
-        goal: 8,
-        unit: 'glasses',
-        category: 'health',
-        color: 'blue'
+        active: true,
+        createdAt: new Date().toISOString(),
+        streak: 0
       },
       {
         id: 'steps',
         name: '10,000 Steps',
         icon: 'footprints',
+        description: 'Walk 10,000 steps every day',
         frequency: 'daily',
-        goal: 10000,
-        unit: 'steps',
-        category: 'fitness',
-        color: 'green'
+        active: true,
+        createdAt: new Date().toISOString(),
+        streak: 0
       },
       {
         id: 'meditation',
         name: 'Meditation',
         icon: 'brain',
+        description: 'Meditate for at least 10 minutes',
         frequency: 'daily',
-        goal: 10,
-        unit: 'minutes',
-        category: 'wellness',
-        color: 'purple'
+        active: true,
+        createdAt: new Date().toISOString(),
+        streak: 0
       }
     ];
     
     saveHabits(defaultHabits);
+  }
+};
+
+// Complete a habit for a specific date
+export const completeHabit = (habitId: string, date: Date): void => {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  const dayLog = getLogForDate(dateKey);
+  
+  // Initialize habits object if it doesn't exist
+  if (!dayLog.habits) {
+    dayLog.habits = {};
+  }
+  
+  // Add the completed habit entry
+  const entry: HabitEntry = {
+    id: `${habitId}-${dateKey}`,
+    habitId: habitId,
+    completed: true,
+    timestamp: new Date().toISOString()
+  };
+  
+  dayLog.habits[habitId] = entry;
+  saveDailyLog(dayLog);
+  
+  // Update streak
+  updateHabitStreak(habitId);
+};
+
+// Uncomplete (remove completion of) a habit for a specific date
+export const uncompleteHabit = (habitId: string, date: Date): void => {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  const dayLog = getLogForDate(dateKey);
+  
+  if (dayLog.habits && dayLog.habits[habitId]) {
+    delete dayLog.habits[habitId];
+    saveDailyLog(dayLog);
+    
+    // Update streak
+    updateHabitStreak(habitId);
   }
 };
 
@@ -129,15 +179,17 @@ export const toggleHabitCompletion = (habitId: string, date: Date, value: number
     const entry: HabitEntry = {
       id: `${habitId}-${dateKey}`,
       habitId: habitId,
-      date: dateKey,
       completed: true,
-      value: typeof value === 'number' ? value : undefined
+      timestamp: new Date().toISOString()
     };
     
     dayLog.habits[habitId] = entry;
   }
   
   saveDailyLog(dayLog);
+  
+  // Update streak
+  updateHabitStreak(habitId);
 };
 
 // Update a habit's progress value
@@ -152,15 +204,14 @@ export const updateHabitProgress = (habitId: string, date: Date, value: number):
   
   // If the habit entry exists, update its value; otherwise, create a new one
   if (dayLog.habits[habitId]) {
-    const entry = dayLog.habits[habitId];
-    entry.value = value;
-    entry.completed = value > 0;
+    dayLog.habits[habitId].value = value;
+    dayLog.habits[habitId].completed = value > 0;
   } else {
     const entry: HabitEntry = {
       id: `${habitId}-${dateKey}`,
       habitId,
-      date: dateKey,
       completed: value > 0,
+      timestamp: new Date().toISOString(),
       value
     };
     
@@ -168,6 +219,38 @@ export const updateHabitProgress = (habitId: string, date: Date, value: number):
   }
   
   saveDailyLog(dayLog);
+  
+  // Update streak
+  updateHabitStreak(habitId);
+};
+
+// Helper function to update a habit's streak
+const updateHabitStreak = (habitId: string): void => {
+  const habits = getAllHabits();
+  const habitIndex = habits.findIndex(h => h.id === habitId);
+  
+  if (habitIndex >= 0) {
+    const logs = getAllLogs();
+    let currentStreak = 0;
+    
+    // Sort logs by date (latest first)
+    const sortedLogs = logs.sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    // Count consecutive days with completed habit
+    for (const log of sortedLogs) {
+      if (log.habits && log.habits[habitId] && log.habits[habitId].completed) {
+        currentStreak++;
+      } else {
+        break; // Break on first day without completion
+      }
+    }
+    
+    // Update the habit's streak
+    habits[habitIndex].streak = currentStreak;
+    saveHabits(habits);
+  }
 };
 
 // Get habit statistics

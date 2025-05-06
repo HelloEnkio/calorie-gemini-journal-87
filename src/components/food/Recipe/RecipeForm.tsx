@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FoodItem, RecipeIngredient } from "@/types";
+import { FoodItem, MeasureUnit, RecipeIngredient } from "@/types";
 import AddIngredientForm from "./AddIngredientForm";
 import IngredientItem from "./IngredientItem";
 import RecipeNutritionSummary from "./RecipeNutritionSummary";
@@ -23,7 +23,7 @@ const RecipeForm = ({
 }: RecipeFormProps) => {
   const [currentIngredient, setCurrentIngredient] = useState<string>("");
   const [currentQuantity, setCurrentQuantity] = useState<string>("100");
-  const [currentUnit, setCurrentUnit] = useState<"g" | "ml" | "cup" | "tbsp" | "tsp" | "oz" | "piece">("g");
+  const [currentUnit, setCurrentUnit] = useState<MeasureUnit>(MeasureUnit.GRAMS);
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -40,16 +40,20 @@ const RecipeForm = ({
   // Add an ingredient to the recipe
   const addIngredient = (foodItem: FoodItem) => {
     const newIngredient: RecipeIngredient = {
-      foodItemId: foodItem.id,
+      id: crypto.randomUUID(),
+      foodId: foodItem.id,
       quantity: parseInt(currentQuantity) || 100,
+      amount: parseInt(currentQuantity) || 100,
       unit: currentUnit,
-      name: foodItem.name
+      name: foodItem.name,
+      calories: foodItem.calories,
+      macros: foodItem.macros
     };
     
     setIngredients([...ingredients, newIngredient]);
     setCurrentIngredient("");
     setCurrentQuantity("100");
-    setCurrentUnit("g"); // Reset to grams by default
+    setCurrentUnit(MeasureUnit.GRAMS); // Reset to grams by default
     setShowSuggestions(false);
   };
   
@@ -61,15 +65,15 @@ const RecipeForm = ({
   };
   
   // Function to get the conversion factor from units to grams
-  const getConversionFactor = (unit: "g" | "ml" | "cup" | "tbsp" | "tsp" | "oz" | "piece"): number => {
+  const getConversionFactor = (unit: MeasureUnit): number => {
     switch (unit) {
-      case 'g': return 1;
-      case 'ml': return 1; // Approximation: 1ml ≈ 1g (for water)
-      case 'cup': return 240; // 1 cup ≈ 240g
-      case 'tbsp': return 15; // 1 tablespoon ≈ 15g
-      case 'tsp': return 5; // 1 teaspoon ≈ 5g
-      case 'oz': return 28; // 1 ounce ≈ 28g
-      case 'piece': return 100; // Approximation: 1 piece ≈ 100g (highly variable)
+      case MeasureUnit.GRAMS: return 1;
+      case MeasureUnit.MILLILITERS: return 1; // Approximation: 1ml ≈ 1g (for water)
+      case MeasureUnit.CUP: return 240; // 1 cup ≈ 240g
+      case MeasureUnit.TABLESPOON: return 15; // 1 tablespoon ≈ 15g
+      case MeasureUnit.TEASPOON: return 5; // 1 teaspoon ≈ 5g
+      case MeasureUnit.OUNCE: return 28; // 1 ounce ≈ 28g
+      case MeasureUnit.PIECE: return 100; // Approximation: 1 piece ≈ 100g (highly variable)
       default: return 1;
     }
   };
@@ -87,7 +91,7 @@ const RecipeForm = ({
       const foodItem = searchFoods(ingredient.name)[0];
       if (foodItem) {
         // Convert quantity according to unit
-        const gramEquivalent = ingredient.quantity * getConversionFactor(ingredient.unit);
+        const gramEquivalent = ingredient.amount * getConversionFactor(ingredient.unit);
         const ratio = gramEquivalent / (foodItem.weight || 100);
         
         totalMacros.calories += foodItem.calories * ratio;
@@ -108,7 +112,7 @@ const RecipeForm = ({
   // Calculate total recipe weight
   const calculateTotalWeight = (): number => {
     return ingredients.reduce((sum, ing) => {
-      const gramEquivalent = ing.quantity * getConversionFactor(ing.unit);
+      const gramEquivalent = ing.amount * getConversionFactor(ing.unit);
       return sum + gramEquivalent;
     }, 0);
   };
@@ -150,7 +154,7 @@ const RecipeForm = ({
             <IngredientItem
               key={index}
               name={ing.name}
-              quantity={ing.quantity}
+              quantity={ing.amount}
               unit={ing.unit}
               onRemove={() => removeIngredient(index)}
             />

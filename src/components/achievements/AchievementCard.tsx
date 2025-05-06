@@ -11,14 +11,17 @@ interface AchievementCardProps {
 const AchievementCard = ({ achievement }: AchievementCardProps) => {
   const { name, description, icon, unlocked, progress, maxProgress, level } = achievement;
   
-  // Map numeric level to string for CSS classes
-  const getLevelClass = (level: 1 | 2 | 3) => {
-    switch (level) {
-      case 1: return 'bronze';
-      case 2: return 'silver';
-      case 3: return 'gold';
-      default: return 'bronze';
+  // Map level to string for CSS classes
+  const getLevelClass = (level: 'bronze' | 'silver' | 'gold' | 1 | 2 | 3) => {
+    if (typeof level === 'number') {
+      switch (level) {
+        case 1: return 'bronze';
+        case 2: return 'silver';
+        case 3: return 'gold';
+        default: return 'bronze';
+      }
     }
+    return level || 'bronze';
   };
   
   return (

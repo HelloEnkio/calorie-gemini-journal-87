@@ -1,3 +1,4 @@
+
 export interface MacroNutrients {
   protein: number;
   carbs: number;
@@ -19,13 +20,24 @@ export interface UserGoals {
   macros?: MacroNutrients;
 }
 
-// Add missing exports and type definitions
 export interface FoodItem {
   id: string;
   name: string;
   calories: number;
   macros: MacroNutrients;
   weight?: number;
+  category?: string;
+}
+
+export enum MeasureUnit {
+  GRAMS = 'g',
+  MILLILITERS = 'ml',
+  PIECES = 'pcs',
+  TABLESPOON = 'tbsp',
+  TEASPOON = 'tsp',
+  CUP = 'cup',
+  OUNCE = 'oz',
+  PIECE = 'piece'
 }
 
 export interface RecipeItem {
@@ -35,6 +47,9 @@ export interface RecipeItem {
   macros: MacroNutrients;
   ingredients: RecipeIngredient[];
   servings: number;
+  weight?: number;
+  category?: string;
+  isRecipe?: boolean;
 }
 
 export interface RecipeIngredient {
@@ -42,17 +57,11 @@ export interface RecipeIngredient {
   foodId: string;
   name: string;
   amount: number;
+  quantity?: number;
   unit: MeasureUnit;
   calories: number;
   macros: MacroNutrients;
-}
-
-export enum MeasureUnit {
-  GRAMS = 'g',
-  MILLILITERS = 'ml',
-  PIECES = 'pcs',
-  TABLESPOON = 'tbsp',
-  TEASPOON = 'tsp'
+  foodItemId?: string;
 }
 
 export interface Habit {
@@ -60,17 +69,23 @@ export interface Habit {
   name: string;
   icon?: string;
   category?: string;
+  description?: string;
   frequency: 'daily' | 'weekly';
   goal?: number;
   unit?: string;
   color?: string;
+  active?: boolean;
+  streak?: number;
+  createdAt: string;
 }
 
 export interface HabitEntry {
   id: string;
   habitId: string;
-  date: string;
   completed: boolean;
+  timestamp: string;
+  date?: string;
+  notes?: string;
   value?: number;
 }
 
@@ -83,7 +98,6 @@ export interface HabitStats {
   averageValue?: number;
 }
 
-// Update FoodEntry to include weight and make geminiData optional
 export interface FoodEntry {
   id: string;
   name: string;
@@ -96,10 +110,11 @@ export interface FoodEntry {
     category?: string;
     healthScore?: number;
     suggestions?: string[];
+    prompt?: string;
+    response?: any;
   };
 }
 
-// Update WorkoutEntry to include additional fields
 export interface WorkoutEntry {
   id: string;
   name: string;
@@ -110,7 +125,6 @@ export interface WorkoutEntry {
   notes?: string;
 }
 
-// Update WeightEntry to include id
 export interface WeightEntry {
   id: string;
   weight: number;
@@ -119,13 +133,16 @@ export interface WeightEntry {
   photoUrl?: string;
 }
 
-// Update Achievement to include category
 export interface Achievement {
   id: string;
   title: string;
+  name: string;
   description: string;
   icon: string;
+  unlocked?: boolean;
   unlockedAt?: string;
   progress?: number;
+  maxProgress?: number;
+  level: 'bronze' | 'silver' | 'gold' | 1 | 2 | 3;
   category: string;
 }

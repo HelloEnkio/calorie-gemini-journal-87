@@ -13,14 +13,14 @@ interface IngredientItemProps {
 const IngredientItem = ({ name, quantity, unit, onRemove }: IngredientItemProps) => {
   // Helper function to format the unit display
   const formatUnit = (unit: MeasureUnit): string => {
-    const measureUnits: { value: MeasureUnit; label: string }[] = [
-      { value: "g", label: "Grammes (g)" },
-      { value: "ml", label: "Millilitres (ml)" },
-      { value: "cup", label: "Tasse" },
-      { value: "tbsp", label: "Cuillère à soupe" },
-      { value: "tsp", label: "Cuillère à café" },
-      { value: "oz", label: "Once (oz)" },
-      { value: "piece", label: "Pièce" }
+    const measureUnits = [
+      { value: MeasureUnit.GRAMS, label: "Grammes (g)" },
+      { value: MeasureUnit.MILLILITERS, label: "Millilitres (ml)" },
+      { value: MeasureUnit.CUP, label: "Tasse" },
+      { value: MeasureUnit.TABLESPOON, label: "Cuillère à soupe" },
+      { value: MeasureUnit.TEASPOON, label: "Cuillère à café" },
+      { value: MeasureUnit.OUNCE, label: "Once (oz)" },
+      { value: MeasureUnit.PIECE, label: "Pièce" }
     ];
     
     const unitItem = measureUnits.find(u => u.value === unit);
