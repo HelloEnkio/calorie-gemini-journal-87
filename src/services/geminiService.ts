@@ -85,14 +85,14 @@ export const analyzeFoodWithGemini = async (
     const jsonResult = JSON.parse(jsonMatch[0]);
     
     return {
-      success: true,
-      foodName: jsonResult.foodName,
-      calories: Number(jsonResult.calories),
-      macros: {
-        protein: Number(jsonResult.macros.protein),
-        carbs: Number(jsonResult.macros.carbs),
-        fat: Number(jsonResult.macros.fat),
-      },
+        success: true,
+        foodName: jsonResult.foodName,
+        calories: Number(jsonResult.calories),
+        macros: {
+          protein: Number(jsonResult.macros.protein),
+          carbs: Number(jsonResult.macros.carbs),
+          fat: Number(jsonResult.macros.fat),
+        },
     };
   } catch (error) {
     console.error("Error analyzing food with Gemini:", error);

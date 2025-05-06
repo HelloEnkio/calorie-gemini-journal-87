@@ -84,4 +84,5 @@ export interface GeminiAnalysisResult {
   calories?: number;
   macros?: MacroNutrients;
   errorMessage?: string;
+  confidence?: number; // Added from the other definition
 }

@@ -29,7 +29,7 @@ export const exportToExcel = (data: DailyLog[], exportType: "daily" | "summary")
         Protein: entry.macros.protein,
         Carbs: entry.macros.carbs,
         Fat: entry.macros.fat,
-        // Use optional chaining for fields that might not exist in the FoodEntry interface
+        // Access optional properties safely
         Meal: entry.mealType || "",
         Notes: entry.timestamp || ""
       }));
