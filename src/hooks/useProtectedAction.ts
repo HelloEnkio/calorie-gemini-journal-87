@@ -1,17 +1,24 @@
 
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
-// Hook pour protéger les actions qui requierent un compte
 export const useProtectedAction = () => {
   const { isLoggedIn, setShowAuthModal } = useAuth();
   
-  const protectAction = (callback: () => void) => {
-    if (!isLoggedIn) {
-      // Si l'utilisateur n'est pas connecté, on montre le modal d'inscription
-      setShowAuthModal(true);
+  /**
+   * Protège une action qui nécessite d'être connecté
+   * @param action La fonction à exécuter si l'utilisateur est connecté
+   * @param showToast Afficher un message toast en cas d'échec (par défaut: true)
+   * @returns Une fonction qui vérifie l'état de connexion avant d'exécuter l'action
+   */
+  const protectAction = (action: () => void, showToast = true) => {
+    if (isLoggedIn) {
+      action();
     } else {
-      // Si l'utilisateur est connecté, on exécute simplement l'action
-      callback();
+      if (showToast) {
+        toast.error("Vous devez être connecté pour effectuer cette action");
+      }
+      setShowAuthModal(true);
     }
   };
   

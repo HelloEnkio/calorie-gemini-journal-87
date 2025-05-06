@@ -1,36 +1,38 @@
 
 import { useState, useEffect, useRef } from "react";
-import { searchFoods } from "@/utils/foodDatabase";
 import { FoodItem } from "@/types";
+import { searchFoods } from "@/utils/foodDatabase";
 
 export const useFoodSuggestions = (foodName: string) => {
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionRef = useRef<HTMLDivElement>(null);
 
-  // Search for food items when user types
+  // Rechercher des suggestions lorsque le nom de l'aliment change
   useEffect(() => {
-    if (foodName.length > 0 && showSuggestions) {
+    // Ne rechercher que si le nom a au moins 2 caractères
+    if (foodName.length >= 2) {
       setIsSearching(true);
       const results = searchFoods(foodName);
       setSuggestions(results);
+      setShowSuggestions(true);
       setIsSearching(false);
-    } else if (foodName.length === 0) {
+    } else {
       setSuggestions([]);
+      setShowSuggestions(false);
     }
-  }, [foodName, showSuggestions]);
-  
-  // Close suggestions when clicking outside
+  }, [foodName]);
+
+  // Fermer les suggestions lors d'un clic à l'extérieur
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        suggestionRef.current && 
-        !suggestionRef.current.contains(event.target as Node) &&
         inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
+        !inputRef.current.contains(event.target as Node) &&
+        suggestionRef.current &&
+        !suggestionRef.current.contains(event.target as Node)
       ) {
         setShowSuggestions(false);
       }
@@ -42,9 +44,9 @@ export const useFoodSuggestions = (foodName: string) => {
     };
   }, []);
 
-  // Show suggestions when input is focused
+  // Fonction pour gérer le focus sur l'input
   const handleInputFocus = () => {
-    if (foodName.length > 0) {
+    if (foodName.length >= 2) {
       setIsSearching(true);
       const results = searchFoods(foodName);
       setSuggestions(results);
@@ -52,8 +54,8 @@ export const useFoodSuggestions = (foodName: string) => {
       setIsSearching(false);
     }
   };
-  
-  // Hide suggestions explicitly
+
+  // Fonction pour cacher explicitement les suggestions
   const hideSuggestions = () => {
     setShowSuggestions(false);
   };

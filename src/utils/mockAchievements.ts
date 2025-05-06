@@ -1,138 +1,124 @@
 
 import { Achievement } from "@/types";
-import { ACHIEVEMENTS_KEY } from "./storage/core";
 
-// Generate mock achievements
-export const generateMockAchievements = (): Achievement[] => {
+// Clé de stockage pour les achievements
+const ACHIEVEMENTS_KEY = "nutrition-tracker-achievements";
+
+// Initialiser les achievements dans le localStorage
+export const initializeMockAchievements = (): void => {
+  console.info("Initializing mock achievements...");
+  
   const achievements: Achievement[] = [
     {
-      id: "streak-3",
-      name: "Démarrage rapide",
-      description: "Connectez-vous 3 jours de suite",
-      icon: "trophy",
+      id: "first-entry",
+      name: "Premier pas",
+      description: "Enregistrer votre premier aliment",
+      icon: "🎯",
       unlocked: true,
-      progress: 100,
-      maxProgress: 3,
-      category: "consistency",
       level: 1
     },
     {
-      id: "streak-7",
-      name: "Sur la bonne voie",
-      description: "Connectez-vous 7 jours de suite",
-      icon: "trophy",
-      unlocked: true,
-      progress: 100,
+      id: "daily-streak",
+      name: "Constance",
+      description: "Utiliser l'application 7 jours de suite",
+      icon: "📅",
+      unlocked: false,
+      progress: 3,
       maxProgress: 7,
-      category: "consistency",
       level: 2
     },
     {
-      id: "streak-30",
-      name: "Maestro de la régularité",
-      description: "Connectez-vous 30 jours de suite",
-      icon: "trophy",
-      unlocked: false,
-      progress: 14,
-      maxProgress: 30,
-      category: "consistency",
-      level: 3
-    },
-    {
-      id: "calories-goal-5",
-      name: "À la frontière",
-      description: "Atteignez votre objectif calorique 5 fois",
-      icon: "star",
-      unlocked: true,
-      progress: 100,
-      maxProgress: 5,
-      category: "nutrition",
-      level: 1
-    },
-    {
-      id: "calories-goal-15",
-      name: "Le juste milieu",
-      description: "Atteignez votre objectif calorique 15 fois",
-      icon: "star",
-      unlocked: false,
-      progress: 8,
-      maxProgress: 15,
-      category: "nutrition",
-      level: 2
-    },
-    {
-      id: "workout-5",
-      name: "Débutant sportif",
-      description: "Enregistrez 5 séances d'entraînement",
-      icon: "badge",
-      unlocked: true,
-      progress: 100,
-      maxProgress: 5,
-      category: "fitness",
-      level: 1
-    },
-    {
-      id: "workout-20",
-      name: "Adepte du fitness",
-      description: "Enregistrez 20 séances d'entraînement",
-      icon: "badge",
-      unlocked: false,
-      progress: 8,
-      maxProgress: 20,
-      category: "fitness",
-      level: 2
-    },
-    {
-      id: "weight-trend",
-      name: "Le chemin du progrès",
-      description: "Perdez du poids pendant 4 semaines consécutives",
-      icon: "award",
+      id: "macro-master",
+      name: "Maître des macros",
+      description: "Atteindre vos objectifs de macronutriments 5 jours consécutifs",
+      icon: "🧪",
       unlocked: false,
       progress: 2,
-      maxProgress: 4,
-      category: "weight",
+      maxProgress: 5,
       level: 3
     },
     {
-      id: "macro-balance-3",
-      name: "Équilibre nutritionnel",
-      description: "Atteignez l'équilibre parfait des macros 3 fois",
-      icon: "star",
-      unlocked: true,
-      progress: 100,
-      maxProgress: 3,
-      category: "nutrition",
-      level: 1
+      id: "weight-goal",
+      name: "Objectif atteint",
+      description: "Atteindre votre objectif de poids",
+      icon: "⚖️",
+      unlocked: false,
+      level: 3
     },
     {
-      id: "macro-balance-10",
-      name: "Maestro des macronutriments",
-      description: "Atteignez l'équilibre parfait des macros 10 fois",
-      icon: "star",
+      id: "photo-tracker",
+      name: "Suivi visuel",
+      description: "Ajouter 10 photos de progression",
+      icon: "📸",
       unlocked: false,
       progress: 4,
       maxProgress: 10,
-      category: "nutrition",
+      level: 1
+    },
+    {
+      id: "water-master",
+      name: "Hydratation parfaite",
+      description: "Compléter l'habitude 'Boire 2L d'eau' pendant 10 jours",
+      icon: "💧",
+      unlocked: false,
+      progress: 7,
+      maxProgress: 10,
       level: 2
     }
   ];
-
-  return achievements;
+  
+  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
+  console.info("Mock achievements initialization complete");
 };
 
-// Initialize mock achievements
-export const initializeMockAchievements = () => {
-  // Check if data already exists
-  const achievementsData = localStorage.getItem(ACHIEVEMENTS_KEY);
-  if (achievementsData) {
-    console.log('Mock achievements already initialized');
-    return;
+// Obtenir tous les achievements
+export const getAchievements = (): Achievement[] => {
+  const stored = localStorage.getItem(ACHIEVEMENTS_KEY);
+  
+  if (!stored) {
+    return [];
   }
   
-  console.log('Initializing mock achievements...');
+  try {
+    return JSON.parse(stored);
+  } catch (error) {
+    console.error("Erreur lors du chargement des achievements:", error);
+    return [];
+  }
+};
+
+// Débloquer un achievement
+export const unlockAchievement = (id: string): boolean => {
+  const achievements = getAchievements();
+  const achievementIndex = achievements.findIndex(a => a.id === id);
   
-  const achievements = generateMockAchievements();
+  if (achievementIndex === -1) return false;
+  
+  achievements[achievementIndex].unlocked = true;
   localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
   
-  console.log('Mock achievements initialization complete');
+  return true;
+};
+
+// Mettre à jour la progression d'un achievement
+export const updateAchievementProgress = (id: string, progress: number): boolean => {
+  const achievements = getAchievements();
+  const achievementIndex = achievements.findIndex(a => a.id === id);
+  
+  if (achievementIndex === -1) return false;
+  
+  const achievement = achievements[achievementIndex];
+  
+  if (!achievement.maxProgress) return false;
+  
+  achievement.progress = progress;
+  
+  // Vérifier si l'achievement est maintenant débloqué
+  if (progress >= achievement.maxProgress) {
+    achievement.unlocked = true;
+  }
+  
+  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
+  
+  return true;
 };
