@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WorkoutEntry } from "@/types";
-import { addWorkoutEntry, generateId } from "@/utils/storage";
+import { addWorkoutEntry } from "@/utils/storage";
+import { generateId } from "@/utils/storage";
 import { toast } from "sonner";
 import { useProtectedAction } from "@/hooks/useProtectedAction";
 

@@ -1,40 +1,26 @@
 
 import { FoodEntry, WorkoutEntry, WeightEntry } from "@/types";
 import { generateId } from "./core";
-import { getTodaysLog, saveDailyLog, getLogForDate } from "./logs";
+import { 
+  getTodaysLog, 
+  saveDailyLog, 
+  getLogForDate,
+  addFoodEntry as addFood,
+  removeFoodEntry as removeFood,
+  addWorkoutEntry as addWorkout,
+  removeWorkoutEntry as removeWorkout
+} from "./logs";
 
-// Add food entry
+// Add food entry - using wrapper to avoid naming conflicts
 export const addFoodEntry = (entry: FoodEntry): void => {
-  const todayLog = getTodaysLog();
-  todayLog.foodEntries.push(entry);
-  
-  // Update totals
-  todayLog.totalCalories += entry.calories;
-  todayLog.totalMacros.protein += entry.macros.protein;
-  todayLog.totalMacros.carbs += entry.macros.carbs;
-  todayLog.totalMacros.fat += entry.macros.fat;
-  
-  saveDailyLog(todayLog);
+  const today = new Date();
+  addFood(today, entry);
 };
 
 // Remove food entry
 export const removeFoodEntry = (entryId: string): void => {
-  const todayLog = getTodaysLog();
-  const entryIndex = todayLog.foodEntries.findIndex(entry => entry.id === entryId);
-  
-  if (entryIndex >= 0) {
-    const entry = todayLog.foodEntries[entryIndex];
-    
-    // Update totals
-    todayLog.totalCalories -= entry.calories;
-    todayLog.totalMacros.protein -= entry.macros.protein;
-    todayLog.totalMacros.carbs -= entry.macros.carbs;
-    todayLog.totalMacros.fat -= entry.macros.fat;
-    
-    // Remove entry
-    todayLog.foodEntries.splice(entryIndex, 1);
-    saveDailyLog(todayLog);
-  }
+  const today = new Date();
+  removeFood(today, entryId);
 };
 
 // Update food entry
@@ -68,16 +54,14 @@ export const updateFoodEntry = (entryId: string, updatedEntry: FoodEntry): boole
 
 // Add workout entry
 export const addWorkoutEntry = (entry: WorkoutEntry): void => {
-  const todayLog = getTodaysLog();
-  todayLog.workouts.push(entry);
-  saveDailyLog(todayLog);
+  const today = new Date();
+  addWorkout(today, entry);
 };
 
 // Remove workout entry
 export const removeWorkoutEntry = (entryId: string): void => {
-  const todayLog = getTodaysLog();
-  todayLog.workouts = todayLog.workouts.filter(entry => entry.id !== entryId);
-  saveDailyLog(todayLog);
+  const today = new Date();
+  removeWorkout(today, entryId);
 };
 
 // Add weight entry

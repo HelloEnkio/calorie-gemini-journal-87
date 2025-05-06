@@ -54,6 +54,19 @@ export const updateDailyLog = (date: Date | string, updatedLog: DailyLog): void 
   localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(logs));
 };
 
+// Additional helper functions
+export const getTodaysLog = (): DailyLog => {
+  return getDailyLog(new Date());
+};
+
+export const getLogForDate = (dateKey: string): DailyLog => {
+  return getDailyLog(dateKey);
+};
+
+export const saveDailyLog = (log: DailyLog): void => {
+  updateDailyLog(log.date, log);
+};
+
 // Helpers for handling food entries
 export const addFoodEntry = (date: Date, entry: FoodEntry): void => {
   const dateKey = format(date, 'yyyy-MM-dd');
@@ -120,4 +133,28 @@ export const removeWorkoutEntry = (date: Date, entryId: string): void => {
   dayLog.workouts = dayLog.workouts.filter(entry => entry.id !== entryId);
   
   updateDailyLog(dateKey, dayLog);
+};
+
+// Helper functions for date ranges
+export const getLogsForLastDays = (days: number): DailyLog[] => {
+  const logs = getAllLogs();
+  const today = new Date();
+  const startDate = new Date();
+  startDate.setDate(today.getDate() - days);
+  
+  return logs.filter(log => {
+    const logDate = new Date(log.date);
+    return logDate >= startDate && logDate <= today;
+  });
+};
+
+export const getLogsInDateRange = (startDate: string, endDate: string): DailyLog[] => {
+  const logs = getAllLogs();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  return logs.filter(log => {
+    const logDate = new Date(log.date);
+    return logDate >= start && logDate <= end;
+  });
 };

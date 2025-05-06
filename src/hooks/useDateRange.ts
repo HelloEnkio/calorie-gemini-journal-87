@@ -1,50 +1,56 @@
 
 import { useState, useEffect } from "react";
-import { format, subDays } from "date-fns";
-import { getAllLogs, getLogsForLastDays, getLogsInDateRange } from "@/utils/storage";
+import { format } from "date-fns";
 import { DailyLog } from "@/types";
+import { getLogsForLastDays, getLogsInDateRange } from "@/utils/storage";
 
-type DateRangeType = "week" | "month" | "all" | "custom";
-
-export function useDateRange() {
-  const [dateRange, setDateRange] = useState<DateRangeType>("week");
-  const [startDate, setStartDate] = useState<string>(format(subDays(new Date(), 7), "yyyy-MM-dd"));
-  const [endDate, setEndDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+export const useDateRange = () => {
+  const [dateRange, setDateRange] = useState<string>("7days");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const [logs, setLogs] = useState<DailyLog[]>([]);
-  
-  useEffect(() => {
-    let filteredLogs;
-    
-    switch (dateRange) {
-      case "week":
-        filteredLogs = getLogsForLastDays(7);
-        setStartDate(format(subDays(new Date(), 7), "yyyy-MM-dd"));
-        setEndDate(format(new Date(), "yyyy-MM-dd"));
-        break;
-      case "month":
-        filteredLogs = getLogsForLastDays(30);
-        setStartDate(format(subDays(new Date(), 30), "yyyy-MM-dd"));
-        setEndDate(format(new Date(), "yyyy-MM-dd"));
-        break;
-      case "all":
-        filteredLogs = getAllLogs();
-        if (filteredLogs.length > 0) {
-          const sortedLogs = [...filteredLogs].sort((a, b) => a.date.localeCompare(b.date));
-          setStartDate(sortedLogs[0].date);
-          setEndDate(sortedLogs[sortedLogs.length - 1].date);
-        }
-        break;
-      case "custom":
-        // Utiliser les dates sélectionnées
-        filteredLogs = getAllLogs().filter(log => {
-          return log.date >= startDate && log.date <= endDate;
-        });
-        break;
-      default:
-        filteredLogs = [];
+
+  // Get logs based on date range
+  const fetchLogs = () => {
+    let fetchedLogs: DailyLog[] = [];
+
+    if (dateRange === "custom" && startDate && endDate) {
+      fetchedLogs = getLogsInDateRange(startDate, endDate);
+    } else {
+      // Convert string range to number of days
+      const days = dateRange === "7days"
+        ? 7
+        : dateRange === "30days"
+          ? 30
+          : dateRange === "90days"
+            ? 90
+            : 7;  // Default to 7 days
+      
+      fetchedLogs = getLogsForLastDays(days);
     }
-    
-    setLogs(filteredLogs);
+
+    // Sort logs by date in ascending order
+    fetchedLogs.sort((a, b) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+
+    setLogs(fetchedLogs);
+  };
+
+  // Initialize date range
+  useEffect(() => {
+    // Set default values for custom date range
+    if (startDate === "") {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      setStartDate(format(thirtyDaysAgo, "yyyy-MM-dd"));
+    }
+
+    if (endDate === "") {
+      setEndDate(format(new Date(), "yyyy-MM-dd"));
+    }
+
+    fetchLogs();
   }, [dateRange, startDate, endDate]);
 
   return {
@@ -54,6 +60,9 @@ export function useDateRange() {
     setStartDate,
     endDate,
     setEndDate,
-    logs
+    logs,
+    refreshLogs: fetchLogs
   };
-}
+};
+
+export default useDateRange;
