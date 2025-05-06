@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -15,13 +14,12 @@ import WorkoutTab from "@/components/journal/WorkoutTab";
 import HabitsTab from "@/components/journal/HabitsTab";
 import WeightTab from "@/components/journal/WeightTab";
 import { CalendarIcon } from "lucide-react";
-
 const Index = () => {
   const [date, setDate] = useState<Date>(new Date());
   // Initialize with an empty array to prevent errors
   const [dailyLogs, setDailyLogs] = useState<Array<any>>([]);
   const [userGoals, setUserGoals] = useState(() => getUserGoals());
-  
+
   // Update dailyLogs when date changes
   useEffect(() => {
     // Ensure getAllLogs returns an array
@@ -29,75 +27,49 @@ const Index = () => {
     setDailyLogs(Array.isArray(logs) ? logs : []);
     setUserGoals(getUserGoals());
   }, [date]);
-  
   const formattedDate = format(date, "yyyy-MM-dd");
-  const dateFormatted = format(date, "EEEE d MMMM yyyy", { locale: fr });
+  const dateFormatted = format(date, "EEEE d MMMM yyyy", {
+    locale: fr
+  });
   const isToday = format(date, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
-  
+
   // Find the log for the current date - ensure dailyLogs is an array first
-  const dailyLog = Array.isArray(dailyLogs) 
-    ? dailyLogs.find((log) => log.date === formattedDate)
-    : undefined;
-  
+  const dailyLog = Array.isArray(dailyLogs) ? dailyLogs.find(log => log.date === formattedDate) : undefined;
+
   // Function to handle date navigation
   const navigateToDay = (newDate: Date) => {
     setDate(newDate);
   };
-  
+
   // Function to go to today
   const goToToday = () => {
     setDate(new Date());
   };
-  
+
   // Function to refresh data
   const refreshData = () => {
     const logs = getAllLogs();
     setDailyLogs(Array.isArray(logs) ? logs : []);
   };
-
-  return (
-    <div className="container mx-auto py-10">
+  return <div className="container mx-auto py-10">
       <div className="mb-8 flex justify-between items-center">
         <Card>
-          <CardHeader>
-            <CardTitle>Sélectionner une date</CardTitle>
-          </CardHeader>
+          
           <CardContent className="grid gap-4">
-            <JournalDateNavigator
-              currentDate={date}
-              dateFormatted={dateFormatted}
-              navigateToDay={navigateToDay}
-              goToToday={goToToday}
-              isToday={isToday}
-              date={date}
-              onDateChange={(newDate: Date) => {
-                setDate(newDate);
-              }}
-            />
+            <JournalDateNavigator currentDate={date} dateFormatted={dateFormatted} navigateToDay={navigateToDay} goToToday={goToToday} isToday={isToday} date={date} onDateChange={(newDate: Date) => {
+            setDate(newDate);
+          }} />
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[280px] justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
+                <Button variant={"outline"} className={cn("w-[280px] justify-start text-left font-normal", !date && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP", { locale: fr }) : <span>Choisir une date</span>}
+                  {date ? format(date, "PPP", {
+                  locale: fr
+                }) : <span>Choisir une date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  locale={fr}
-                  selected={date}
-                  onSelect={(newDate) => newDate && setDate(newDate)}
-                  disabled={(date) =>
-                    date > new Date() || date < new Date("2024-01-01")
-                  }
-                  initialFocus
-                />
+                <Calendar mode="single" locale={fr} selected={date} onSelect={newDate => newDate && setDate(newDate)} disabled={date => date > new Date() || date < new Date("2024-01-01")} initialFocus />
               </PopoverContent>
             </Popover>
           </CardContent>
@@ -120,26 +92,24 @@ const Index = () => {
           <WorkoutTab dayLog={dailyLog} refreshData={refreshData} />
         </TabsContent>
         <TabsContent value="habits">
-          <HabitsTab 
-            dayLog={dailyLog || {
-              date: formattedDate,
-              totalCalories: 0,
-              totalMacros: { protein: 0, carbs: 0, fat: 0 },
-              foodEntries: [],
-              workouts: []
-            }} 
-            refreshData={refreshData} 
-            currentDate={date}
-          />
+          <HabitsTab dayLog={dailyLog || {
+          date: formattedDate,
+          totalCalories: 0,
+          totalMacros: {
+            protein: 0,
+            carbs: 0,
+            fat: 0
+          },
+          foodEntries: [],
+          workouts: []
+        }} refreshData={refreshData} currentDate={date} />
         </TabsContent>
         <TabsContent value="weight">
           <WeightTab dayLog={dailyLog} refreshData={refreshData} />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
 
 // Import QuickAddForm component
