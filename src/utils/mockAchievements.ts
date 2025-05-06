@@ -14,7 +14,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 100,
       maxProgress: 3,
       category: "consistency",
-      level: "bronze"
+      level: 1
     },
     {
       id: "streak-7",
@@ -25,7 +25,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 100,
       maxProgress: 7,
       category: "consistency",
-      level: "silver"
+      level: 2
     },
     {
       id: "streak-30",
@@ -36,7 +36,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 14,
       maxProgress: 30,
       category: "consistency",
-      level: "gold"
+      level: 3
     },
     {
       id: "calories-goal-5",
@@ -47,7 +47,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 100,
       maxProgress: 5,
       category: "nutrition",
-      level: "bronze"
+      level: 1
     },
     {
       id: "calories-goal-15",
@@ -58,7 +58,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 8,
       maxProgress: 15,
       category: "nutrition",
-      level: "silver"
+      level: 2
     },
     {
       id: "workout-5",
@@ -69,7 +69,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 100,
       maxProgress: 5,
       category: "fitness",
-      level: "bronze"
+      level: 1
     },
     {
       id: "workout-20",
@@ -80,7 +80,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 8,
       maxProgress: 20,
       category: "fitness",
-      level: "silver"
+      level: 2
     },
     {
       id: "weight-trend",
@@ -91,7 +91,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 2,
       maxProgress: 4,
       category: "weight",
-      level: "gold"
+      level: 3
     },
     {
       id: "macro-balance-3",
@@ -102,7 +102,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 100,
       maxProgress: 3,
       category: "nutrition",
-      level: "bronze"
+      level: 1
     },
     {
       id: "macro-balance-10",
@@ -113,7 +113,7 @@ export const generateMockAchievements = (): Achievement[] => {
       progress: 4,
       maxProgress: 10,
       category: "nutrition",
-      level: "silver"
+      level: 2
     }
   ];
 

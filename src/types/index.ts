@@ -73,7 +73,7 @@ export interface Achievement {
   unlocked: boolean;
   progress?: number;
   maxProgress?: number;
-  level: 'bronze' | 'silver' | 'gold' | 'platinum';
+  level: 1 | 2 | 3;
   category: 'nutrition' | 'fitness' | 'consistency' | 'weight';
 }
 

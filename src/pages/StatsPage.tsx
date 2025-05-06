@@ -1,7 +1,7 @@
 
 import { useMemo } from "react";
 import { useDateRange } from "@/hooks/useDateRange";
-import { getDateRangeDescription } from "@/utils/statsCalculations";
+import { getDateRangeDescription, DateRangeType } from "@/utils/statsCalculations";
 import StatsHeader from "@/components/stats/StatsHeader";
 import SummaryCard from "@/components/stats/SummaryCard";
 import StatsContent from "@/components/stats/StatsContent";
@@ -30,7 +30,7 @@ const StatsPage = () => {
         endDate={endDate}
         logsCount={logs.length}
         dateRangeDescription={dateRangeDescription}
-        onDateRangeChange={(value) => setDateRange(value)}
+        onDateRangeChange={(value: DateRangeType) => setDateRange(value)}
         onStartDateChange={(e) => setStartDate(e.target.value)}
         onEndDateChange={(e) => setEndDate(e.target.value)}
       />

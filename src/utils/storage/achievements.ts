@@ -20,7 +20,7 @@ export const getAchievements = (): Achievement[] => {
       icon: '🍽️',
       unlocked: false,
       category: 'nutrition',
-      level: 'bronze'
+      level: 1
     },
     {
       id: 'calorie-goal-streak',
@@ -31,7 +31,7 @@ export const getAchievements = (): Achievement[] => {
       progress: 0,
       maxProgress: 3,
       category: 'nutrition',
-      level: 'silver'
+      level: 2
     },
     {
       id: 'first-workout',
@@ -40,7 +40,7 @@ export const getAchievements = (): Achievement[] => {
       icon: '💪',
       unlocked: false,
       category: 'fitness',
-      level: 'bronze'
+      level: 1
     },
     {
       id: 'weight-tracking',
@@ -51,7 +51,7 @@ export const getAchievements = (): Achievement[] => {
       progress: 0,
       maxProgress: 5,
       category: 'consistency',
-      level: 'gold'
+      level: 3
     },
     {
       id: 'macro-balance',
@@ -60,7 +60,7 @@ export const getAchievements = (): Achievement[] => {
       icon: '⭐',
       unlocked: false,
       category: 'nutrition',
-      level: 'gold'
+      level: 3
     }
   ];
   

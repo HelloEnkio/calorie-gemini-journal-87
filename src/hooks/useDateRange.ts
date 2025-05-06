@@ -3,9 +3,10 @@ import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { DailyLog } from "@/types";
 import { getLogsForLastDays, getLogsInDateRange } from "@/utils/storage";
+import { DateRangeType } from "@/utils/statsCalculations";
 
 export const useDateRange = () => {
-  const [dateRange, setDateRange] = useState<string>("7days");
+  const [dateRange, setDateRange] = useState<DateRangeType>("week");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [logs, setLogs] = useState<DailyLog[]>([]);
@@ -18,11 +19,11 @@ export const useDateRange = () => {
       fetchedLogs = getLogsInDateRange(startDate, endDate);
     } else {
       // Convert string range to number of days
-      const days = dateRange === "7days"
+      const days = dateRange === "week"
         ? 7
-        : dateRange === "30days"
+        : dateRange === "month"
           ? 30
-          : dateRange === "90days"
+          : dateRange === "all"
             ? 90
             : 7;  // Default to 7 days
       
