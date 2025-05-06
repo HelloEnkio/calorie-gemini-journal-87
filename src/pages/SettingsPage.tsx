@@ -1,114 +1,113 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { getUserGoals, updateUserGoals } from "@/utils/storage";
 import CalorieGoalCard from "@/components/settings/CalorieGoalCard";
 import MacrosDistributionCard from "@/components/settings/MacrosDistributionCard";
 import GeminiApiKeyForm from "@/components/settings/GeminiApiKeyForm";
-import { getUserGoals, saveUserGoals } from "@/utils/storage/goals";
+import HabitsSettingsCard from "@/components/settings/HabitsSettingsCard";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const SettingsPage = () => {
-  // Get the user goals from storage
-  const [dailyCalories, setDailyCalories] = useState<string>("2000");
-  const [proteinPercentage, setProteinPercentage] = useState<number>(25);
-  const [carbsPercentage, setCarbsPercentage] = useState<number>(45);
-  const [fatPercentage, setFatPercentage] = useState<number>(30);
+  const [dailyCalories, setDailyCalories] = useState("2000");
+  const [proteinPercentage, setProteinPercentage] = useState(30);
+  const [carbsPercentage, setCarbsPercentage] = useState(45);
+  const [fatPercentage, setFatPercentage] = useState(25);
   
-  // Calculate macro grams based on percentages and calories
-  const proteinGrams = Math.round((Number(dailyCalories) * (proteinPercentage / 100)) / 4);
-  const carbsGrams = Math.round((Number(dailyCalories) * (carbsPercentage / 100)) / 4);
-  const fatGrams = Math.round((Number(dailyCalories) * (fatPercentage / 100)) / 9);
-
-  // Load user goals from storage on component mount
-  useEffect(() => {
-    const userGoals = getUserGoals();
-    setDailyCalories(userGoals.dailyCalories.toString());
+  // Calculer les grammes de macros en fonction des calories et des pourcentages
+  const proteinGrams = Math.round((Number(dailyCalories) * proteinPercentage / 100) / 4);
+  const carbsGrams = Math.round((Number(dailyCalories) * carbsPercentage / 100) / 4);
+  const fatGrams = Math.round((Number(dailyCalories) * fatPercentage / 100) / 9);
+  
+  // Charger les objectifs utilisateur
+  const loadGoals = useCallback(() => {
+    const goals = getUserGoals();
+    setDailyCalories(goals.dailyCalories.toString());
     
-    if (userGoals.macroPercentages) {
-      setProteinPercentage(userGoals.macroPercentages.protein);
-      setCarbsPercentage(userGoals.macroPercentages.carbs);
-      setFatPercentage(userGoals.macroPercentages.fat);
+    if (goals.macros) {
+      // Calculer les pourcentages en fonction des grammes et des calories
+      const totalCals = goals.dailyCalories;
+      const proteinCals = (goals.macros.protein || 0) * 4;
+      const carbsCals = (goals.macros.carbs || 0) * 4;
+      const fatCals = (goals.macros.fat || 0) * 9;
+      
+      setProteinPercentage(Math.round((proteinCals / totalCals) * 100) || 30);
+      setCarbsPercentage(Math.round((carbsCals / totalCals) * 100) || 45);
+      setFatPercentage(Math.round((fatCals / totalCals) * 100) || 25);
     }
   }, []);
-
-  // Save updated goals when values change
+  
   useEffect(() => {
-    // Ensure percentages add up to 100%
-    const totalPercentage = proteinPercentage + carbsPercentage + fatPercentage;
-    if (totalPercentage !== 100) return;
-
-    // Save to storage
-    const userGoals = {
+    loadGoals();
+  }, [loadGoals]);
+  
+  // Mettre à jour les objectifs utilisateur
+  const updateGoals = () => {
+    updateUserGoals({
       dailyCalories: Number(dailyCalories),
       macros: {
         protein: proteinGrams,
         carbs: carbsGrams,
         fat: fatGrams,
       },
-      macroPercentages: {
-        protein: proteinPercentage,
-        carbs: carbsPercentage,
-        fat: fatPercentage,
-      }
-    };
+    });
     
-    saveUserGoals(userGoals);
-  }, [dailyCalories, proteinPercentage, carbsPercentage, fatPercentage, proteinGrams, carbsGrams, fatGrams]);
-
-  // Handler for calories change
-  const handleCaloriesChange = (value: string) => {
-    setDailyCalories(value);
-  };
-
-  // Handlers for macro percentage changes
-  const handleProteinChange = (value: number[]) => {
-    const newProtein = value[0];
-    
-    // Calculate the diff and distribute it between carbs and fat proportionally
-    const diff = newProtein - proteinPercentage;
-    const carbsToFatRatio = carbsPercentage / (carbsPercentage + fatPercentage);
-    
-    setCarbsPercentage(Math.round(carbsPercentage - (diff * carbsToFatRatio)));
-    setFatPercentage(Math.round(100 - newProtein - (carbsPercentage - (diff * carbsToFatRatio))));
-    setProteinPercentage(newProtein);
-    
-    toast.info("Distribution des macros mise à jour");
+    toast.success("Objectifs mis à jour avec succès");
   };
   
-  const handleCarbsChange = (value: number[]) => {
-    const newCarbs = value[0];
+  // Gérer les changements de pourcentages de macros
+  const handleProteinChange = (values: number[]) => {
+    const newProteinPct = values[0];
+    const diff = newProteinPct - proteinPercentage;
     
-    // Calculate the diff and distribute it between protein and fat proportionally
-    const diff = newCarbs - carbsPercentage;
-    const proteinToFatRatio = proteinPercentage / (proteinPercentage + fatPercentage);
+    // Ajuster les autres pourcentages proportionnellement
+    const carbsFactor = carbsPercentage / (carbsPercentage + fatPercentage);
+    const newCarbsPct = Math.max(10, Math.round(carbsPercentage - (diff * carbsFactor)));
+    const newFatPct = 100 - newProteinPct - newCarbsPct;
     
-    setProteinPercentage(Math.round(proteinPercentage - (diff * proteinToFatRatio)));
-    setFatPercentage(Math.round(100 - newCarbs - (proteinPercentage - (diff * proteinToFatRatio))));
-    setCarbsPercentage(newCarbs);
-    
-    toast.info("Distribution des macros mise à jour");
+    setProteinPercentage(newProteinPct);
+    setCarbsPercentage(newCarbsPct);
+    setFatPercentage(newFatPct);
   };
   
-  const handleFatChange = (value: number[]) => {
-    const newFat = value[0];
+  const handleCarbsChange = (values: number[]) => {
+    const newCarbsPct = values[0];
+    const diff = newCarbsPct - carbsPercentage;
     
-    // Calculate the diff and distribute it between protein and carbs proportionally
-    const diff = newFat - fatPercentage;
-    const proteinToCarbsRatio = proteinPercentage / (proteinPercentage + carbsPercentage);
+    // Ajuster les autres pourcentages proportionnellement
+    const proteinFactor = proteinPercentage / (proteinPercentage + fatPercentage);
+    const newProteinPct = Math.max(10, Math.round(proteinPercentage - (diff * proteinFactor)));
+    const newFatPct = 100 - newProteinPct - newCarbsPct;
     
-    setProteinPercentage(Math.round(proteinPercentage - (diff * proteinToCarbsRatio)));
-    setCarbsPercentage(Math.round(100 - newFat - (proteinPercentage - (diff * proteinToCarbsRatio))));
-    setFatPercentage(newFat);
-    
-    toast.info("Distribution des macros mise à jour");
+    setProteinPercentage(newProteinPct);
+    setCarbsPercentage(newCarbsPct);
+    setFatPercentage(newFatPct);
   };
-
+  
+  const handleFatChange = (values: number[]) => {
+    const newFatPct = values[0];
+    const diff = newFatPct - fatPercentage;
+    
+    // Ajuster les autres pourcentages proportionnellement
+    const proteinFactor = proteinPercentage / (proteinPercentage + carbsPercentage);
+    const newProteinPct = Math.max(10, Math.round(proteinPercentage - (diff * proteinFactor)));
+    const newCarbsPct = 100 - newProteinPct - newFatPct;
+    
+    setProteinPercentage(newProteinPct);
+    setCarbsPercentage(newCarbsPct);
+    setFatPercentage(newFatPct);
+  };
+  
   return (
-    <div className="mobile-container pt-4 pb-20 space-y-6">
-      <h1 className="text-2xl font-bold">Paramètres</h1>
+    <div className="max-w-lg mx-auto px-4 pb-24">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-1">Paramètres</h1>
+        <p className="text-muted-foreground">Configurez l'application selon vos besoins</p>
+      </div>
       
       <CalorieGoalCard 
-        dailyCalories={dailyCalories}
-        onCaloriesChange={handleCaloriesChange}
+        dailyCalories={dailyCalories} 
+        onCaloriesChange={setDailyCalories}
       />
       
       <MacrosDistributionCard 
@@ -124,7 +123,13 @@ const SettingsPage = () => {
         onFatChange={handleFatChange}
       />
       
+      <HabitsSettingsCard />
+      
       <GeminiApiKeyForm />
+      
+      <div className="mt-6 text-center">
+        <Button onClick={updateGoals}>Enregistrer les modifications</Button>
+      </div>
     </div>
   );
 };

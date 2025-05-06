@@ -1,180 +1,156 @@
 
-import { DailyLog, FoodEntry, WeightEntry, WorkoutEntry, MacroNutrients } from "@/types";
-import { generateId } from "./storage/core";
-import { format, subDays } from "date-fns";
-import { createColoredImageBase64, createMockWeightImages } from "./imageStorage";
+import { FoodEntry, DailyLog, WorkoutEntry, WeightEntry } from "@/types";
+import { addDays, subDays, format } from "date-fns";
+import { initializeDefaultHabits } from "./habitsStorage";
 
-// Fonction pour générer une entrée alimentaire aléatoire
-const generateRandomFoodEntry = (date: Date): FoodEntry => {
-  const foods = [
-    { name: "Salade César au poulet", calories: 350, protein: 25, carbs: 10, fat: 25 },
-    { name: "Steak et légumes", calories: 450, protein: 35, carbs: 15, fat: 20 },
-    { name: "Yaourt grec et fruits", calories: 180, protein: 15, carbs: 20, fat: 5 },
-    { name: "Pizza margherita", calories: 680, protein: 24, carbs: 80, fat: 28 },
-    { name: "Smoothie protéiné", calories: 220, protein: 20, carbs: 25, fat: 3 },
-    { name: "Omelette aux légumes", calories: 280, protein: 18, carbs: 5, fat: 22 },
-    { name: "Sandwich au thon", calories: 320, protein: 22, carbs: 35, fat: 12 },
-    { name: "Bol de quinoa aux légumes", calories: 380, protein: 12, carbs: 60, fat: 8 },
-    { name: "Saumon grillé", calories: 300, protein: 28, carbs: 0, fat: 19 },
-    { name: "Bol de fruits", calories: 120, protein: 1, carbs: 30, fat: 0 },
-  ];
-
-  const randomFood = foods[Math.floor(Math.random() * foods.length)];
-
-  return {
-    id: generateId(),
-    name: randomFood.name,
-    calories: randomFood.calories,
-    macros: {
-      protein: randomFood.protein,
-      carbs: randomFood.carbs,
-      fat: randomFood.fat,
-    },
-    timestamp: new Date(date).toISOString(),
-  };
+// Générer un ID aléatoire
+export const generateId = () => {
+  return Math.random().toString(36).substr(2, 9);
 };
 
-// Fonction pour générer une entrée de poids aléatoire
-const generateRandomWeightEntry = (date: Date, baseWeight: number, dayIndex: number): WeightEntry | null => {
-  // On génère plus régulièrement des poids pour avoir plus de points de données
-  if (dayIndex % Math.floor(Math.random() * 2 + 1) !== 0) {
-    return null;
-  }
-
-  // Légère fluctuation du poids (-0.5 à +0.3)
-  const fluctuation = Math.random() * 0.8 - 0.5;
-  const weight = baseWeight + fluctuation;
-
-  // Ajoutons des photos pour plus d'entrées de poids
-  let photoUrl: string | undefined = undefined;
-  
-  // Pour les intervalles de 7 jours, ajoutons une photo
-  // Pour les autres jours, 30% de chance d'avoir une photo
-  if (dayIndex === 0 || dayIndex === 7 || dayIndex === 14 || dayIndex === 21 || 
-      dayIndex === 28 || dayIndex === 35 || dayIndex === 42 || dayIndex === 49 || 
-      (Math.random() > 0.7)) {
-    // Format standard pour les photos
-    photoUrl = `weight-photo-day-${dayIndex}.png`;
-  }
-
-  return {
-    id: generateId(),
-    weight: parseFloat(weight.toFixed(1)),
-    timestamp: new Date(date).toISOString(),
-    photoUrl
-  };
-};
-
-// Fonction pour générer une entrée d'entraînement aléatoire
-const generateRandomWorkoutEntry = (date: Date): WorkoutEntry | null => {
-  // 40% de chance d'avoir un entraînement ce jour-là
-  if (Math.random() > 0.4) {
-    return null;
-  }
-
-  const workouts = [
-    { type: "Course", duration: 30, calories: 300 },
-    { type: "Musculation", duration: 45, calories: 280 },
-    { type: "Natation", duration: 40, calories: 350 },
-    { type: "Vélo", duration: 60, calories: 400 },
-    { type: "Yoga", duration: 30, calories: 180 },
-    { type: "Marche", duration: 50, calories: 200 },
-    { type: "HIIT", duration: 20, calories: 250 },
-  ];
-
-  const randomWorkout = workouts[Math.floor(Math.random() * workouts.length)];
-
-  // Légère variation de la durée et des calories
-  const durationVariation = Math.floor(Math.random() * 11) - 5; // -5 à +5 minutes
-  const caloriesVariation = Math.floor(Math.random() * 41) - 20; // -20 à +20 calories
-
-  return {
-    id: generateId(),
-    type: randomWorkout.type,
-    duration: randomWorkout.duration + durationVariation,
-    caloriesBurned: randomWorkout.calories + caloriesVariation,
-    timestamp: new Date(date).toISOString(),
-  };
-};
-
-// Générer un log quotidien avec des valeurs aléatoires
-const generateDailyLog = (date: Date, baseWeight: number, dayIndex: number): DailyLog => {
-  // Générer 2 à 4 entrées alimentaires par jour
-  const numFoodEntries = Math.floor(Math.random() * 3) + 2;
-  const foodEntries: FoodEntry[] = [];
-  
-  for (let i = 0; i < numFoodEntries; i++) {
-    foodEntries.push(generateRandomFoodEntry(date));
-  }
-
-  // Calculer les totaux pour la journée
-  const totalCalories = foodEntries.reduce((sum, entry) => sum + entry.calories, 0);
-  const totalProtein = foodEntries.reduce((sum, entry) => sum + entry.macros.protein, 0);
-  const totalCarbs = foodEntries.reduce((sum, entry) => sum + entry.macros.carbs, 0);
-  const totalFat = foodEntries.reduce((sum, entry) => sum + entry.macros.fat, 0);
-
-  // Générer les entraînements
-  const workoutEntry = generateRandomWorkoutEntry(date);
-  const workouts = workoutEntry ? [workoutEntry] : [];
-  
-  // 10% de chance d'avoir un deuxième entraînement le même jour
-  if (workoutEntry && Math.random() > 0.9) {
-    const secondWorkout = generateRandomWorkoutEntry(date);
-    if (secondWorkout) {
-      workouts.push(secondWorkout);
-    }
-  }
-
-  // Générer l'entrée de poids (peut être null)
-  const weightEntry = generateRandomWeightEntry(date, baseWeight, dayIndex);
-
-  return {
-    date: format(date, "yyyy-MM-dd"),
-    foodEntries,
-    totalCalories,
-    totalMacros: {
-      protein: totalProtein,
-      carbs: totalCarbs,
-      fat: totalFat,
-    } as MacroNutrients,
-    workouts,
-    weight: weightEntry,
-  };
-};
-
+// Initialiser les données pour une démo
 export const initializeMockData = () => {
-  console.info("Initializing mock data...");
+  // Vérifier si les données sont déjà présentes
+  const logsDataExists = localStorage.getItem('nutrition-tracker-daily-logs');
   
-  // Vérifier si des données existent déjà
-  const existingData = localStorage.getItem("nutrition-tracker-daily-logs");
-  if (existingData) {
-    const parsedData = JSON.parse(existingData);
-    if (Array.isArray(parsedData) && parsedData.length > 0) {
-      console.info("Mock data already exists, skipping initialization");
-      return;
-    }
+  if (logsDataExists) {
+    return; // Ne pas recréer les données si elles existent déjà
   }
-
+  
+  // Créer le tableau qui contiendra nos journées
+  const dailyLogs: DailyLog[] = [];
+  
+  // Date d'aujourd'hui
   const today = new Date();
-  const mockLogs: DailyLog[] = [];
   
-  // Poids de départ (légèrement aléatoire entre 70 et 80 kg)
-  const startingWeight = 70 + Math.random() * 10;
-  
-  // Générer des données pour les 60 derniers jours (au lieu de 30) pour avoir plus de données
-  for (let i = 59; i >= 0; i--) {
-    const date = subDays(today, i);
-    // Réduire légèrement le poids au fil du temps (tendance à la perte)
-    const adjustedBaseWeight = startingWeight - (i * 0.07);
+  // Générer des données pour les 14 derniers jours
+  for (let i = 0; i < 14; i++) {
+    const currentDate = subDays(today, i);
+    const formattedDate = format(currentDate, 'yyyy-MM-dd');
     
-    const dailyLog = generateDailyLog(date, adjustedBaseWeight, i);
-    mockLogs.push(dailyLog);
+    // Calories et macros variables selon le jour
+    const baseCals = 2000;
+    const variation = Math.random() * 400 - 200; // +/- 200 kcal
+    const totalCals = Math.round(baseCals + variation);
+
+    // Créer un log pour cette journée
+    const dailyLog: DailyLog = {
+      date: formattedDate,
+      totalCalories: totalCals,
+      totalMacros: {
+        protein: Math.round((totalCals * 0.3) / 4), // 30% des calories en protéines
+        carbs: Math.round((totalCals * 0.45) / 4),  // 45% des calories en glucides
+        fat: Math.round((totalCals * 0.25) / 9),    // 25% des calories en lipides
+      },
+      foodEntries: generateMockFoodEntries(formattedDate, totalCals),
+      workouts: generateMockWorkouts(formattedDate, i),
+      habits: {}
+    };
+    
+    // Ajouter une entrée de poids tous les 3 jours
+    if (i % 3 === 0) {
+      // Simuler une légère perte de poids au fil du temps
+      const baseWeight = 75;
+      const weightLoss = (i / 30) * 2; // 2kg de perte sur 30 jours
+      
+      dailyLog.weight = {
+        weight: parseFloat((baseWeight - weightLoss).toFixed(1)),
+        timestamp: new Date(formattedDate).toISOString(),
+        notes: i === 0 ? "Je me sens bien aujourd'hui !" : undefined,
+        photoUrl: i === 0 ? `image-weight-photo-day-0.png` : `image-weight-photo-day-${i}.png`,
+      };
+    }
+    
+    dailyLogs.push(dailyLog);
   }
   
   // Enregistrer les données dans le localStorage
-  localStorage.setItem("nutrition-tracker-daily-logs", JSON.stringify(mockLogs));
-  console.info("Mock data initialization complete with extended history data");
+  localStorage.setItem('nutrition-tracker-daily-logs', JSON.stringify(dailyLogs));
+  
+  // Initialiser les objectifs utilisateur
+  const goals = {
+    dailyCalories: 2000,
+    macros: {
+      protein: 150,
+      carbs: 225,
+      fat: 55
+    }
+  };
+  localStorage.setItem('nutrition-tracker-goals', JSON.stringify(goals));
+  
+  // Initialiser les habitudes par défaut
+  initializeDefaultHabits();
 };
 
-// Création des images factices
-export { createMockWeightImages };
+// Générer des entrées de nourriture fictives
+const generateMockFoodEntries = (date: string, totalCals: number): FoodEntry[] => {
+  const entries: FoodEntry[] = [];
+  const meals = [
+    { name: "Petit-déjeuner", ratio: 0.25 },
+    { name: "Déjeuner", ratio: 0.4 },
+    { name: "Dîner", ratio: 0.35 }
+  ];
+  
+  meals.forEach(meal => {
+    const mealCals = Math.round(totalCals * meal.ratio);
+    
+    entries.push({
+      id: generateId(),
+      name: meal.name,
+      calories: mealCals,
+      macros: {
+        protein: Math.round((mealCals * 0.3) / 4),
+        carbs: Math.round((mealCals * 0.45) / 4),
+        fat: Math.round((mealCals * 0.25) / 9),
+      },
+      timestamp: new Date(date).toISOString(),
+      weight: Math.round(mealCals * 0.8) // Approximation du poids du repas
+    });
+  });
+  
+  return entries;
+};
+
+// Générer des entraînements fictifs
+const generateMockWorkouts = (date: string, dayIndex: number): WorkoutEntry[] => {
+  if (dayIndex % 2 !== 0) return []; // Séance tous les deux jours
+  
+  const workoutTypes = [
+    "Course à pied",
+    "Musculation",
+    "Natation",
+    "Vélo",
+    "HIIT"
+  ];
+  
+  const workoutType = workoutTypes[Math.floor(Math.random() * workoutTypes.length)];
+  const duration = Math.floor(Math.random() * 45) + 30; // 30 à 75 minutes
+  const caloriesBurned = Math.floor(duration * 8); // Approx. 8 kcal/minute
+  
+  return [
+    {
+      id: generateId(),
+      type: workoutType,
+      duration: duration,
+      caloriesBurned: caloriesBurned,
+      timestamp: new Date(date).toISOString(),
+      notes: workoutType === "Musculation" ? "Focus sur le haut du corps" : undefined
+    }
+  ];
+};
+
+// Créer des images factices pour les photos de poids
+export const createMockWeightImages = () => {
+  // Simuler des images stockées (dans une application réelle, cela viendrait du serveur)
+  const today = new Date();
+  
+  // Créer les entrées pour chaque jour à intervalles réguliers
+  for (let i = 0; i <= 13; i += 3) {
+    const date = subDays(today, i);
+    const formattedDate = format(date, 'yyyy-MM-dd');
+    
+    // Dans une vraie application, nous téléchargerions des images
+    // Ici, nous simulons que les images existent déjà
+    localStorage.setItem(`nutrition-tracker-image-weight-photo-day-${i}.png`, `data:image/png;base64,pretendThisIsAnImage-${formattedDate}`);
+  }
+};

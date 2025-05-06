@@ -1,86 +1,108 @@
 
 import { useState, useEffect } from "react";
-import { isToday, format, addDays, subDays } from "date-fns";
-import { fr } from "date-fns/locale"; 
-import { formatDateKey, getLogForDate, getUserGoals, checkAndUpdateAchievements } from "@/utils/storage";
+import { format, isToday, parseISO } from "date-fns";
+import { fr } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getDailyLog, getUserGoals } from "@/utils/storage";
+import JournalDateNavigator from "@/components/journal/JournalDateNavigator";
 import CaloriesTab from "@/components/journal/CaloriesTab";
 import WeightTab from "@/components/journal/WeightTab";
 import WorkoutTab from "@/components/journal/WorkoutTab";
-import JournalDateNavigator from "@/components/journal/JournalDateNavigator";
+import HabitsTab from "@/components/journal/HabitsTab";
+import { DailyLog, UserGoals } from "@/types";
 
 const Index = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [dayLog, setDayLog] = useState(getLogForDate(formatDateKey(currentDate)));
-  const [goals, setGoals] = useState(getUserGoals());
-  const [activeSubTab, setActiveSubTab] = useState("calories");
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [dayLog, setDayLog] = useState<DailyLog | null>(null);
+  const [goals, setGoals] = useState<UserGoals>({ dailyCalories: 2000 });
+  const [activeTab, setActiveTab] = useState<string>("calories");
   
-  // Refresh data
-  const refreshData = () => {
-    setDayLog(getLogForDate(formatDateKey(currentDate)));
-    checkAndUpdateAchievements();
-  };
+  const dateFormatted = format(currentDate, "EEEE d MMMM", { locale: fr });
+  const isCurrentDateToday = isToday(currentDate);
   
-  // Navigate to a different day
   const navigateToDay = (date: Date) => {
     setCurrentDate(date);
-    setDayLog(getLogForDate(formatDateKey(date)));
   };
   
-  // Go to today
   const goToToday = () => {
-    const today = new Date();
-    setCurrentDate(today);
-    setDayLog(getLogForDate(formatDateKey(today)));
+    setCurrentDate(new Date());
   };
   
-  // Format the date for display
-  const dateFormatted = format(currentDate, "EEEE d MMMM", { locale: fr });
+  const loadDayData = () => {
+    const formattedDate = format(currentDate, "yyyy-MM-dd");
+    const log = getDailyLog(formattedDate);
+    
+    setDayLog(log);
+  };
+  
+  const loadGoals = () => {
+    const userGoals = getUserGoals();
+    setGoals(userGoals);
+  };
   
   useEffect(() => {
-    // Check achievements when the page loads
-    checkAndUpdateAchievements();
-  }, []);
+    loadDayData();
+    loadGoals();
+  }, [currentDate]);
+  
+  if (!dayLog) {
+    return <div>Chargement...</div>;
+  }
   
   return (
-    <div className="mobile-container pt-6 pb-20">
-      {/* Day navigation */}
-      <JournalDateNavigator 
-        currentDate={currentDate} 
-        dateFormatted={dateFormatted} 
+    <div className="max-w-lg mx-auto px-4 pb-20">
+      <JournalDateNavigator
+        currentDate={currentDate}
+        dateFormatted={dateFormatted}
         navigateToDay={navigateToDay}
         goToToday={goToToday}
-        isToday={isToday(currentDate)}
+        isToday={isCurrentDateToday}
       />
       
-      {/* Journal Sub-tabs */}
-      <Tabs defaultValue={activeSubTab} value={activeSubTab} onValueChange={setActiveSubTab} className="mb-6 mt-4">
-        <TabsList className="grid grid-cols-3 mb-6 rounded-xl bg-muted/70 p-1">
-          <TabsTrigger value="calories" className="rounded-lg data-[state=active]:shadow-sm">Calories</TabsTrigger>
-          <TabsTrigger value="weight" className="rounded-lg data-[state=active]:shadow-sm">Poids</TabsTrigger>
-          <TabsTrigger value="workout" className="rounded-lg data-[state=active]:shadow-sm">Sport</TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <div className="border-b overflow-x-auto -mx-4 px-4">
+          <TabsList className="inline-flex h-9 p-1 text-muted-foreground w-full justify-start">
+            <TabsTrigger
+              value="calories"
+              className="h-8 rounded-full px-3 text-sm data-[state=active]:bg-primary data-[state=active]:text-white"
+            >
+              Calories
+            </TabsTrigger>
+            <TabsTrigger
+              value="weight"
+              className="h-8 rounded-full px-3 text-sm data-[state=active]:bg-primary data-[state=active]:text-white"
+            >
+              Poids
+            </TabsTrigger>
+            <TabsTrigger
+              value="workout"
+              className="h-8 rounded-full px-3 text-sm data-[state=active]:bg-primary data-[state=active]:text-white"
+            >
+              Sport
+            </TabsTrigger>
+            <TabsTrigger
+              value="habits"
+              className="h-8 rounded-full px-3 text-sm data-[state=active]:bg-primary data-[state=active]:text-white"
+            >
+              Habitudes
+            </TabsTrigger>
+          </TabsList>
+        </div>
         
-        <TabsContent value="calories" className="tab-content">
-          <CaloriesTab 
-            dayLog={dayLog} 
-            goals={goals} 
-            refreshData={refreshData} 
-          />
+        <TabsContent value="calories" className="space-y-4">
+          <CaloriesTab dayLog={dayLog} goals={goals} refreshData={loadDayData} />
         </TabsContent>
         
-        <TabsContent value="weight" className="tab-content">
-          <WeightTab 
-            dayLog={dayLog} 
-            refreshData={refreshData} 
-          />
+        <TabsContent value="weight" className="space-y-4">
+          <WeightTab dayLog={dayLog} refreshData={loadDayData} />
         </TabsContent>
         
-        <TabsContent value="workout" className="tab-content">
-          <WorkoutTab 
-            dayLog={dayLog} 
-            refreshData={refreshData} 
-          />
+        <TabsContent value="workout" className="space-y-4">
+          <WorkoutTab dayLog={dayLog} refreshData={loadDayData} />
+        </TabsContent>
+        
+        <TabsContent value="habits" className="space-y-4">
+          <HabitsTab dayLog={dayLog} refreshData={loadDayData} />
         </TabsContent>
       </Tabs>
     </div>

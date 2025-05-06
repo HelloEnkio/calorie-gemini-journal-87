@@ -8,6 +8,7 @@ import MacroDistribution from "@/components/stats/MacroDistribution";
 import WeightChart from "@/components/stats/WeightChart";
 import WorkoutStats from "@/components/stats/WorkoutStats";
 import WeightPhotoComparison from "@/components/stats/WeightPhotoComparison";
+import HabitsStats from "@/components/stats/HabitsStats";
 import { calculateGoalAchievements } from "@/utils/statsCalculations";
 import { useState } from "react";
 
@@ -26,11 +27,12 @@ const StatsContent = ({ logs }: StatsContentProps) => {
       onValueChange={setActiveTab}
       className="mt-6"
     >
-      <div className="flex justify-center mb-6">
-        <TabsList className="grid grid-cols-3 w-full max-w-xs">
+      <div className="flex justify-center mb-6 overflow-x-auto">
+        <TabsList className="grid grid-cols-4 w-full max-w-md">
           <TabsTrigger value="calories">Calories</TabsTrigger>
           <TabsTrigger value="weight">Poids</TabsTrigger>
           <TabsTrigger value="workout">Sport</TabsTrigger>
+          <TabsTrigger value="habits">Habitudes</TabsTrigger>
         </TabsList>
       </div>
       
@@ -81,6 +83,17 @@ const StatsContent = ({ logs }: StatsContentProps) => {
           </CardHeader>
           <CardContent>
             <WorkoutStats logs={logs} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="habits" className="space-y-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Suivi des habitudes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <HabitsStats logs={logs} />
           </CardContent>
         </Card>
       </TabsContent>

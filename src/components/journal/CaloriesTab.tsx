@@ -151,7 +151,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
             </div>
           </div>
           
-          <Progress value={caloriePercentage} className="h-2 mb-2" />
+          <Progress value={caloriePercentage} className="h-2 mb-2 bg-slate-100" />
           
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>0%</span>
@@ -187,7 +187,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
               <>
                 <Progress
                   value={proteinTargetPct}
-                  className={cn("h-1", getMacroStatus("protein") === "success" && "bg-green-300")}
+                  className={cn("h-1 bg-green-50", getMacroStatus("protein") === "success" && "bg-green-300")}
                 />
                 <div className="text-xs mt-1">
                   {proteinTargetPct}% de l'objectif
@@ -213,7 +213,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
               <>
                 <Progress
                   value={carbsTargetPct}
-                  className={cn("h-1", getMacroStatus("carbs") === "success" && "bg-amber-300")}
+                  className={cn("h-1 bg-amber-50", getMacroStatus("carbs") === "success" && "bg-amber-300")}
                 />
                 <div className="text-xs mt-1">
                   {carbsTargetPct}% de l'objectif
@@ -239,7 +239,7 @@ const CaloriesTab = ({ dayLog, goals, refreshData }: CaloriesTabProps) => {
               <>
                 <Progress
                   value={fatTargetPct}
-                  className={cn("h-1", getMacroStatus("fat") === "success" && "bg-rose-300")}
+                  className={cn("h-1 bg-rose-50", getMacroStatus("fat") === "success" && "bg-rose-300")}
                 />
                 <div className="text-xs mt-1">
                   {fatTargetPct}% de l'objectif
