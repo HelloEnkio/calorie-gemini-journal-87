@@ -18,12 +18,15 @@ import { CalendarIcon } from "lucide-react";
 
 const Index = () => {
   const [date, setDate] = useState<Date>(new Date());
-  const [dailyLogs, setDailyLogs] = useState(() => getAllLogs());
+  // Initialize with an empty array to prevent errors
+  const [dailyLogs, setDailyLogs] = useState<Array<any>>([]);
   const [userGoals, setUserGoals] = useState(() => getUserGoals());
   
   // Update dailyLogs when date changes
   useEffect(() => {
-    setDailyLogs(getAllLogs());
+    // Ensure getAllLogs returns an array
+    const logs = getAllLogs();
+    setDailyLogs(Array.isArray(logs) ? logs : []);
     setUserGoals(getUserGoals());
   }, [date]);
   
@@ -31,8 +34,10 @@ const Index = () => {
   const dateFormatted = format(date, "EEEE d MMMM yyyy", { locale: fr });
   const isToday = format(date, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
   
-  // Find the log for the current date
-  const dailyLog = dailyLogs.find((log) => log.date === formattedDate);
+  // Find the log for the current date - ensure dailyLogs is an array first
+  const dailyLog = Array.isArray(dailyLogs) 
+    ? dailyLogs.find((log) => log.date === formattedDate)
+    : undefined;
   
   // Function to handle date navigation
   const navigateToDay = (newDate: Date) => {
@@ -46,7 +51,8 @@ const Index = () => {
   
   // Function to refresh data
   const refreshData = () => {
-    setDailyLogs(getAllLogs());
+    const logs = getAllLogs();
+    setDailyLogs(Array.isArray(logs) ? logs : []);
   };
 
   return (
@@ -63,6 +69,7 @@ const Index = () => {
               navigateToDay={navigateToDay}
               goToToday={goToToday}
               isToday={isToday}
+              date={date}
               onDateChange={(newDate: Date) => {
                 setDate(newDate);
               }}
