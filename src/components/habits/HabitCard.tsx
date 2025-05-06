@@ -34,7 +34,7 @@ const HabitCard = ({ habit, habitEntry, onComplete, onUncomplete }: HabitCardPro
     // Créer un style avec une bordure plus foncée et un fond léger
     return {
       borderColor: isCompleted ? habit.color : undefined,
-      backgroundColor: isCompleted ? `${habit.color}10` : undefined,
+      backgroundColor: isCompleted ? `${habit.color}15` : undefined, // More transparent background (15% opacity)
     };
   };
   

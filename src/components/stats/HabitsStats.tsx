@@ -5,7 +5,7 @@ import { getAllHabits, getHabitStats } from "@/utils/habitsStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Fire, Award } from "lucide-react";
+import { Flame, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface HabitProgressProps {
@@ -22,8 +22,9 @@ const HabitProgress = ({ percentage, label, timeframe }: HabitProgressProps) => 
     </div>
     <Progress 
       value={percentage} 
-      className="h-1.5 bg-slate-100" 
-      indicatorColor={percentage >= 80 ? "bg-green-500" : "bg-blue-500"}
+      className={cn("h-1.5", 
+        percentage >= 80 ? "bg-slate-100" : "bg-slate-100"
+      )}
     />
     <div className="text-xs text-muted-foreground">{timeframe}</div>
   </div>
@@ -110,7 +111,7 @@ const HabitsStats = ({ logs }: HabitsStatsProps) => {
                         habitsStats[habit.id].streak > 5 && "bg-green-50 border-green-100 text-green-800"
                       )}>
                         <div className="flex items-center gap-2">
-                          <Fire className="h-5 w-5" />
+                          <Flame className="h-5 w-5" />
                           <span className="text-sm font-medium">Série actuelle</span>
                         </div>
                         <div className="text-2xl font-bold mt-1">

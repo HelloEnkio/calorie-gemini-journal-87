@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from "react";
-import { getUserGoals, updateUserGoals } from "@/utils/storage";
+import { getUserGoals, saveUserGoals } from "@/utils/storage";
 import CalorieGoalCard from "@/components/settings/CalorieGoalCard";
 import MacrosDistributionCard from "@/components/settings/MacrosDistributionCard";
 import GeminiApiKeyForm from "@/components/settings/GeminiApiKeyForm";
@@ -43,7 +43,7 @@ const SettingsPage = () => {
   
   // Mettre à jour les objectifs utilisateur
   const updateGoals = () => {
-    updateUserGoals({
+    saveUserGoals({
       dailyCalories: Number(dailyCalories),
       macros: {
         protein: proteinGrams,

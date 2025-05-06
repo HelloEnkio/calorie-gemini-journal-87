@@ -2,9 +2,43 @@
 import { Habit, HabitEntry, HabitStats, DailyLog } from '@/types';
 import { format, subDays, parseISO, differenceInDays, isAfter } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
-import { updateDailyLog, getDailyLog, getAllDailyLogs } from './storage';
+import { getAllLogs } from './storage';
 
 const HABITS_STORAGE_KEY = 'nutrition-tracker-habits';
+
+// Helper function to get a daily log
+const getDailyLog = (dateKey: string): DailyLog => {
+  const logs = getAllLogs();
+  const existingLog = logs.find(log => log.date === dateKey);
+  
+  if (existingLog) {
+    return existingLog;
+  }
+  
+  // Create a new empty log if none exists
+  return {
+    date: dateKey,
+    totalCalories: 0,
+    totalMacros: { protein: 0, carbs: 0, fat: 0 },
+    foodEntries: [],
+    workouts: [],
+    habits: {}
+  };
+};
+
+// Helper function to update a daily log
+const updateDailyLog = (dateKey: string, updatedLog: DailyLog): void => {
+  const logs = getAllLogs();
+  const existingLogIndex = logs.findIndex(log => log.date === dateKey);
+  
+  if (existingLogIndex >= 0) {
+    logs[existingLogIndex] = updatedLog;
+  } else {
+    logs.push(updatedLog);
+  }
+  
+  localStorage.setItem('nutrition-tracker-daily-logs', JSON.stringify(logs));
+};
 
 // Récupérer toutes les habitudes
 export const getAllHabits = (): Habit[] => {
@@ -148,7 +182,7 @@ export const updateHabitStreak = (habitId: string): void => {
   }
   
   const today = new Date();
-  const logs = getAllDailyLogs();
+  const logs = getAllLogs();
   
   // Trier les logs par date (du plus récent au plus ancien)
   logs.sort((a, b) => {
@@ -195,7 +229,7 @@ export const getHabitStats = (habitId: string): HabitStats | null => {
     return null;
   }
   
-  const logs = getAllDailyLogs();
+  const logs = getAllLogs();
   const today = new Date();
   
   // Calcul du taux de complétion sur différentes périodes

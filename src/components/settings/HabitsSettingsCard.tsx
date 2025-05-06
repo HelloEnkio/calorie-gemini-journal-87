@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Edit, Fire } from "lucide-react";
+import { Trash2, Plus, Edit, Flame } from "lucide-react";
 import { toast } from "sonner";
 
 const EMOJI_LIST = [
@@ -166,7 +166,7 @@ const HabitsSettingsCard = () => {
                         {habit.name}
                         {habit.streak && habit.streak > 0 && (
                           <Badge variant="outline" className="ml-2 bg-orange-50 text-orange-700">
-                            <Fire className="h-3 w-3 mr-1" />
+                            <Flame className="h-3 w-3 mr-1" />
                             {habit.streak}
                           </Badge>
                         )}

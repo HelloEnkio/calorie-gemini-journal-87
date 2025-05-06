@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { format, isToday, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getDailyLog, getUserGoals } from "@/utils/storage";
+import { getAllLogs, getUserGoals } from "@/utils/storage";
 import JournalDateNavigator from "@/components/journal/JournalDateNavigator";
 import CaloriesTab from "@/components/journal/CaloriesTab";
 import WeightTab from "@/components/journal/WeightTab";
@@ -30,7 +30,15 @@ const Index = () => {
   
   const loadDayData = () => {
     const formattedDate = format(currentDate, "yyyy-MM-dd");
-    const log = getDailyLog(formattedDate);
+    const logs = getAllLogs();
+    const log = logs.find(l => l.date === formattedDate) || {
+      date: formattedDate,
+      totalCalories: 0,
+      totalMacros: { protein: 0, carbs: 0, fat: 0 },
+      foodEntries: [],
+      workouts: [],
+      habits: {}
+    };
     
     setDayLog(log);
   };
