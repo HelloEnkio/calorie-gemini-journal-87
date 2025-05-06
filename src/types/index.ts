@@ -122,3 +122,31 @@ export interface HabitStats {
     year: number;
   };
 }
+
+// Recipe item with ingredients
+export interface RecipeItem extends FoodItem {
+  ingredients: RecipeIngredient[];
+  isRecipe: true;
+}
+
+// Recipe ingredient
+export interface RecipeIngredient {
+  foodItemId: string;
+  quantity: number; // in grams
+  name: string;
+}
+
+// Type for food item or recipe
+export interface FoodItem {
+  id: string;
+  name: string;
+  calories: number;
+  macros: {
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  weight?: number;
+  category?: string;
+  isRecipe?: boolean;
+}

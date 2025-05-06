@@ -1,18 +1,6 @@
 
 import { FuzzySearch } from './fuzzySearch';
-
-export interface FoodItem {
-  id: string;
-  name: string;
-  calories: number;
-  macros: {
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-  weight?: number;
-  category?: string;
-}
+import { FoodItem, RecipeItem, RecipeIngredient } from '@/types';
 
 // Base de données simulée d'aliments
 const foodDatabase: FoodItem[] = [
@@ -258,6 +246,9 @@ const foodDatabase: FoodItem[] = [
   }
 ];
 
+// Base de données des recettes
+const recipeDatabase: RecipeItem[] = [];
+
 // Initialiser le moteur de recherche floue avec les noms des aliments
 const foodSearchEngine = new FuzzySearch(foodDatabase, ['name', 'category'], {
   threshold: 0.2,
@@ -273,11 +264,19 @@ const foodSearchEngine = new FuzzySearch(foodDatabase, ['name', 'category'], {
 export const searchFoods = (query: string): FoodItem[] => {
   if (!query || query.trim() === '') {
     // Renvoyer les 5 premiers aliments par défaut
-    return foodDatabase.slice(0, 5);
+    return [...foodDatabase, ...recipeDatabase].slice(0, 5);
   }
   
-  // Utiliser la recherche floue pour trouver des aliments
-  return foodSearchEngine.search(query);
+  // Rechercher dans les aliments simples
+  const foodResults = foodSearchEngine.search(query);
+  
+  // Rechercher dans les recettes (recherche simple pour l'instant)
+  const recipeResults = recipeDatabase.filter(recipe => 
+    recipe.name.toLowerCase().includes(query.toLowerCase())
+  );
+  
+  // Combinaison des résultats (limités à 5)
+  return [...foodResults, ...recipeResults].slice(0, 5);
 };
 
 /**
@@ -286,7 +285,12 @@ export const searchFoods = (query: string): FoodItem[] => {
  * @returns Aliment trouvé ou undefined
  */
 export const getFoodById = (id: string): FoodItem | undefined => {
-  return foodDatabase.find(food => food.id === id);
+  // Chercher d'abord dans les aliments simples
+  const foodItem = foodDatabase.find(food => food.id === id);
+  if (foodItem) return foodItem;
+  
+  // Puis chercher dans les recettes
+  return recipeDatabase.find(recipe => recipe.id === id);
 };
 
 /**
@@ -294,7 +298,66 @@ export const getFoodById = (id: string): FoodItem | undefined => {
  * @returns Liste de tous les aliments
  */
 export const getAllFoods = (): FoodItem[] => {
-  return [...foodDatabase];
+  return [...foodDatabase, ...recipeDatabase];
+};
+
+/**
+ * Vérifie si un aliment existe déjà (par nom)
+ * @param name Nom de l'aliment à vérifier
+ * @returns Booléen indiquant si l'aliment existe déjà
+ */
+const foodExists = (name: string): boolean => {
+  const normalizedName = name.toLowerCase().trim();
+  return foodDatabase.some(food => food.name.toLowerCase().trim() === normalizedName) || 
+         recipeDatabase.some(recipe => recipe.name.toLowerCase().trim() === normalizedName);
+};
+
+/**
+ * Ajoute un nouvel aliment à la base de données
+ * @param newFood Nouvel aliment à ajouter
+ * @returns Booléen indiquant si l'ajout a réussi
+ */
+export const addFoodItem = (newFood: FoodItem): boolean => {
+  if (foodExists(newFood.name)) return false;
+  
+  // Ajouter l'aliment à la base de données
+  foodDatabase.push(newFood);
+  
+  // Mettre à jour le moteur de recherche
+  const newFoodSearchEngine = new FuzzySearch(foodDatabase, ['name', 'category'], {
+    threshold: 0.2,
+    caseSensitive: false,
+    maxResults: 5,
+  });
+  
+  // Remplacer l'ancien moteur de recherche par le nouveau
+  Object.assign(foodSearchEngine, newFoodSearchEngine);
+  
+  return true;
+};
+
+/**
+ * Crée une nouvelle recette
+ * @param newRecipe Nouvelle recette à ajouter
+ * @returns Booléen indiquant si l'ajout a réussi
+ */
+export const createRecipe = (newRecipe: RecipeItem): boolean => {
+  if (foodExists(newRecipe.name)) return false;
+  
+  // Ajouter la recette à la base de données
+  recipeDatabase.push(newRecipe);
+  
+  return true;
+};
+
+/**
+ * Récupère les ingrédients d'une recette
+ * @param recipeId ID de la recette
+ * @returns Liste des ingrédients ou undefined si la recette n'existe pas
+ */
+export const getRecipeIngredients = (recipeId: string): RecipeIngredient[] | undefined => {
+  const recipe = recipeDatabase.find(r => r.id === recipeId);
+  return recipe?.ingredients;
 };
 
 /**
@@ -303,6 +366,17 @@ export const getAllFoods = (): FoodItem[] => {
  * @returns Booléen indiquant si la mise à jour a réussi
  */
 export const updateFoodItem = (updatedFood: FoodItem): boolean => {
+  // Vérifier si c'est une recette
+  if (updatedFood.isRecipe) {
+    const index = recipeDatabase.findIndex(recipe => recipe.id === updatedFood.id);
+    if (index === -1) return false;
+    
+    // Mettre à jour la recette
+    recipeDatabase[index] = updatedFood as RecipeItem;
+    return true;
+  }
+  
+  // C'est un aliment simple
   const index = foodDatabase.findIndex(food => food.id === updatedFood.id);
   if (index === -1) return false;
   
