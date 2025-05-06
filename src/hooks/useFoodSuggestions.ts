@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useRef } from "react";
-import { searchFoods, FoodItem } from "@/utils/foodDatabase";
+import { searchFoods } from "@/utils/foodDatabase";
+import { FoodItem } from "@/types";
 
 export const useFoodSuggestions = (foodName: string) => {
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);

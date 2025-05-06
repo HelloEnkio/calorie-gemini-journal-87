@@ -1,6 +1,6 @@
 
 import { Search } from "lucide-react";
-import { FoodItem } from "@/utils/foodDatabase";
+import { FoodItem } from "@/types";
 
 interface FoodSuggestionsProps {
   suggestions: FoodItem[];

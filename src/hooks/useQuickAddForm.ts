@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from "react";
-import { FoodItem, updateFoodItem } from "@/utils/foodDatabase";
+import { updateFoodItem } from "@/utils/foodDatabase";
 import { addFoodEntry, generateId } from "@/utils/storage";
-import { FoodEntry, MacroNutrients } from "@/types";
+import { FoodEntry, MacroNutrients, FoodItem } from "@/types";
 import { toast } from "sonner";
 
 export const useQuickAddForm = (onAdd?: () => void) => {

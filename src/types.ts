@@ -14,6 +14,7 @@ export interface FoodEntry {
   macros: MacroNutrients;
   timestamp: string;
   weight?: number;
+  mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   geminiData?: {
     prompt: string;
     response: any;
@@ -110,13 +111,36 @@ export interface Achievement {
   category?: string; // Make category optional to fix type errors
 }
 
-// Add GeminiAnalysisResult type to fix import errors
+// GeminiAnalysisResult with updated properties
 export interface GeminiAnalysisResult {
+  success: boolean;
+  calories?: number;
+  macros?: MacroNutrients;
+  foodName?: string;
+  errorMessage?: string;
+  confidence?: number;
+}
+
+// Food-related types
+export interface FoodItem {
+  id: string;
+  name: string;
   calories: number;
-  macros: {
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-  confidence: number;
+  macros: MacroNutrients;
+  weight?: number;
+  category?: string;
+  isRecipe?: boolean;
+}
+
+// Recipe item with ingredients
+export interface RecipeItem extends FoodItem {
+  ingredients: RecipeIngredient[];
+  isRecipe: true;
+}
+
+// Recipe ingredient
+export interface RecipeIngredient {
+  foodItemId: string;
+  quantity: number; // in grams
+  name: string;
 }

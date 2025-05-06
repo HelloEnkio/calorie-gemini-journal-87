@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import FoodSuggestions from "./FoodSuggestions";
 import CreateFoodModal from "./CreateFoodModal";
-import { FoodItem } from "@/utils/foodDatabase";
+import { FoodItem } from "@/types";
 
 interface FoodNameInputProps {
   foodName: string;
