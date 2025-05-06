@@ -1,18 +1,6 @@
 
 import { toast } from "sonner";
-
-// Structure de réponse pour l'analyse alimentaire
-interface GeminiAnalysisResponse {
-  success: boolean;
-  foodName?: string;
-  calories?: number;
-  macros?: {
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-  errorMessage?: string;
-}
+import { GeminiAnalysisResponse } from "@/types";
 
 // Fonction d'analyse alimentaire avec Gemini
 export const analyzeFoodWithGemini = async (
@@ -40,7 +28,7 @@ export const analyzeFoodWithGemini = async (
 };
 
 // Fonction simulant l'analyse alimentaire (pour la démo)
-const simulateGeminiAnalysis = (description: string): GeminiAnalysisResponse => {
+const simulateGeminiAnalysis = (description: string): Promise<GeminiAnalysisResponse> => {
   // Simuler un délai de traitement
   return new Promise((resolve) => {
     setTimeout(() => {

@@ -1,5 +1,5 @@
 
-import { FoodItem, RecipeItem, RecipeIngredient } from '@/types';
+import { FoodItem, RecipeItem, RecipeIngredient, MeasureUnit } from '@/types';
 import { foodDatabase, recipeDatabase } from './foodData';
 import { updateSearchEngine, foodExists } from './foodSearch';
 
@@ -55,7 +55,7 @@ export const createRecipe = (newRecipe: RecipeItem): boolean => {
     ...newRecipe,
     ingredients: newRecipe.ingredients.map(ingredient => ({
       ...ingredient,
-      unit: ingredient.unit || 'g' // Ajouter une unité par défaut si elle n'existe pas
+      unit: ingredient.unit || MeasureUnit.GRAMS // Utiliser MeasureUnit.GRAMS au lieu de 'g'
     }))
   };
   

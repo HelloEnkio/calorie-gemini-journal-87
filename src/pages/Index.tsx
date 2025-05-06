@@ -28,13 +28,20 @@ const Index = () => {
   }, [date]);
   
   const formattedDate = format(date, "yyyy-MM-dd");
+  const dateFormatted = format(date, "EEEE d MMMM yyyy", { locale: fr });
+  const isToday = format(date, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
   
   // Find the log for the current date
   const dailyLog = dailyLogs.find((log) => log.date === formattedDate);
   
   // Function to handle date navigation
-  const navigateToDate = (newDate: Date) => {
+  const navigateToDay = (newDate: Date) => {
     setDate(newDate);
+  };
+  
+  // Function to go to today
+  const goToToday = () => {
+    setDate(new Date());
   };
   
   // Function to refresh data
@@ -51,13 +58,13 @@ const Index = () => {
           </CardHeader>
           <CardContent className="grid gap-4">
             <JournalDateNavigator
-              date={date}
+              currentDate={date}
+              dateFormatted={dateFormatted}
+              navigateToDay={navigateToDay}
+              goToToday={goToToday}
+              isToday={isToday}
               onDateChange={(newDate: Date) => {
-                if (newDate > date) {
-                  navigateToDate(addDays(date, 1));
-                } else {
-                  navigateToDate(subDays(date, 1));
-                }
+                setDate(newDate);
               }}
             />
             <Popover>
@@ -106,14 +113,17 @@ const Index = () => {
           <WorkoutTab dayLog={dailyLog} refreshData={refreshData} />
         </TabsContent>
         <TabsContent value="habits">
-          <HabitsTab dayLog={dailyLog || {
-            date: formattedDate,
-            totalCalories: 0,
-            totalMacros: { protein: 0, carbs: 0, fat: 0 },
-            foodEntries: [],
-            workouts: []
-          }} 
-          refreshData={refreshData} />
+          <HabitsTab 
+            dayLog={dailyLog || {
+              date: formattedDate,
+              totalCalories: 0,
+              totalMacros: { protein: 0, carbs: 0, fat: 0 },
+              foodEntries: [],
+              workouts: []
+            }} 
+            refreshData={refreshData} 
+            currentDate={date}
+          />
         </TabsContent>
         <TabsContent value="weight">
           <WeightTab dayLog={dailyLog} refreshData={refreshData} />

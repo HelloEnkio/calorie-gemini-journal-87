@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Star, Trophy, ChevronDown, ChevronUp } from "lucide-react";
+import { Star, Trophy } from "lucide-react";
 import FoodEntry from "@/components/food/FoodEntry";
 import QuickAddForm from "@/components/food/QuickAddForm";
 import GeminiInputForm from "@/components/food/GeminiInputForm";

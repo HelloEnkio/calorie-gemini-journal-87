@@ -12,6 +12,9 @@ interface JournalDateNavigatorProps {
   navigateToDay: (date: Date) => void;
   goToToday: () => void;
   isToday: boolean;
+  // Add these new props
+  date?: Date;
+  onDateChange?: (date: Date) => void;
 }
 
 const JournalDateNavigator = ({
@@ -19,8 +22,23 @@ const JournalDateNavigator = ({
   dateFormatted,
   navigateToDay,
   goToToday,
-  isToday
+  isToday,
+  // Use the new props if provided, otherwise fall back to the original props
+  date,
+  onDateChange
 }: JournalDateNavigatorProps) => {
+  // Use date prop if provided
+  const activeDate = date || currentDate;
+  
+  // Handle date change - use onDateChange if provided, otherwise use navigateToDay
+  const handleDateChange = (newDate: Date) => {
+    if (onDateChange) {
+      onDateChange(newDate);
+    } else if (navigateToDay) {
+      navigateToDay(newDate);
+    }
+  };
+
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-2">
@@ -42,8 +60,8 @@ const JournalDateNavigator = ({
           <PopoverContent className="w-auto p-0" align="end">
             <CalendarComponent
               mode="single"
-              selected={currentDate}
-              onSelect={(date) => date && navigateToDay(date)}
+              selected={activeDate}
+              onSelect={(date) => date && handleDateChange(date)}
               locale={fr}
               className="pointer-events-auto"
             />
@@ -56,7 +74,7 @@ const JournalDateNavigator = ({
           variant="outline" 
           size="icon" 
           className="h-8 w-8 rounded-full" 
-          onClick={() => navigateToDay(subDays(currentDate, 1))}
+          onClick={() => handleDateChange(subDays(activeDate, 1))}
         >
           <ChevronLeft className="h-4 w-4" />
           <span className="sr-only">Jour précédent</span>
@@ -68,7 +86,7 @@ const JournalDateNavigator = ({
           variant="outline" 
           size="icon" 
           className="h-8 w-8 rounded-full" 
-          onClick={() => navigateToDay(addDays(currentDate, 1))}
+          onClick={() => handleDateChange(addDays(activeDate, 1))}
         >
           <ChevronRight className="h-4 w-4" />
           <span className="sr-only">Jour suivant</span>
