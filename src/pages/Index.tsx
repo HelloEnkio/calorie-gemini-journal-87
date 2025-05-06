@@ -68,8 +68,8 @@ const Index = () => {
       />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <div className="border-b overflow-x-auto -mx-4 px-4">
-          <TabsList className="inline-flex h-9 p-1 text-muted-foreground w-full justify-start">
+        <div className="border-b flex justify-center overflow-x-auto -mx-4 px-4">
+          <TabsList className="inline-flex h-9 p-1 text-muted-foreground">
             <TabsTrigger
               value="calories"
               className="h-8 rounded-full px-3 text-sm data-[state=active]:bg-primary data-[state=active]:text-white"
