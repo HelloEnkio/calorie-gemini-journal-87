@@ -16,6 +16,7 @@ import HabitsTab from "@/components/journal/HabitsTab";
 import WeightTab from "@/components/journal/WeightTab";
 import { CalendarIcon } from "lucide-react";
 import QuickAddForm from "@/components/food/QuickAddForm";
+import GeminiInputForm from "@/components/food/GeminiInputForm";
 
 const Index = () => {
   const [date, setDate] = useState<Date>(new Date());
@@ -54,18 +55,31 @@ const Index = () => {
     const logs = getAllLogs();
     setDailyLogs(Array.isArray(logs) ? logs : []);
   };
-  return <div className="container mx-auto py-10">
+  
+  return (
+    <div className="container mx-auto py-10">
       <div className="mb-8">
         <Card className="w-full">
           <CardContent className="pt-6">
             <div className="space-y-4">
-              <JournalDateNavigator currentDate={date} dateFormatted={dateFormatted} navigateToDay={navigateToDay} goToToday={goToToday} isToday={isToday} date={date} onDateChange={(newDate: Date) => {
-                setDate(newDate);
-              }} />
+              <JournalDateNavigator 
+                currentDate={date} 
+                dateFormatted={dateFormatted} 
+                navigateToDay={navigateToDay} 
+                goToToday={goToToday} 
+                isToday={isToday} 
+                date={date} 
+                onDateChange={(newDate: Date) => {
+                  setDate(newDate);
+                }} 
+              />
               <div className="w-full">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                    <Button 
+                      variant={"outline"} 
+                      className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
+                    >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {date ? format(date, "PPP", {
                         locale: fr
@@ -73,7 +87,15 @@ const Index = () => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" locale={fr} selected={date} onSelect={newDate => newDate && setDate(newDate)} disabled={date => date > new Date() || date < new Date("2024-01-01")} initialFocus className="pointer-events-auto" />
+                    <Calendar 
+                      mode="single" 
+                      locale={fr} 
+                      selected={date} 
+                      onSelect={newDate => newDate && setDate(newDate)} 
+                      disabled={date => date > new Date() || date < new Date("2024-01-01")} 
+                      initialFocus 
+                      className="pointer-events-auto" 
+                    />
                   </PopoverContent>
                 </Popover>
               </div>
@@ -99,21 +121,23 @@ const Index = () => {
         </TabsContent>
         <TabsContent value="habits">
           <HabitsTab dayLog={dailyLog || {
-          date: formattedDate,
-          totalCalories: 0,
-          totalMacros: {
-            protein: 0,
-            carbs: 0,
-            fat: 0
-          },
-          foodEntries: [],
-          workouts: []
-        }} refreshData={refreshData} currentDate={date} />
+            date: formattedDate,
+            totalCalories: 0,
+            totalMacros: {
+              protein: 0,
+              carbs: 0,
+              fat: 0
+            },
+            foodEntries: [],
+            workouts: []
+          }} refreshData={refreshData} currentDate={date} />
         </TabsContent>
         <TabsContent value="weight">
           <WeightTab dayLog={dailyLog} refreshData={refreshData} />
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
