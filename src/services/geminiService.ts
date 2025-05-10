@@ -6,17 +6,9 @@ import { GeminiAnalysisResponse } from "@/types";
 export const analyzeFoodWithGemini = async (
   description: string
 ): Promise<GeminiAnalysisResponse> => {
-  // Vérifier si une clé API est disponible
-  const apiKey = localStorage.getItem("gemini_api_key");
-  
-  if (!apiKey) {
-    // Simuler l'analyse sans API (pour la démonstration)
-    return simulateGeminiAnalysis(description);
-  }
-
   try {
-    // Dans une vraie implémentation, nous ferions un appel API à Gemini ici
-    // Mais pour cette démo, nous simulons toujours la réponse
+    // Pour l'instant, nous simulons l'analyse
+    // Dans une implémentation réelle, nous utiliserions une clé API stockée côté serveur
     return simulateGeminiAnalysis(description);
   } catch (error) {
     console.error("Error calling Gemini API:", error);

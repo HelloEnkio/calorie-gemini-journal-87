@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,8 @@ import WorkoutTab from "@/components/journal/WorkoutTab";
 import HabitsTab from "@/components/journal/HabitsTab";
 import WeightTab from "@/components/journal/WeightTab";
 import { CalendarIcon } from "lucide-react";
+import QuickAddForm from "@/components/food/QuickAddForm";
+
 const Index = () => {
   const [date, setDate] = useState<Date>(new Date());
   // Initialize with an empty array to prevent errors
@@ -111,6 +114,3 @@ const Index = () => {
     </div>;
 };
 export default Index;
-
-// Import QuickAddForm component
-import QuickAddForm from "@/components/food/QuickAddForm";

@@ -1,12 +1,11 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { getUserGoals, saveUserGoals } from "@/utils/storage";
 import CalorieGoalCard from "@/components/settings/CalorieGoalCard";
 import MacrosDistributionCard from "@/components/settings/MacrosDistributionCard";
-import GeminiApiKeyForm from "@/components/settings/GeminiApiKeyForm";
 import HabitsSettingsCard from "@/components/settings/HabitsSettingsCard";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const SettingsPage = () => {
   const [dailyCalories, setDailyCalories] = useState("2000");
@@ -124,8 +123,6 @@ const SettingsPage = () => {
       />
       
       <HabitsSettingsCard />
-      
-      <GeminiApiKeyForm />
       
       <div className="mt-6 text-center">
         <Button onClick={updateGoals}>Enregistrer les modifications</Button>
