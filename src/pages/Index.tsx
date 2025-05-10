@@ -62,19 +62,21 @@ const Index = () => {
               <JournalDateNavigator currentDate={date} dateFormatted={dateFormatted} navigateToDay={navigateToDay} goToToday={goToToday} isToday={isToday} date={date} onDateChange={(newDate: Date) => {
                 setDate(newDate);
               }} />
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP", {
-                      locale: fr
-                    }) : <span>Choisir une date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" locale={fr} selected={date} onSelect={newDate => newDate && setDate(newDate)} disabled={date => date > new Date() || date < new Date("2024-01-01")} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
+              <div className="w-full">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "PPP", {
+                        locale: fr
+                      }) : <span>Choisir une date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" locale={fr} selected={date} onSelect={newDate => newDate && setDate(newDate)} disabled={date => date > new Date() || date < new Date("2024-01-01")} initialFocus className="pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           </CardContent>
         </Card>
