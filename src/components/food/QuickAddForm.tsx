@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
@@ -7,9 +8,11 @@ import { useQuickAddForm } from "@/hooks/useQuickAddForm";
 import { useFoodSuggestions } from "@/hooks/useFoodSuggestions";
 import { useProtectedAction } from "@/hooks/useProtectedAction";
 import { useAuth } from "@/contexts/AuthContext";
+
 interface QuickAddFormProps {
   onAdd?: () => void;
 }
+
 const QuickAddForm = ({
   onAdd
 }: QuickAddFormProps) => {
@@ -53,8 +56,59 @@ const QuickAddForm = ({
   const handleProtectedSubmit = () => {
     protectAction(() => handleSubmit());
   };
-  return <Card className="mb-4">
-      
-    </Card>;
+  
+  return (
+    <Card className="mb-4">
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Ajouter un repas</h3>
+            <Button variant="ghost" size="icon">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <FoodNameInput
+            foodName={foodName}
+            setFoodName={setFoodName}
+            suggestions={suggestions}
+            showSuggestions={showSuggestions}
+            setShowSuggestions={setShowSuggestions}
+            isSearching={isSearching}
+            handleInputFocus={handleInputFocus}
+            hideSuggestions={hideSuggestions}
+            inputRef={inputRef}
+            suggestionRef={suggestionRef}
+            handleSelectSuggestion={handleSelectSuggestion}
+          />
+          
+          <NutritionFields
+            calories={calories}
+            setCalories={setCalories}
+            protein={protein}
+            setProtein={setProtein}
+            carbs={carbs}
+            setCarbs={setCarbs}
+            fat={fat}
+            setFat={setFat}
+            weight={weight}
+            setWeight={setWeight}
+            autoUpdateMacros={autoUpdateMacros}
+            setAutoUpdateMacros={setAutoUpdateMacros}
+            originalQuantity={originalQuantity}
+            updateMacrosBasedOnQuantity={updateMacrosBasedOnQuantity}
+          />
+          
+          <Button 
+            onClick={handleProtectedSubmit}
+            className="w-full"
+          >
+            Ajouter
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
 };
+
 export default QuickAddForm;

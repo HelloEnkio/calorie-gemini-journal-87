@@ -55,26 +55,27 @@ const Index = () => {
     setDailyLogs(Array.isArray(logs) ? logs : []);
   };
   return <div className="container mx-auto py-10">
-      <div className="mb-8 flex justify-between items-center">
-        <Card>
-          
-          <CardContent className="grid gap-4">
-            <JournalDateNavigator currentDate={date} dateFormatted={dateFormatted} navigateToDay={navigateToDay} goToToday={goToToday} isToday={isToday} date={date} onDateChange={(newDate: Date) => {
-            setDate(newDate);
-          }} />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant={"outline"} className={cn("w-[280px] justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP", {
-                  locale: fr
-                }) : <span>Choisir une date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" locale={fr} selected={date} onSelect={newDate => newDate && setDate(newDate)} disabled={date => date > new Date() || date < new Date("2024-01-01")} initialFocus />
-              </PopoverContent>
-            </Popover>
+      <div className="mb-8">
+        <Card className="w-full">
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <JournalDateNavigator currentDate={date} dateFormatted={dateFormatted} navigateToDay={navigateToDay} goToToday={goToToday} isToday={isToday} date={date} onDateChange={(newDate: Date) => {
+                setDate(newDate);
+              }} />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP", {
+                      locale: fr
+                    }) : <span>Choisir une date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" locale={fr} selected={date} onSelect={newDate => newDate && setDate(newDate)} disabled={date => date > new Date() || date < new Date("2024-01-01")} initialFocus className="pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+            </div>
           </CardContent>
         </Card>
       </div>
