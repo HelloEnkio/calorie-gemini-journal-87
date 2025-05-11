@@ -1,0 +1,27 @@
+// Configuration de la base de données
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Configuration du générateur Prisma Client
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Modèle User
+model User {
+  id       String  @id @default(uuid())
+  email    String  @unique
+  password String
+  entries  Entry[]
+}
+
+// Modèle Entry
+model Entry {
+  id        String   @id @default(uuid())
+  userId    String
+  calories  Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+} 
