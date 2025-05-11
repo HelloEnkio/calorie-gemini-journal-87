@@ -35,5 +35,5 @@ COPY --from=builder /app/prisma ./prisma
 ENV NODE_ENV=production
 EXPOSE 4000
 
-# Lancement de l'application
-CMD ["node", "dist/index.js"]
+# Lance d'abord les migrations, puis démarre l'app
+ENTRYPOINT ["sh", "-c", "npx prisma migrate deploy --schema=prisma/schema.prisma && node dist/index.js"]
