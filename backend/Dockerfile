@@ -13,7 +13,6 @@ RUN npx prisma generate
 # 3. Copier le code source et compiler
 COPY backend/src ./src
 COPY backend/tsconfig.json ./
-COPY backend/utils ./utils    # si vous avez utils, sinon adaptez
 RUN npm run build
 
 # Étape 2 : image de production allégée
