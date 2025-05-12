@@ -56,7 +56,7 @@ COPY --from=builder /app/prisma ./prisma
 
 # Exposer le port sur lequel votre application Node.js écoute
 # (Assurez-vous que votre application utilise bien le port 4000)
-EXPOSE 80
+EXPOSE 4000
 
 # Point d'entrée (ENTRYPOINT) pour exécuter les migrations Prisma puis démarrer l'application.
 # L'option '--schema=./prisma/schema.prisma' est relative au WORKDIR (/app).
